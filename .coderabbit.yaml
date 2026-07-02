@@ -1,0 +1,138 @@
+language: "es-ES"
+tone_instructions: "Se directo, tecnico y conciso. Prioriza bugs, seguridad, privacidad, regresiones y pruebas faltantes. Evita elogios genericos."
+
+reviews:
+  profile: "assertive"
+  request_changes_workflow: false
+  high_level_summary: true
+  high_level_summary_placeholder: "@coderabbitai summary"
+  high_level_summary_in_walkthrough: false
+  review_status: true
+  review_details: true
+  commit_status: true
+  fail_commit_status: false
+  collapse_walkthrough: true
+  changed_files_summary: true
+  sequence_diagrams: false
+  estimate_code_review_effort: true
+  assess_linked_issues: true
+  related_issues: true
+  related_prs: true
+  suggested_labels: true
+  suggested_reviewers: false
+  poem: false
+  in_progress_fortune: false
+  enable_prompt_for_ai_agents: true
+
+  auto_review:
+    enabled: true
+    drafts: false
+    auto_incremental_review: true
+    ignore_title_keywords:
+      - "wip"
+      - "draft"
+
+  path_filters:
+    - ".coderabbit.yaml"
+    - ".dockerignore"
+    - ".github/**"
+    - ".gitignore"
+    - ".specify/memory/constitution.md"
+    - "AGENTS.md"
+    - "Cargo.lock"
+    - "Cargo.toml"
+    - "Makefile"
+    - "README.md"
+    - "crates/**"
+    - "docker/**"
+    - "docs/**"
+    - "specs/**"
+    - "tests/**"
+    - "!.agents/**"
+    - "!.cache/**"
+    - "!.codex/**"
+    - "!.git/**"
+    - "!.specify/extensions/**"
+    - "!.specify/integrations/**"
+    - "!.specify/scripts/**"
+    - "!.specify/templates/**"
+    - "!.specify/workflows/**"
+    - "!build/**"
+    - "!coverage/**"
+    - "!dist/**"
+    - "!log/**"
+    - "!logs/**"
+    - "!node_modules/**"
+    - "!target/**"
+    - "!temp/**"
+    - "!tmp/**"
+    - "!*.log"
+    - "!*.tmp"
+    - "!*.bak"
+
+  path_instructions:
+    - path: "crates/**/*.rs"
+      instructions: "Revisa con foco en seguridad defensiva, privacidad, manejo de errores normalizados, limites explicitos, preservacion de contenido protegido y ausencia de red/proveedores reales en esta feature."
+    - path: "crates/translator-cli/**"
+      instructions: "El CLI debe aceptar una sola request JSON UTF-8 por stdin, rechazar argv, emitir JSON limpio por stdout, mantener stderr redaccionado y usar exit code no cero en fallos."
+    - path: "crates/translator-core/src/workspace.rs"
+      instructions: "Verifica canonicalizacion, rechazo de traversal, symlinks fuera del workspace, archivos sensibles, binarios, NUL bytes, no UTF-8 y TOCTOU."
+    - path: "crates/translator-core/src/provider.rs"
+      instructions: "El proveedor no debe recibir paths, workspace roots, secretos, entorno, logs ni contenido protegido. Solo segmentos traducibles, idioma origen/destino y tono."
+    - path: "specs/**"
+      instructions: "Trata specs como fuente operativa de la feature activa. Verifica trazabilidad entre requisitos, plan, contratos, tareas, quickstart y pruebas."
+    - path: "docs/**"
+      instructions: "Trata docs como planeacion estrategica. Evita duplicar detalle operativo que ya pertenece a specs/<feature>/."
+    - path: "docker/**"
+      instructions: "Respeta la politica de host limpio: Rust y herramientas del proyecto deben quedar encapsuladas en Docker, sin instalar runtimes globales."
+
+  pre_merge_checks:
+    custom_checks:
+      - name: "Spec Kit scope"
+        mode: "warning"
+        instructions: "Falla si el cambio agrega proveedor real, red, MCP server, wrapper Zed, edicion de buffers o soporte completo de archivos de codigo dentro de la feature 001 sin actualizar spec, plan y decisiones."
+      - name: "Privacy and redaction"
+        mode: "warning"
+        instructions: "Falla si logs, stderr, errores, provider diagnostics o tests exponen source text sensible, traducciones completas, secretos, headers, tokens o paths sensibles."
+      - name: "Validation evidence"
+        mode: "warning"
+        instructions: "Falla si cambios de comportamiento Rust no incluyen pruebas o no actualizan quickstart/tasks con la validacion esperada por Spec Kit."
+
+  tools:
+    clippy:
+      enabled: true
+    markdownlint:
+      enabled: true
+    hadolint:
+      enabled: true
+    checkmake:
+      enabled: true
+    shellcheck:
+      enabled: true
+    osvScanner:
+      enabled: true
+    trivy:
+      enabled: true
+
+chat:
+  auto_reply: true
+  art: false
+
+knowledge_base:
+  opt_out: true
+  web_search:
+    enabled: false
+
+code_generation:
+  docstrings:
+    language: "es-ES"
+  unit_tests:
+    path_instructions:
+      - path: "crates/**/*.rs"
+        instructions: "Genera pruebas enfocadas en caminos buenos, malos y adversariales. No agregues red, proveedores reales ni dependencias globales."
+
+issue_enrichment:
+  auto_enrich:
+    enabled: false
+  planning:
+    enabled: false

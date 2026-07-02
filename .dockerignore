@@ -1,0 +1,15 @@
+.git/
+.cache/
+target/
+**/target/
+node_modules/
+coverage/
+logs/
+log/
+tmp/
+temp/
+*.log
+.env
+.env.*
+Dockerfile*
+.dockerignore

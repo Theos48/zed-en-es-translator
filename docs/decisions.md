@@ -1,0 +1,69 @@
+# Matriz de decisiones
+
+Este documento registra decisiones estables de producto, arquitectura y proceso.
+La implementacion detallada de la feature activa vive en `specs/<feature>/`.
+
+## Estado de decisiones
+
+| ID | Area | Decision | Estado | Razon |
+| --- | --- | --- | --- | --- |
+| D001 | Producto | La primera version implementa traduccion ingles -> espanol. | Aceptada | Reduce alcance y permite validar el flujo principal. |
+| D002 | Producto | La arquitectura debe dejar espacio para mas idiomas en el futuro. | Aceptada | Evita acoplar contratos internos a un unico par de idiomas. |
+| D003 | UX | El MVP muestra la traduccion en el Agent Panel de Zed. | Aceptada | Es la via documentada mas cercana para herramientas externas en Zed. |
+| D004 | UX | El MVP no modifica ni reemplaza texto en el buffer. | Aceptada | El objetivo inicial es lectura asistida, no edicion automatica. |
+| D005 | Entrada | El usuario puede traducir texto seleccionado o un archivo completo con limites claros. | Aceptada | Cubre lectura puntual y documentos como README sin abrir otra aplicacion. |
+| D006 | Seguridad de contenido | Markdown debe preservar fenced code blocks e inline code. | Aceptada | Evita traducciones destructivas de codigo o comandos. |
+| D007 | Seguridad de contenido | En archivos de codigo, comentarios y docstrings si pueden traducirse. | Aceptada | Son contenido legible por humanos y parte del caso de uso. |
+| D008 | Estilo | La traduccion por defecto usa espanol neutro tecnico. | Aceptada | Encaja con documentacion, comentarios y material tecnico. |
+| D009 | Salida | El modo normal devuelve traduccion limpia. | Aceptada | Prioriza lectura rapida sin metadata innecesaria. |
+| D010 | Proveedores | El primer proveedor sera mock/determinista para TDD. | Aceptada | Permite desarrollar sin red, secretos ni dependencias externas. |
+| D011 | Proveedores | El diseno debe ser compatible con motor local futuro. | Aceptada | Mantiene opcion offline y evita depender de un servicio remoto. |
+| D012 | Proveedores | Se puede permitir internet, pero no APIs de pago. | Aceptada | Respeta la restriccion de costo y deja espacio para proveedores gratuitos o endpoints propios. |
+| D013 | Privacidad | Todo envio de texto fuera del equipo requiere confirmacion explicita. | Aceptada | El usuario controla cuando sale informacion del entorno local. |
+| D014 | Dependencias | Las dependencias y herramientas se deciden caso por caso siguiendo la politica del sistema. | Aceptada | Mantiene el host Fedora limpio y evita instalaciones globales innecesarias. |
+| D015 | Metodo | El desarrollo usara Spec Kit. | Aceptada | Fuerza especificaciones y criterios verificables antes de implementar. |
+| D016 | Metodo | El core se desarrollara con TDD. | Aceptada | El comportamiento de preservacion de formato/codigo debe ser verificable. |
+| D017 | Tecnologia | Usar Rust + TypeScript: Rust para wrapper/core y TypeScript para MCP. | Aceptada | Rust alinea con Zed y core testeable; TypeScript aprovecha el SDK MCP mas maduro. |
+| D018 | Tecnologia | No elegir motor local real todavia; disenar `Provider` para CLI local, HTTP local y remoto. | Aceptada | Evita acoplamiento temprano y permite evaluar motores despues. |
+| D019 | MCP | Exponer `translate_text` y `translate_file`; tratar seleccion como alias/flujo UX. | Aceptada | Cubre entrada directa y archivos sin sobredisenar una tool dependiente del editor. |
+| D020 | Limites | Limite inicial de archivo completo: 20 KiB por defecto, configurable despues. | Aceptada | Reduce riesgo de entradas lentas, enormes o accidentales. |
+| D021 | Archivos | MVP orientado a documentacion y codigo fuente con modo comentarios/docstrings; no archivos arbitrarios completos. | Aceptada | Equilibra utilidad con seguridad de contenido. |
+| D022 | Salida | Modo normal limpio, con errores claros solo cuando algo impida traducir. | Aceptada | Mantiene lectura simple sin ocultar fallos accionables. |
+| D023 | Spec Kit | Spec Kit queda inicializado y las features formales viven bajo `specs/<feature>/`. | Aceptada | La implementacion activa necesita una fuente operativa unica para requisitos, plan, contratos, tareas y quickstart. |
+| D024 | Documentacion | Crear diagramas cuando se definan flujos, arquitectura o decisiones complejas. | Aceptada | Mantiene el plan especifico y facilita revisar el sistema antes de implementar. |
+| D025 | Arquitectura | Cerrar esta fase con matriz de decisiones y ADR de arquitectura antes de bajar a specs. | Aceptada | Separa decisiones base de la especificacion formal de features. |
+| D026 | Documentacion | Usar la skill `mermaid-diagrams` para Mermaid fuente dentro del repo hasta que se aprueben validadores o exportadores. | Aceptada | Es mas acotada para nuestro caso y mejora diagramas sin instalar herramientas, generar imagenes ni cambiar politicas del sistema. |
+| D027 | Integracion TS-Rust | El servidor MCP TypeScript llamara primero a un binario CLI Rust. | Aceptada | Es la opcion mas simple para MVP, facil de probar y evita complejidad inicial de WASM o servicios HTTP locales. |
+| D028 | Pruebas | Usar `make test` para Rust via contenedor, `vitest` para TypeScript cuando llegue MCP, y tests de integracion contra el CLI Rust. | Aceptada | Cubre core, adaptador MCP futuro y contrato entre procesos sin instalar runtimes globales de proyecto. |
+| D029 | Estructura | Usar `zed-extension/`, `crates/translator-core/`, `crates/translator-cli/`, `mcp-server/`, `tests/` y reservar `specs/` para Spec Kit. | Aceptada | Zed puede instalar/publicar una extension desde subdirectorio, y Spec Kit generara specs formales en `specs/` sin competir con archivos de extension. |
+| D030 | Contrato core | `TranslateRequest` tendra campos comunes de idioma, tono, preservacion e `input_kind`; aceptara exactamente una entrada publica: `source_text` para texto directo o `workspace_root` + `file_path` para archivo validado. | Aceptada | El MCP necesita schema explicito para tools; nuestro core necesita distinguir texto directo de lectura segura de archivo sin mezclar configuracion del proveedor ni aceptar texto de archivo suministrado por el caller. |
+| D031 | Contrato core | La salida publica sera `translated_text` en exito y `code` + `message` en error. | Aceptada | MCP soporta contenido de texto y errores de ejecucion con `isError`; nuestro UX pide salida limpia salvo fallos accionables. |
+| D032 | Errores | Usar codigos iniciales `INVALID_INPUT`, `UNSUPPORTED_LANGUAGE_PAIR`, `UNSUPPORTED_FILE_TYPE`, `FILE_TOO_LARGE`, `FILE_NOT_FOUND`, `PROVIDER_NOT_CONFIGURED`, `REMOTE_CONFIRMATION_REQUIRED`, `PROVIDER_FAILED`, `INTERNAL_ERROR`. | Aceptada | Cubre validacion MCP, limites de archivo, privacidad remota y fallos de proveedor definidos en nuestras decisiones previas. |
+| D033 | Provider | El `Provider` recibira segmentos traducibles y devolvera segmentos traducidos; el core protege codigo/formato y reconstruye la salida. | Aceptada | Separa responsabilidad de traduccion del analisis de Markdown/codigo y permite mocks deterministas para TDD. |
+| D034 | Archivos | `translate_file` aceptara inicialmente `.md`, `.markdown`, `.txt`, `.rs`, `.ts`, `.tsx`, `.js`, `.jsx`, `.py`, `.sh`, `.bash` y `.zsh`. | Aceptada | Cubre documentacion simple y lenguajes de codigo prioritarios con comentarios/docstrings definidos; formatos como `.rst`, `.adoc` y `.mdx` quedan fuera hasta tener preservacion especifica. |
+| D035 | Archivos | `translate_text` aceptara texto seleccionado o pegado sin validar extension de archivo. | Aceptada | La seleccion ya acota el riesgo y permite leer fragmentos de cualquier archivo sin habilitar traduccion completa de formatos no soportados. |
+| D036 | Comentarios | En codigo, traducir solo comentarios/docstrings reconocidos por reglas del lenguaje y conservar el resto del codigo intacto en la salida. | Aceptada | Cumple el objetivo de lectura sin traducir codigo y mantiene contexto alrededor de comentarios/docstrings. |
+| D037 | Spec Kit | El primer ciclo formal de Spec Kit sera un MVP tecnico: core Rust, `MockProvider`, contrato CLI, limites y pruebas negativas de seguridad. | Aceptada | No mezcla contrato/base segura con proveedor real; permite TDD sin red ni secretos. |
+| D038 | Archivos | En el primer ciclo Spec Kit, `translate_file` aceptara solo `.md`, `.markdown` y `.txt`; soporte de codigo completo queda gated por segmentador confiable y pruebas. | Aceptada | Evita prometer preservacion de codigo antes de tener parser/segmentador robusto; D034 queda como objetivo del MVP usable posterior. |
+| D039 | Seguridad de archivos | `translate_file` solo podra leer dentro del workspace autorizado por Zed, tras canonicalizacion. | Aceptada | Reduce riesgo de exfiltracion por paths arbitrarios desde una tool MCP. |
+| D040 | Seguridad de archivos | Rechazar paths absolutos no autorizados, traversal con `..`, symlinks que escapen del workspace, archivos ocultos sensibles, contenido binario y entradas no UTF-8. | Aceptada | La validacion por extension no basta para proteger secretos o archivos fuera de alcance. |
+| D041 | Limites | El limite de archivo completo y `translate_text` sera 20 KiB UTF-8 por defecto; cada segmento tendra maximo 4 KiB, maximo 256 segmentos, salida maxima 40 KiB y timeout inicial de proveedor de 15 s. | Aceptada | Fija limites verificables para TDD, evita entradas enormes y acota memoria/latencia. |
+| D042 | Privacidad remota | Los proveedores remotos estaran deshabilitados por defecto; toda llamada remota requiere configuracion explicita y confirmacion por cada traduccion, aplicada por servidor/core. | Aceptada | La seguridad no debe depender solo de la UI o del cliente MCP; el servidor debe negar por defecto. |
+| D043 | Privacidad remota | El `file_path` no se enviara a proveedores remotos en el MVP; el proveedor solo recibira segmentos traducibles. | Aceptada | Minimiza metadata sensible y conserva privacidad del workspace. |
+| D044 | Logs | Los logs nunca incluiran `source_text`, segmentos, traduccion completa, secretos, headers, tokens ni rutas sensibles sin redaccion. | Aceptada | Evita filtraciones por logs de Zed, MCP, CLI o proveedor. |
+| D045 | Configuracion | No se versionaran `.env` reales; el MCP/CLI recibira un entorno minimo por allowlist y no heredara todo el entorno de Zed por defecto. | Aceptada | Reduce exposicion accidental de secretos y mantiene el host/proyecto limpio. |
+| D046 | Contrato CLI | El puente TypeScript -> Rust usara JSON UTF-8 por stdin/stdout, una request por proceso, exit code 0 para exito, exit code no cero para error, stderr solo redaccionado y timeout externo. | Aceptada | Da un wire contract testeable para integracion MCP sin acoplarse a detalles internos del core. |
+| D047 | Sandbox Provider | Proveedores CLI/HTTP futuros usaran allowlist; CLI sin shell, args estructurados, cwd controlado y env minimo; HTTP local solo loopback, remoto con HTTPS y sin redirects peligrosos. | Aceptada | Reduce ejecucion arbitraria, SSRF y fuga de entorno cuando se agreguen proveedores reales. |
+| D048 | Formato | `preserve_formatting` sera obligatorio en el MVP, aunque exista en el contrato como campo explicito. | Aceptada | No habra modo de romper formato/codigo hasta que existan pruebas que lo justifiquen. |
+| D049 | Errores | Agregar codigos `PATH_NOT_ALLOWED`, `NON_UTF8_INPUT`, `NO_TRANSLATABLE_SEGMENTS`, `SECRET_DETECTED` y `PROVIDER_TIMEOUT`. | Aceptada | Cubre controles nuevos de archivo, privacidad, ausencia de segmentos y timeouts. |
+| D050 | Secretos | Si se detectan patrones obvios de secreto antes de una llamada remota, la operacion se bloqueara o exigira confirmacion reforzada; en el MVP tecnico se bloqueara. | Aceptada | Preservar codigo no evita que comentarios o Markdown contengan credenciales. |
+| D051 | Supply chain | Rust y TypeScript usaran lockfiles, versiones revisadas y auditoria antes de publicar o habilitar proveedores reales. | Aceptada | Controla riesgo de dependencias, scripts de instalacion y binarios externos. |
+| D052 | Agent Panel | La seleccion de Zed se tratara como UX no garantizada hasta validarla manualmente; el flujo base aceptado es pegar texto o pasar path permitido al Agent Panel. | Aceptada | Evita depender de una capacidad no comprobada de Zed para el primer ciclo. |
+| D053 | Documentacion | La constitucion manda sobre principios, `specs/<feature>/` manda sobre la feature activa, y `docs/` registra decisiones estables, investigacion y roadmap. | Aceptada | Evita mantener dos planes vivos y reduce deriva documental conforme avance la implementacion. |
+| D054 | Toolchain Rust | Rust se ejecuta por defecto mediante la imagen Docker oficial fijada en el `Makefile`; no se instala `rustc`/`cargo` globalmente para este proyecto. | Aceptada | Cumple la politica del host y deja el flujo reproducible para TDD. |
+| D055 | Spec Kit | `docs/feature-map.md` alimenta futuras iteraciones `specify -> clarify -> plan -> tasks -> implement`, pero el detalle operativo se mueve a `specs/<feature>/` cuando una feature se formaliza. | Aceptada | Conserva el detalle util para futuras specs sin duplicar la fuente de verdad de la feature activa. |
+
+## Preguntas pendientes siguientes
+
+1. Preparar la siguiente feature formal desde `docs/feature-map.md`, con el
+   servidor MCP como candidato natural despues del nucleo de traduccion.
