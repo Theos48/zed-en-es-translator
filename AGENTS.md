@@ -27,6 +27,25 @@ Al retomar una sesion:
 3. Leer `docs/feature-map.md` si se va a preparar una nueva feature.
 4. Leer `specs/<feature>/` si se va a implementar o ajustar la feature activa.
 
+## Regla para Rust
+
+Cuando se escriba, revise o refactorice codigo Rust, o cuando se ejecute
+`/implement` para tareas que toquen Rust, usar tambien la skill
+`rust-best-practices`.
+
+Aplicacion:
+
+- Leer `.agents/skills/rust-best-practices/SKILL.md` antes de cambiar codigo
+  Rust.
+- Leer las referencias relevantes de la skill en el mismo turno cuando la
+  decision involucre ownership, errores, performance, traits, tests o
+  documentacion publica.
+- Mantener la politica de host limpio: Rust se ejecuta mediante el `Makefile`
+  y el contenedor Docker del proyecto, no con `cargo`/`rustc` instalados en el
+  host para este repo.
+- Si la skill no esta disponible en una sesion futura, avisar antes de
+  implementar cambios Rust.
+
 Regla de sincronizacion:
 
 - Si solo avanza la implementacion esperada, actualizar `specs/<feature>/`.
