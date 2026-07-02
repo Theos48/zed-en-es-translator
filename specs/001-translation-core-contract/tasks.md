@@ -246,6 +246,6 @@ For each behavior task:
 
 ## Phase 7: Convergence
 
-- [ ] T078 CRITICAL remove `input_kind` from provider-visible `ProviderRequest` data while keeping input-kind decisions internal to segmentation/reconstruction per Constitution II and data-model ProviderRequest (contradicts)
-- [ ] T079 Add tests and implementation so blank text files or protected-only Markdown/text file requests return `NO_TRANSLATABLE_SEGMENTS` without breaking direct ambiguous text preservation per FR-006 and Edge Cases (partial)
-- [ ] T080 Make CLI/contract JSON parsing UTF-8 safe, preserving non-ASCII JSON strings and mapping invalid UTF-8 stdin to `NON_UTF8_INPUT`, with focused tests per FR-012 and CLI wire contract (partial)
+- [x] T078 CRITICAL remove `input_kind` from provider-visible `ProviderRequest` data while keeping input-kind decisions internal to segmentation/reconstruction per Constitution II and data-model ProviderRequest (contradicts)
+- [x] T079 Add tests and implementation so blank text files or protected-only Markdown/text file requests return `NO_TRANSLATABLE_SEGMENTS` without breaking direct ambiguous text preservation per FR-006 and Edge Cases (partial)
+- [x] T080 Make CLI/contract JSON parsing UTF-8 safe, preserving non-ASCII JSON strings and mapping invalid UTF-8 stdin to `NON_UTF8_INPUT`, with focused tests per FR-012 and CLI wire contract (partial)

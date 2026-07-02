@@ -1,4 +1,4 @@
-use translator_core::{InputKind, Language, MockProvider, Provider, ProviderRequest, Tone};
+use translator_core::{Language, MockProvider, Provider, ProviderRequest, Tone};
 
 #[test]
 fn mock_provider_is_deterministic() {
@@ -8,7 +8,6 @@ fn mock_provider_is_deterministic() {
         source_language: Language::English,
         target_language: Language::Spanish,
         tone: Tone::TechnicalNeutral,
-        input_kind: InputKind::Text,
     };
 
     let first = provider

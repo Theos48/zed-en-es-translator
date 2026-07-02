@@ -37,7 +37,6 @@ pub fn translate_text(
         Language::English,
         Language::Spanish,
         Tone::TechnicalNeutral,
-        InputKind::Text,
     )?;
     let response = provider.translate(&request).map_err(redact_failure)?;
     ensure_provider_response_shape(&request, &response)?;

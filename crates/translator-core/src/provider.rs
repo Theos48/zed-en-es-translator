@@ -1,6 +1,4 @@
-use crate::{
-    validate_segments, ErrorCode, InputKind, Language, Tone, TranslatableSegment, TranslateFailure,
-};
+use crate::{validate_segments, ErrorCode, Language, Tone, TranslatableSegment, TranslateFailure};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ProviderRequest {
@@ -8,7 +6,6 @@ pub struct ProviderRequest {
     pub source_language: Language,
     pub target_language: Language,
     pub tone: Tone,
-    pub input_kind: InputKind,
 }
 
 impl ProviderRequest {
@@ -17,7 +14,6 @@ impl ProviderRequest {
         source_language: Language,
         target_language: Language,
         tone: Tone,
-        input_kind: InputKind,
     ) -> Result<Self, TranslateFailure> {
         let validated_segments = segments
             .iter()
@@ -31,7 +27,6 @@ impl ProviderRequest {
             source_language,
             target_language,
             tone,
-            input_kind,
         })
     }
 }

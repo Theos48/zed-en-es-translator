@@ -1,6 +1,6 @@
 use crate::{
-    ensure_provider_response_shape, redact_failure, InputKind, Language, Provider, ProviderRequest,
-    Tone, TranslateFailure,
+    ensure_provider_response_shape, redact_failure, ErrorCode, InputKind, Language, Provider,
+    ProviderRequest, Tone, TranslateFailure,
 };
 
 pub fn translate_document(
@@ -8,14 +8,30 @@ pub fn translate_document(
     input_kind: InputKind,
     provider: &impl Provider,
 ) -> Result<String, TranslateFailure> {
-    match input_kind {
+    let translated = match input_kind {
         InputKind::Text => translate_visible_text(content, provider),
         InputKind::Markdown => translate_markdown(content, provider),
+    }?;
+
+    if translated.segment_count == 0 {
+        return Err(no_translatable_segments());
     }
+
+    Ok(translated.text)
 }
 
-fn translate_markdown(content: &str, provider: &impl Provider) -> Result<String, TranslateFailure> {
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct TranslatedDocument {
+    text: String,
+    segment_count: usize,
+}
+
+fn translate_markdown(
+    content: &str,
+    provider: &impl Provider,
+) -> Result<TranslatedDocument, TranslateFailure> {
     let mut output = String::new();
+    let mut segment_count = 0;
     let mut in_fence: Option<String> = None;
     let mut in_frontmatter = false;
     let mut frontmatter_checked = false;
@@ -72,26 +88,31 @@ fn translate_markdown(content: &str, provider: &impl Provider) -> Result<String,
             continue;
         }
 
-        output.push_str(&translate_inline_visible(line, provider)?);
+        let translated = translate_inline_visible(line, provider)?;
+        output.push_str(&translated.text);
+        segment_count += translated.segment_count;
     }
 
-    Ok(output)
+    Ok(TranslatedDocument {
+        text: output,
+        segment_count,
+    })
 }
 
 fn translate_inline_visible(
     line: &str,
     provider: &impl Provider,
-) -> Result<String, TranslateFailure> {
+) -> Result<TranslatedDocument, TranslateFailure> {
     let mut output = String::new();
+    let mut segment_count = 0;
     let mut cursor = 0;
 
     while let Some(relative_start) = line[cursor..].find('`') {
         let start = cursor + relative_start;
         if start > cursor {
-            output.push_str(&translate_visible_markdown_text(
-                &line[cursor..start],
-                provider,
-            )?);
+            let translated = translate_visible_markdown_text(&line[cursor..start], provider)?;
+            output.push_str(&translated.text);
+            segment_count += translated.segment_count;
         }
 
         let tick_count = count_backticks(&line[start..]);
@@ -105,24 +126,35 @@ fn translate_inline_visible(
             }
             None => {
                 output.push_str(&line[start..]);
-                return Ok(output);
+                return Ok(TranslatedDocument {
+                    text: output,
+                    segment_count,
+                });
             }
         }
     }
 
     if cursor < line.len() {
-        output.push_str(&translate_visible_markdown_text(&line[cursor..], provider)?);
+        let translated = translate_visible_markdown_text(&line[cursor..], provider)?;
+        output.push_str(&translated.text);
+        segment_count += translated.segment_count;
     }
 
-    Ok(output)
+    Ok(TranslatedDocument {
+        text: output,
+        segment_count,
+    })
 }
 
 fn translate_visible_text(
     text: &str,
     provider: &impl Provider,
-) -> Result<String, TranslateFailure> {
+) -> Result<TranslatedDocument, TranslateFailure> {
     if text.trim().is_empty() {
-        return Ok(text.to_string());
+        return Ok(TranslatedDocument {
+            text: text.to_string(),
+            segment_count: 0,
+        });
     }
 
     let request = ProviderRequest::new(
@@ -130,23 +162,33 @@ fn translate_visible_text(
         Language::English,
         Language::Spanish,
         Tone::TechnicalNeutral,
-        InputKind::Text,
     )?;
     let response = provider.translate(&request).map_err(redact_failure)?;
     ensure_provider_response_shape(&request, &response)?;
 
-    Ok(response
+    let translated = response
         .translated_segments
         .into_iter()
         .next()
-        .unwrap_or_else(|| text.to_string()))
+        .ok_or_else(|| {
+            TranslateFailure::new(
+                ErrorCode::ProviderFailed,
+                "Provider returned no translated segments.",
+            )
+        })?;
+
+    Ok(TranslatedDocument {
+        text: translated,
+        segment_count: 1,
+    })
 }
 
 fn translate_visible_markdown_text(
     text: &str,
     provider: &impl Provider,
-) -> Result<String, TranslateFailure> {
+) -> Result<TranslatedDocument, TranslateFailure> {
     let mut output = String::new();
+    let mut segment_count = 0;
     let mut cursor = 0;
 
     while let Some(relative_start) = text[cursor..].find("](") {
@@ -154,10 +196,9 @@ fn translate_visible_markdown_text(
         let destination_start = marker_start + 2;
         if let Some(relative_end) = text[destination_start..].find(')') {
             let destination_end = destination_start + relative_end + 1;
-            output.push_str(&translate_visible_text(
-                &text[cursor..destination_start],
-                provider,
-            )?);
+            let translated = translate_visible_text(&text[cursor..destination_start], provider)?;
+            output.push_str(&translated.text);
+            segment_count += translated.segment_count;
             output.push_str(&text[destination_start..destination_end]);
             cursor = destination_end;
         } else {
@@ -166,10 +207,22 @@ fn translate_visible_markdown_text(
     }
 
     if cursor < text.len() {
-        output.push_str(&translate_visible_text(&text[cursor..], provider)?);
+        let translated = translate_visible_text(&text[cursor..], provider)?;
+        output.push_str(&translated.text);
+        segment_count += translated.segment_count;
     }
 
-    Ok(output)
+    Ok(TranslatedDocument {
+        text: output,
+        segment_count,
+    })
+}
+
+fn no_translatable_segments() -> TranslateFailure {
+    TranslateFailure::new(
+        ErrorCode::NoTranslatableSegments,
+        "No translatable segments were found.",
+    )
 }
 
 fn opening_fence_marker(line: &str) -> Option<String> {

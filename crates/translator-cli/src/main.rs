@@ -19,14 +19,24 @@ fn run() -> i32 {
         return 1;
     }
 
-    let mut input = String::new();
-    if std::io::stdin().read_to_string(&mut input).is_err() {
+    let mut input_bytes = Vec::new();
+    if std::io::stdin().read_to_end(&mut input_bytes).is_err() {
         write_failure(TranslateFailure::new(
             ErrorCode::InvalidInput,
             "Failed to read request input.",
         ));
         return 1;
     }
+    let input = match String::from_utf8(input_bytes) {
+        Ok(input) => input,
+        Err(_) => {
+            write_failure(TranslateFailure::new(
+                ErrorCode::NonUtf8Input,
+                "The input must be UTF-8 text.",
+            ));
+            return 1;
+        }
+    };
 
     let request = match TranslateRequest::from_json(&input) {
         Ok(request) => request,

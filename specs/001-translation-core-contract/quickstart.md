@@ -179,6 +179,18 @@ CLI:
 - Decision drift: no accepted limit or error code changed during
   implementation, so `docs/decisions.md` did not need a new decision entry.
 
+2026-07-02 convergence validation:
+
+- T078: `ProviderRequest` now exposes only segments, language pair, and tone to
+  providers; `input_kind` remains internal to file loading and reconstruction.
+- T079: blank `.txt` files and protected-only Markdown files now return
+  `NO_TRANSLATABLE_SEGMENTS`; ambiguous direct text remains a successful
+  preserved output.
+- T080: raw non-ASCII JSON strings are preserved through the contract and CLI;
+  invalid UTF-8 stdin maps to `NON_UTF8_INPUT`.
+- Command: `make test`
+- Result: PASS.
+
 ## Security And Adversarial Coverage Summary
 
 Automated tests cover good paths, bad paths, and malicious/adversarial paths:

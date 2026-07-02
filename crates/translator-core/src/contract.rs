@@ -345,16 +345,13 @@ enum JsonValue {
 }
 
 struct JsonParser<'a> {
-    input: &'a [u8],
+    input: &'a str,
     pos: usize,
 }
 
 impl<'a> JsonParser<'a> {
     fn new(input: &'a str) -> Self {
-        Self {
-            input: input.as_bytes(),
-            pos: 0,
-        }
+        Self { input, pos: 0 }
     }
 
     fn parse_object(&mut self) -> Result<BTreeMap<String, JsonValue>, TranslateFailure> {
@@ -424,16 +421,22 @@ impl<'a> JsonParser<'a> {
         self.expect_byte(b'"')?;
         let mut output = String::new();
 
-        while let Some(byte) = self.next_byte() {
+        while let Some(byte) = self.peek_byte() {
             match byte {
-                b'"' => return Ok(output),
-                b'\\' => output.push(self.parse_escape()?),
+                b'"' => {
+                    self.pos += 1;
+                    return Ok(output);
+                }
+                b'\\' => {
+                    self.pos += 1;
+                    output.push(self.parse_escape()?);
+                }
                 0x00..=0x1f => {
                     return Err(TranslateFailure::invalid_input(
                         "Control character in JSON string.",
                     ));
                 }
-                _ => output.push(byte as char),
+                _ => output.push(self.next_char()?),
             }
         }
 
@@ -508,7 +511,12 @@ impl<'a> JsonParser<'a> {
     }
 
     fn expect_literal(&mut self, literal: &[u8]) -> Result<(), TranslateFailure> {
-        if self.input.get(self.pos..self.pos + literal.len()) == Some(literal) {
+        if self
+            .input
+            .as_bytes()
+            .get(self.pos..self.pos + literal.len())
+            == Some(literal)
+        {
             self.pos += literal.len();
             Ok(())
         } else {
@@ -517,13 +525,22 @@ impl<'a> JsonParser<'a> {
     }
 
     fn peek_byte(&self) -> Option<u8> {
-        self.input.get(self.pos).copied()
+        self.input.as_bytes().get(self.pos).copied()
     }
 
     fn next_byte(&mut self) -> Option<u8> {
         let byte = self.peek_byte()?;
         self.pos += 1;
         Some(byte)
+    }
+
+    fn next_char(&mut self) -> Result<char, TranslateFailure> {
+        let ch = self.input[self.pos..]
+            .chars()
+            .next()
+            .ok_or_else(|| TranslateFailure::invalid_input("Malformed JSON string."))?;
+        self.pos += ch.len_utf8();
+        Ok(ch)
     }
 }
 
