@@ -5,8 +5,13 @@ pub(crate) fn contains_secret_pattern(input: &str) -> bool {
         || lower.contains("bearer ")
         || lower.contains(".env")
         || lower.contains("_token=")
+        || lower.contains("token:")
         || lower.contains("service_token")
         || lower.contains("database_url=")
+        || lower.contains("password=")
+        || lower.contains("secret=")
+        || lower.contains("client_secret")
+        || lower.contains("aws_secret_access_key")
         || contains_private_key_header(&lower)
 }
 

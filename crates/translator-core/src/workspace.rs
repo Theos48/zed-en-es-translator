@@ -2,7 +2,7 @@ use std::fs::{self, File, Metadata};
 use std::io::Read;
 #[cfg(unix)]
 use std::os::unix::fs::MetadataExt;
-use std::path::{Component, Path, PathBuf};
+use std::path::{Component, Path};
 
 use crate::{ErrorCode, InputKind, TranslateFailure, MAX_INPUT_BYTES};
 
@@ -19,8 +19,7 @@ pub fn load_allowed_file(
     load_allowed_file_with_open_hook(file_path, workspace_root, || {})
 }
 
-#[doc(hidden)]
-pub fn load_allowed_file_with_open_hook(
+fn load_allowed_file_with_open_hook(
     file_path: &str,
     workspace_root: &str,
     before_open: impl FnOnce(),
@@ -171,5 +170,57 @@ fn path_not_allowed() -> TranslateFailure {
     )
 }
 
-#[allow(dead_code)]
-fn _pathbuf_for_docs(_: PathBuf) {}
+#[cfg(all(test, unix))]
+mod tests {
+    use std::fs;
+    use std::os::unix::fs::symlink;
+    use std::path::{Path, PathBuf};
+
+    use super::load_allowed_file_with_open_hook;
+    use crate::ErrorCode;
+
+    #[test]
+    fn rejects_replaced_validated_target_before_opening_file() {
+        let root = temp_case("toctou_after_validation");
+        let workspace = root.join("ws");
+        let inside = workspace.join("inside.md");
+        let outside = root.join("outside.md");
+        let link = workspace.join("doc.md");
+        fs::create_dir_all(&workspace).expect("workspace");
+        write_file(&inside, "Read the docs.");
+        write_file(&outside, "Open the file.");
+        symlink(&inside, &link).expect("initial inside symlink");
+
+        let err = load_allowed_file_with_open_hook("doc.md", workspace.to_str().unwrap(), || {
+            fs::remove_file(&inside).expect("remove validated target");
+            symlink(&outside, &inside).expect("replace target with outside symlink");
+        })
+        .expect_err("replaced validated target should fail");
+
+        assert_eq!(err.code, ErrorCode::PathNotAllowed);
+    }
+
+    fn temp_case(name: &str) -> PathBuf {
+        let root = std::env::temp_dir().join(format!(
+            "zed_translator_{name}_{}_{}",
+            std::process::id(),
+            unique_suffix()
+        ));
+        fs::create_dir_all(&root).expect("temp root");
+        root
+    }
+
+    fn unique_suffix() -> u128 {
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("time")
+            .as_nanos()
+    }
+
+    fn write_file(path: &Path, content: &str) {
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent).expect("parent dir");
+        }
+        fs::write(path, content).expect("write file");
+    }
+}

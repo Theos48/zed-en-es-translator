@@ -30,7 +30,7 @@ fn translate_markdown(
     let mut in_fence: Option<String> = None;
     let mut in_frontmatter = false;
     let mut frontmatter_checked = false;
-    let mut in_html_block = false;
+    let mut in_html_block: Option<HtmlBlockEnd> = None;
     let mut in_code_span: Option<usize> = None;
 
     for line in content.split_inclusive('\n') {
@@ -68,18 +68,20 @@ fn translate_markdown(
             continue;
         }
 
-        if in_html_block {
+        if let Some(end_mode) = in_html_block {
             output.push_str(line);
-            if closes_html_block(start) || trimmed.trim().is_empty() {
-                in_html_block = false;
+            let blank_line_closes_block = matches!(end_mode, HtmlBlockEnd::ClosingTagOrBlankLine)
+                && trimmed.trim().is_empty();
+            if closes_html_block(start) || blank_line_closes_block {
+                in_html_block = None;
             }
             continue;
         }
 
-        if opens_html_block(start) {
+        if let Some(end_mode) = html_block_end_mode(start) {
             output.push_str(line);
             if !closes_html_block(start) && !is_self_closing_html_block(start) {
-                in_html_block = true;
+                in_html_block = Some(end_mode);
             }
             continue;
         }
@@ -244,13 +246,24 @@ fn starts_with_fence_marker(line: &str, marker: &str) -> bool {
     line.starts_with(marker)
 }
 
-fn opens_html_block(line: &str) -> bool {
+#[derive(Clone, Copy)]
+enum HtmlBlockEnd {
+    ClosingTag,
+    ClosingTagOrBlankLine,
+}
+
+fn html_block_end_mode(line: &str) -> Option<HtmlBlockEnd> {
     let lower = line.to_ascii_lowercase();
-    lower.starts_with("<div")
-        || lower.starts_with("<table")
-        || lower.starts_with("<pre")
+    if lower.starts_with("<div") || lower.starts_with("<table") {
+        Some(HtmlBlockEnd::ClosingTagOrBlankLine)
+    } else if lower.starts_with("<pre")
         || lower.starts_with("<script")
         || lower.starts_with("<style")
+    {
+        Some(HtmlBlockEnd::ClosingTag)
+    } else {
+        None
+    }
 }
 
 fn is_self_closing_html_block(line: &str) -> bool {

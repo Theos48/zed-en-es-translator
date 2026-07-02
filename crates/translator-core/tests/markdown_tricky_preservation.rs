@@ -81,6 +81,26 @@ fn resumes_translation_after_unclosed_html_block_blank_line() {
 }
 
 #[test]
+fn preserves_pre_html_block_across_blank_lines_until_closing_tag() {
+    let workspace = temp_case("pre_html_blank");
+    write_file(
+        &workspace.join("pre.md"),
+        "<pre>\nRead inside pre.\n\nRead the docs.\n</pre>\nRead the docs.\n",
+    );
+
+    let success = translate_file(
+        "pre.md",
+        workspace.to_str().expect("utf-8 workspace root"),
+        &MockProvider::new(),
+    )
+    .expect("pre block should remain protected until closing tag");
+
+    assert!(success
+        .translated_text
+        .contains("\n\nRead the docs.\n</pre>\nLee la documentacion."));
+}
+
+#[test]
 fn preserves_link_destination_with_nested_parentheses() {
     let workspace = temp_case("link_parens");
     write_file(

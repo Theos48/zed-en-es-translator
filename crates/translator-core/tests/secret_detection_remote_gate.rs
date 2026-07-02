@@ -47,3 +47,20 @@ fn blocks_common_private_key_headers_before_remote_processing() {
         assert_eq!(err.code, ErrorCode::SecretDetected, "header: {header}");
     }
 }
+
+#[test]
+fn blocks_common_config_secret_patterns_before_remote_processing() {
+    for secret in [
+        "PASSWORD=fake_password",
+        "SECRET=fake_secret",
+        "CLIENT_SECRET=fake_client_secret",
+        "AWS_SECRET_ACCESS_KEY=fake_aws_secret",
+        "X-Auth-Token: fake_token",
+        "id_token: fake_id_token",
+    ] {
+        let err = check_remote_provider_gate(secret, RemoteProviderState::ConfiguredButUnconfirmed)
+            .expect_err("config secret should block");
+
+        assert_eq!(err.code, ErrorCode::SecretDetected, "secret: {secret}");
+    }
+}
