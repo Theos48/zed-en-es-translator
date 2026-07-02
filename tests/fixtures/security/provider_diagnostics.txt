@@ -1,0 +1,2 @@
+Provider diagnostics may echo fake source text, fake bearer tokens, fake API keys,
+or local-looking paths. Tests verify those values are redacted.

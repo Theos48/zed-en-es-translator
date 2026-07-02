@@ -1,0 +1,4 @@
+../outside.md
+docs/../../outside.md
+/tmp/ws-evil/secret.md
+/tmp/outside.md

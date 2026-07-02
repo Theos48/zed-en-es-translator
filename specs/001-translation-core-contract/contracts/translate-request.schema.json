@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/zed-en-es-translator/translate-request.schema.json",
+  "title": "TranslateRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_language",
+    "target_language",
+    "tone",
+    "preserve_formatting",
+    "input_kind"
+  ],
+  "properties": {
+    "source_text": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "maxLength": 20480
+    },
+    "source_language": {
+      "const": "en"
+    },
+    "target_language": {
+      "const": "es"
+    },
+    "tone": {
+      "const": "technical_neutral"
+    },
+    "preserve_formatting": {
+      "const": true
+    },
+    "input_kind": {
+      "enum": ["text", "markdown"]
+    },
+    "file_path": {
+      "type": "string"
+    },
+    "workspace_root": {
+      "type": "string"
+    }
+  },
+  "oneOf": [
+    {
+      "title": "DirectTextRequest",
+      "required": ["source_text"],
+      "not": {
+        "anyOf": [
+          { "required": ["file_path"] },
+          { "required": ["workspace_root"] }
+        ]
+      }
+    },
+    {
+      "title": "FileRequest",
+      "required": ["file_path", "workspace_root"],
+      "not": {
+        "required": ["source_text"]
+      }
+    }
+  ]
+}
