@@ -101,6 +101,46 @@ fn preserves_pre_html_block_across_blank_lines_until_closing_tag() {
 }
 
 #[test]
+fn preserves_pre_html_block_when_different_closing_tag_is_literal_content() {
+    let workspace = temp_case("pre_html_cross_close");
+    write_file(
+        &workspace.join("pre_cross.md"),
+        "<pre>\nRead inside pre.\n</div>\nRead the docs.\n</pre>\nRead the docs.\n",
+    );
+
+    let success = translate_file(
+        "pre_cross.md",
+        workspace.to_str().expect("utf-8 workspace root"),
+        &MockProvider::new(),
+    )
+    .expect("pre block should ignore unrelated closing tags");
+
+    assert!(success
+        .translated_text
+        .contains("</div>\nRead the docs.\n</pre>\nLee la documentacion."));
+}
+
+#[test]
+fn preserves_div_html_block_when_different_closing_tag_is_literal_content() {
+    let workspace = temp_case("div_html_cross_close");
+    write_file(
+        &workspace.join("div_cross.md"),
+        "<div>\nRead inside div.\n</table>\nRead the docs.\n</div>\nRead the docs.\n",
+    );
+
+    let success = translate_file(
+        "div_cross.md",
+        workspace.to_str().expect("utf-8 workspace root"),
+        &MockProvider::new(),
+    )
+    .expect("div block should ignore unrelated closing tags");
+
+    assert!(success
+        .translated_text
+        .contains("</table>\nRead the docs.\n</div>\nLee la documentacion."));
+}
+
+#[test]
 fn preserves_link_destination_with_nested_parentheses() {
     let workspace = temp_case("link_parens");
     write_file(

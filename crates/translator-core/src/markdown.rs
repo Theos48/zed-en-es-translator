@@ -30,7 +30,7 @@ fn translate_markdown(
     let mut in_fence: Option<String> = None;
     let mut in_frontmatter = false;
     let mut frontmatter_checked = false;
-    let mut in_html_block: Option<HtmlBlockEnd> = None;
+    let mut in_html_block: Option<HtmlBlock> = None;
     let mut in_code_span: Option<usize> = None;
 
     for line in content.split_inclusive('\n') {
@@ -68,20 +68,20 @@ fn translate_markdown(
             continue;
         }
 
-        if let Some(end_mode) = in_html_block {
+        if let Some(html_block) = in_html_block {
             output.push_str(line);
-            let blank_line_closes_block = matches!(end_mode, HtmlBlockEnd::ClosingTagOrBlankLine)
-                && trimmed.trim().is_empty();
-            if closes_html_block(start) || blank_line_closes_block {
+            let blank_line_closes_block =
+                html_block.closes_on_blank_line() && trimmed.trim().is_empty();
+            if html_block.closes_with_tag(start) || blank_line_closes_block {
                 in_html_block = None;
             }
             continue;
         }
 
-        if let Some(end_mode) = html_block_end_mode(start) {
+        if let Some(html_block) = html_block(start) {
             output.push_str(line);
-            if !closes_html_block(start) && !is_self_closing_html_block(start) {
-                in_html_block = Some(end_mode);
+            if !html_block.closes_with_tag(start) && !is_self_closing_html_block(start) {
+                in_html_block = Some(html_block);
             }
             continue;
         }
@@ -252,15 +252,49 @@ enum HtmlBlockEnd {
     ClosingTagOrBlankLine,
 }
 
-fn html_block_end_mode(line: &str) -> Option<HtmlBlockEnd> {
+#[derive(Clone, Copy)]
+struct HtmlBlock {
+    expected_close_tag: &'static str,
+    end: HtmlBlockEnd,
+}
+
+impl HtmlBlock {
+    fn closes_with_tag(self, line: &str) -> bool {
+        line.to_ascii_lowercase().contains(self.expected_close_tag)
+    }
+
+    const fn closes_on_blank_line(self) -> bool {
+        matches!(self.end, HtmlBlockEnd::ClosingTagOrBlankLine)
+    }
+}
+
+fn html_block(line: &str) -> Option<HtmlBlock> {
     let lower = line.to_ascii_lowercase();
-    if lower.starts_with("<div") || lower.starts_with("<table") {
-        Some(HtmlBlockEnd::ClosingTagOrBlankLine)
-    } else if lower.starts_with("<pre")
-        || lower.starts_with("<script")
-        || lower.starts_with("<style")
-    {
-        Some(HtmlBlockEnd::ClosingTag)
+    if lower.starts_with("<div") {
+        Some(HtmlBlock {
+            expected_close_tag: "</div>",
+            end: HtmlBlockEnd::ClosingTagOrBlankLine,
+        })
+    } else if lower.starts_with("<table") {
+        Some(HtmlBlock {
+            expected_close_tag: "</table>",
+            end: HtmlBlockEnd::ClosingTagOrBlankLine,
+        })
+    } else if lower.starts_with("<pre") {
+        Some(HtmlBlock {
+            expected_close_tag: "</pre>",
+            end: HtmlBlockEnd::ClosingTag,
+        })
+    } else if lower.starts_with("<script") {
+        Some(HtmlBlock {
+            expected_close_tag: "</script>",
+            end: HtmlBlockEnd::ClosingTag,
+        })
+    } else if lower.starts_with("<style") {
+        Some(HtmlBlock {
+            expected_close_tag: "</style>",
+            end: HtmlBlockEnd::ClosingTag,
+        })
     } else {
         None
     }
@@ -268,15 +302,6 @@ fn html_block_end_mode(line: &str) -> Option<HtmlBlockEnd> {
 
 fn is_self_closing_html_block(line: &str) -> bool {
     line.trim_end().ends_with("/>")
-}
-
-fn closes_html_block(line: &str) -> bool {
-    let lower = line.to_ascii_lowercase();
-    lower.contains("</div>")
-        || lower.contains("</table>")
-        || lower.contains("</pre>")
-        || lower.contains("</script>")
-        || lower.contains("</style>")
 }
 
 fn count_backticks(text: &str) -> usize {
