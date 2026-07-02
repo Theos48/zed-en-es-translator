@@ -270,33 +270,47 @@ impl HtmlBlock {
 
 fn html_block(line: &str) -> Option<HtmlBlock> {
     let lower = line.to_ascii_lowercase();
-    if lower.starts_with("<div") {
+    if starts_with_html_tag(&lower, "div") {
         Some(HtmlBlock {
             expected_close_tag: "</div>",
             end: HtmlBlockEnd::ClosingTagOrBlankLine,
         })
-    } else if lower.starts_with("<table") {
+    } else if starts_with_html_tag(&lower, "table") {
         Some(HtmlBlock {
             expected_close_tag: "</table>",
             end: HtmlBlockEnd::ClosingTagOrBlankLine,
         })
-    } else if lower.starts_with("<pre") {
+    } else if starts_with_html_tag(&lower, "pre") {
         Some(HtmlBlock {
             expected_close_tag: "</pre>",
             end: HtmlBlockEnd::ClosingTag,
         })
-    } else if lower.starts_with("<script") {
+    } else if starts_with_html_tag(&lower, "script") {
         Some(HtmlBlock {
             expected_close_tag: "</script>",
             end: HtmlBlockEnd::ClosingTag,
         })
-    } else if lower.starts_with("<style") {
+    } else if starts_with_html_tag(&lower, "style") {
         Some(HtmlBlock {
             expected_close_tag: "</style>",
             end: HtmlBlockEnd::ClosingTag,
         })
     } else {
         None
+    }
+}
+
+fn starts_with_html_tag(line: &str, tag: &str) -> bool {
+    let Some(rest) = line
+        .strip_prefix('<')
+        .and_then(|rest| rest.strip_prefix(tag))
+    else {
+        return false;
+    };
+
+    match rest.as_bytes().first().copied() {
+        None | Some(b'>') | Some(b'/') => true,
+        Some(byte) => byte.is_ascii_whitespace(),
     }
 }
 

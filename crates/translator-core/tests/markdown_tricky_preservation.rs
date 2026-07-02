@@ -141,6 +141,26 @@ fn preserves_div_html_block_when_different_closing_tag_is_literal_content() {
 }
 
 #[test]
+fn translates_visible_text_after_html_like_tag_prefix() {
+    let workspace = temp_case("html_tag_prefix");
+    write_file(
+        &workspace.join("prefix.md"),
+        "<prelude>\nRead the docs.\n</prelude>\nRead the docs.\n",
+    );
+
+    let success = translate_file(
+        "prefix.md",
+        workspace.to_str().expect("utf-8 workspace root"),
+        &MockProvider::new(),
+    )
+    .expect("html-like tag prefix should not start protected block mode");
+
+    assert!(success
+        .translated_text
+        .contains("<prelude>\nLee la documentacion.\n</prelude>\nLee la documentacion."));
+}
+
+#[test]
 fn preserves_link_destination_with_nested_parentheses() {
     let workspace = temp_case("link_parens");
     write_file(
