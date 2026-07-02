@@ -1,18 +1,14 @@
-use crate::{ErrorCode, TranslateFailure};
+use crate::{
+    secrets::{contains_secret_pattern, contains_sensitive_path},
+    ErrorCode, TranslateFailure,
+};
 
 pub fn redact_failure(failure: TranslateFailure) -> TranslateFailure {
     TranslateFailure::new(failure.code, default_redacted_message(failure.code))
 }
 
 pub fn redact_text(input: &str) -> String {
-    let lower = input.to_ascii_lowercase();
-    if lower.contains("bearer ")
-        || lower.contains("api_key")
-        || lower.contains("token")
-        || lower.contains("-----begin")
-        || lower.contains("/home/")
-        || lower.contains("\\users\\")
-    {
+    if contains_secret_pattern(input) || contains_sensitive_path(input) {
         "[REDACTED]".to_string()
     } else {
         input.to_string()

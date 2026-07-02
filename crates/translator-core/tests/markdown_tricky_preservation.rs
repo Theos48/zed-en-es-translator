@@ -2,6 +2,9 @@ use std::path::PathBuf;
 
 use translator_core::{translate_file, MockProvider};
 
+mod common;
+use common::{temp_case, write_file};
+
 fn workspace_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .parent()
@@ -35,4 +38,62 @@ fn preserves_tricky_markdown_regions() {
     assert!(success
         .translated_text
         .ends_with("echo \"Read the docs\"\n"));
+}
+
+#[test]
+fn preserves_multiline_inline_code_span() {
+    let workspace = temp_case("multiline_code_span");
+    write_file(
+        &workspace.join("multiline.md"),
+        "Read before `do not translate\nRead the docs` after.\n",
+    );
+
+    let success = translate_file(
+        "multiline.md",
+        workspace.to_str().expect("utf-8 workspace root"),
+        &MockProvider::new(),
+    )
+    .expect("multiline code span should translate");
+
+    assert!(success
+        .translated_text
+        .contains("`do not translate\nRead the docs`"));
+}
+
+#[test]
+fn resumes_translation_after_unclosed_html_block_blank_line() {
+    let workspace = temp_case("html_blank");
+    write_file(
+        &workspace.join("html.md"),
+        "<div>\nRead inside HTML.\n\nRead the docs.\n",
+    );
+
+    let success = translate_file(
+        "html.md",
+        workspace.to_str().expect("utf-8 workspace root"),
+        &MockProvider::new(),
+    )
+    .expect("html block should translate after blank line");
+
+    assert!(success
+        .translated_text
+        .contains("\n\nLee la documentacion."));
+}
+
+#[test]
+fn preserves_link_destination_with_nested_parentheses() {
+    let workspace = temp_case("link_parens");
+    write_file(
+        &workspace.join("link.md"),
+        "Read [the documentation](docs/readme(v1).md) before changing the code.\n",
+    );
+
+    let success = translate_file(
+        "link.md",
+        workspace.to_str().expect("utf-8 workspace root"),
+        &MockProvider::new(),
+    )
+    .expect("link destination should be preserved");
+
+    assert!(success.translated_text.contains("](docs/readme(v1).md)"));
 }

@@ -15,22 +15,25 @@ RUST_ENV := -e HOME=$(WORKDIR)/.cache/home \
 RUST_MOUNTS := -v $(CURDIR):$(WORKDIR) -w $(WORKDIR)
 RUST_USER := --user $(USER_ID):$(GROUP_ID)
 RUST_RUN := $(DOCKER) run --rm $(RUST_USER) $(RUST_ENV) $(RUST_MOUNTS) $(RUST_DEV_IMAGE)
+HELP_LINES := \
+	'Targets:' \
+	'  make install       Build the pinned project Rust container image' \
+	'  make pull-rust-base Pull the pinned upstream Rust container image' \
+	'  make rust-image    Build the pinned project Rust container image' \
+	'  make rust-version  Show rustc and cargo versions inside the container' \
+	'  make test          Run all Rust tests inside the container' \
+	'  make test-core     Run translator-core tests inside the container' \
+	'  make fmt           Check Rust formatting inside the container' \
+	'  make clippy        Run clippy inside the container' \
+	'  make shell         Open a shell inside the Rust container' \
+	'  make clean         Remove local Rust build/cache output'
 
-.PHONY: help install pull-rust-base rust-image rust-version test test-core fmt clippy shell clean
+.PHONY: all help install pull-rust-base rust-image rust-version test test-core fmt clippy shell clean
+
+all: test
 
 help:
-	@printf '%s\n' \
-		'Targets:' \
-		'  make install       Build the pinned project Rust container image' \
-		'  make pull-rust-base Pull the pinned upstream Rust container image' \
-		'  make rust-image    Build the pinned project Rust container image' \
-		'  make rust-version  Show rustc and cargo versions inside the container' \
-		'  make test          Run all Rust tests inside the container' \
-		'  make test-core     Run translator-core tests inside the container' \
-		'  make fmt           Check Rust formatting inside the container' \
-		'  make clippy        Run clippy inside the container' \
-		'  make shell         Open a shell inside the Rust container' \
-		'  make clean         Remove local Rust build/cache output'
+	@printf '%s\n' $(HELP_LINES)
 
 install: pull-rust-base rust-image
 

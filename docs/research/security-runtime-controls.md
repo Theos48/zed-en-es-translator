@@ -57,6 +57,12 @@ Reglas:
 - rechazar archivos ocultos sensibles por defecto, especialmente `.env`, `.env.*`, llaves, certificados y credenciales;
 - validar extension permitida despues de normalizar casing;
 - limitar lectura por bytes.
+- rechazar bytes NUL;
+- abrir el archivo validado una sola vez y hacer las comprobaciones de tamano,
+  tipo y contenido sobre ese mismo handle;
+- verificar que el handle abierto corresponde al archivo validado cuando la
+  plataforma permita comparar identidad de archivo, para cerrar ventanas
+  TOCTOU.
 
 Errores relacionados:
 

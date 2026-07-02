@@ -15,6 +15,8 @@ fn request_schema_defines_exclusive_direct_text_and_file_variants() {
     assert!(REQUEST_SCHEMA.contains(r#""source_text""#));
     assert!(REQUEST_SCHEMA.contains(r#""file_path""#));
     assert!(REQUEST_SCHEMA.contains(r#""workspace_root""#));
+    assert!(REQUEST_SCHEMA.contains(r#""minLength": 1"#));
+    assert!(REQUEST_SCHEMA.contains(r#""pattern": "\\S""#));
     assert!(REQUEST_SCHEMA.contains(r#""maxLength": 20480"#));
 }
 

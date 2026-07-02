@@ -5,6 +5,7 @@ pub mod markdown;
 pub mod privacy;
 pub mod provider;
 pub mod redaction;
+mod secrets;
 pub mod workspace;
 
 pub use contract::{
@@ -26,6 +27,13 @@ pub fn translate_text(
     source_text: &str,
     provider: &impl Provider,
 ) -> Result<TranslateSuccess, TranslateFailure> {
+    translate_text_inner(source_text, provider).map_err(redact_failure)
+}
+
+fn translate_text_inner(
+    source_text: &str,
+    provider: &impl Provider,
+) -> Result<TranslateSuccess, TranslateFailure> {
     validate_direct_text_input(source_text)?;
 
     if is_ambiguous_direct_text(source_text) {
@@ -38,7 +46,7 @@ pub fn translate_text(
         Language::Spanish,
         Tone::TechnicalNeutral,
     )?;
-    let response = provider.translate(&request).map_err(redact_failure)?;
+    let response = provider.translate(&request)?;
     ensure_provider_response_shape(&request, &response)?;
 
     let translated_text = response
@@ -52,7 +60,7 @@ pub fn translate_text(
             )
         })?;
 
-    TranslateSuccess::new(translated_text).map_err(redact_failure)
+    TranslateSuccess::new(translated_text)
 }
 
 fn is_ambiguous_direct_text(source_text: &str) -> bool {
@@ -68,9 +76,17 @@ pub fn translate_file(
     workspace_root: &str,
     provider: &impl Provider,
 ) -> Result<TranslateSuccess, TranslateFailure> {
+    translate_file_inner(file_path, workspace_root, provider).map_err(redact_failure)
+}
+
+fn translate_file_inner(
+    file_path: &str,
+    workspace_root: &str,
+    provider: &impl Provider,
+) -> Result<TranslateSuccess, TranslateFailure> {
     let loaded = load_allowed_file(file_path, workspace_root)?;
     let translated_text =
         markdown::translate_document(&loaded.content, loaded.input_kind, provider)?;
 
-    TranslateSuccess::new(translated_text).map_err(redact_failure)
+    TranslateSuccess::new(translated_text)
 }

@@ -26,6 +26,18 @@ fn serializes_file_request_without_source_text() {
 }
 
 #[test]
+fn parses_serialized_file_request_from_wire_json() {
+    let request =
+        TranslateRequest::file("docs/readme.md", "/workspace/project", InputKind::Markdown);
+    let parsed = TranslateRequest::from_json(&request.to_json()).expect("valid file request");
+
+    assert_eq!(parsed.source_text, None);
+    assert_eq!(parsed.file_path.as_deref(), Some("docs/readme.md"));
+    assert_eq!(parsed.workspace_root.as_deref(), Some("/workspace/project"));
+    assert_eq!(parsed.input_kind, InputKind::Markdown);
+}
+
+#[test]
 fn parses_direct_text_request_from_wire_json() {
     let request = TranslateRequest::from_json(
         r#"{"source_text":"Read the docs.","source_language":"en","target_language":"es","tone":"technical_neutral","preserve_formatting":true,"input_kind":"text"}"#,

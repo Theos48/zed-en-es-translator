@@ -16,3 +16,10 @@ fn redacts_sensitive_content_for_all_error_classes() {
         assert!(!redacted.message.contains("/home/theos"));
     }
 }
+
+#[test]
+fn redacts_macos_home_paths() {
+    let redacted = translator_core::redact_text("/Users/theos/private/secret.md");
+
+    assert_eq!(redacted, "[REDACTED]");
+}

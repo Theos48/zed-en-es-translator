@@ -78,13 +78,12 @@ Objetivo: conectar el contrato a un backend real sin acoplar el core.
 
 Criterios:
 
-- no versionar secretos;
-- configuracion clara;
-- errores normalizados;
-- proveedor remoto deshabilitado por defecto;
-- confirmacion por cada traduccion remota;
-- evaluacion de privacidad antes de habilitar proveedores gratuitos/remotos;
-- no enviar `file_path` a proveedores remotos.
+- proveedor elegido de forma explicita y configurable;
+- secretos fuera del repositorio y sin valores reales en ejemplos versionados;
+- errores normalizados compatibles con el contrato vigente;
+- remoto deshabilitado por defecto hasta que exista consentimiento verificable;
+- evaluacion de privacidad antes de habilitar cualquier backend externo;
+- no enviar contexto local innecesario al proveedor.
 
 ## F005: servidor MCP
 
@@ -92,14 +91,11 @@ Objetivo: exponer la traduccion como herramienta invocable desde Zed.
 
 Criterios:
 
-- tools `translate_text` y `translate_file`;
-- validacion de parametros;
-- salida limpia en caso exitoso;
-- errores claros cuando algo impida traducir;
-- `translate_file` workspace-only con canonicalizacion;
-- rechazo de traversal, symlinks fuera del workspace, no UTF-8 y contenido
-  binario;
-- mapear errores del CLI Rust a resultados MCP con `isError: true`.
+- tools basadas en los contratos de traduccion vigentes;
+- validacion de parametros en la frontera MCP;
+- salida limpia en caso exitoso y errores accionables en fallo;
+- lectura de archivos delegada al core/CLI sin duplicar reglas operativas;
+- mapeo de errores del core/CLI a resultados MCP compatibles con Zed.
 
 ## F006: wrapper Zed
 
@@ -109,9 +105,9 @@ Criterios:
 
 - manifest `extension.toml`;
 - build reproducible;
-- logs utiles sin contenido fuente, traduccion, secretos, headers, tokens ni
-  rutas sensibles;
-- entorno minimo por allowlist.
+- logs utiles y redaccionados conforme a la constitucion;
+- entorno minimo por allowlist;
+- arranque del servidor MCP con comando, argumentos y variables controladas.
 
 ## F007: flujo UX dentro de Zed
 
@@ -123,8 +119,8 @@ Criterios:
 - friccion baja;
 - resultado facil de leer en Agent Panel;
 - el buffer no se modifica automaticamente;
-- la seleccion directa desde Zed se validara manualmente;
-- el flujo base acepta texto pegado o path permitido.
+- entradas permitidas definidas por el contrato activo;
+- validacion manual del flujo real de seleccion antes de ampliar alcance.
 
 ## F008: privacidad y configuracion
 
@@ -132,13 +128,12 @@ Objetivo: que el usuario entienda y controle que texto se envia.
 
 Criterios:
 
-- proveedor explicito;
+- proveedor y modo local/remoto visibles para el usuario;
 - secretos fuera del repositorio;
-- mensajes claros sobre red/local;
 - remoto default deny;
-- deteccion basica de secretos antes de llamadas remotas;
-- no heredar todo el entorno de Zed hacia MCP/CLI;
-- pruebas negativas de privacidad.
+- controles de privacidad antes de cualquier llamada remota;
+- entorno heredado minimo entre Zed, MCP y CLI;
+- pruebas negativas de privacidad proporcionales al proveedor habilitado.
 
 ## F009: empaquetado y publicacion
 

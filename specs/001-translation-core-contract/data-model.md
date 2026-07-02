@@ -20,6 +20,7 @@ Fields:
 Validation:
 
 - total input must be at most 20 KiB UTF-8;
+- direct `source_text` must contain at least one non-whitespace character;
 - `preserve_formatting` must be true;
 - unsupported language pairs fail with `UNSUPPORTED_LANGUAGE_PAIR`;
 - direct text requests require `source_text` and must not include file context;

@@ -32,3 +32,18 @@ fn blocks_private_key_header_before_remote_processing() {
 
     assert_eq!(err.code, ErrorCode::SecretDetected);
 }
+
+#[test]
+fn blocks_common_private_key_headers_before_remote_processing() {
+    for header in [
+        "-----BEGIN RSA PRIVATE KEY-----",
+        "-----BEGIN EC PRIVATE KEY-----",
+        "-----BEGIN OPENSSH PRIVATE KEY-----",
+        "-----BEGIN DSA PRIVATE KEY-----",
+    ] {
+        let err = check_remote_provider_gate(header, RemoteProviderState::ConfiguredButUnconfirmed)
+            .expect_err("private key header should block");
+
+        assert_eq!(err.code, ErrorCode::SecretDetected, "header: {header}");
+    }
+}

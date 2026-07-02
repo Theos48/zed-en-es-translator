@@ -2,7 +2,7 @@ use std::io::Read;
 
 use translator_core::{
     redact_failure, translate_file, translate_text, ErrorCode, MockProvider, TranslateFailure,
-    TranslateRequest, TranslateResult, TranslateSuccess,
+    TranslateRequest, TranslateResult, TranslateSuccess, MAX_INPUT_BYTES,
 };
 
 fn main() {
@@ -20,10 +20,20 @@ fn run() -> i32 {
     }
 
     let mut input_bytes = Vec::new();
-    if std::io::stdin().read_to_end(&mut input_bytes).is_err() {
+    let read_result = std::io::stdin()
+        .take((MAX_INPUT_BYTES + 1) as u64)
+        .read_to_end(&mut input_bytes);
+    if read_result.is_err() {
         write_failure(TranslateFailure::new(
             ErrorCode::InvalidInput,
             "Failed to read request input.",
+        ));
+        return 1;
+    }
+    if input_bytes.len() > MAX_INPUT_BYTES {
+        write_failure(TranslateFailure::new(
+            ErrorCode::InvalidInput,
+            "Request input exceeds the configured size limit.",
         ));
         return 1;
     }
@@ -76,6 +86,7 @@ fn run() -> i32 {
 
 fn write_failure(failure: TranslateFailure) {
     let failure = redact_failure(failure);
-    print!("{}", TranslateResult::Failure(failure.clone()).to_json());
-    eprintln!("error_code={}", failure.code.as_str());
+    let error_code = failure.code.as_str();
+    print!("{}", TranslateResult::Failure(failure).to_json());
+    eprintln!("error_code={error_code}");
 }

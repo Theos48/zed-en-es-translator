@@ -2,34 +2,11 @@
 
 use std::fs;
 use std::os::unix::fs::symlink;
-use std::path::{Path, PathBuf};
 
 use translator_core::{translate_file, ErrorCode, MockProvider};
 
-fn temp_case(name: &str) -> PathBuf {
-    let root = std::env::temp_dir().join(format!(
-        "zed_translator_symlink_{}_{}_{}",
-        name,
-        std::process::id(),
-        unique_suffix()
-    ));
-    fs::create_dir_all(&root).expect("temp root");
-    root
-}
-
-fn unique_suffix() -> u128 {
-    std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .expect("time")
-        .as_nanos()
-}
-
-fn write_file(path: &Path, content: &str) {
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent).expect("parent dir");
-    }
-    fs::write(path, content).expect("write file");
-}
+mod common;
+use common::{temp_case, write_file};
 
 #[test]
 fn rejects_direct_file_symlink_escape() {

@@ -459,6 +459,25 @@ impl<'a> JsonParser<'a> {
     }
 
     fn parse_unicode_escape(&mut self) -> Result<char, TranslateFailure> {
+        let value = self.parse_unicode_code_unit()?;
+        match value {
+            0xd800..=0xdbff => {
+                self.expect_unicode_escape_prefix()?;
+                let low = self.parse_unicode_code_unit()?;
+                if !(0xdc00..=0xdfff).contains(&low) {
+                    return Err(TranslateFailure::invalid_input("Invalid unicode."));
+                }
+                let scalar = 0x10000 + (((value - 0xd800) << 10) | (low - 0xdc00));
+                char::from_u32(scalar)
+                    .ok_or_else(|| TranslateFailure::invalid_input("Invalid unicode."))
+            }
+            0xdc00..=0xdfff => Err(TranslateFailure::invalid_input("Invalid unicode.")),
+            _ => char::from_u32(value)
+                .ok_or_else(|| TranslateFailure::invalid_input("Invalid unicode.")),
+        }
+    }
+
+    fn parse_unicode_code_unit(&mut self) -> Result<u32, TranslateFailure> {
         let mut value = 0_u32;
         for _ in 0..4 {
             let byte = self
@@ -474,7 +493,14 @@ impl<'a> JsonParser<'a> {
                     }
                 };
         }
-        char::from_u32(value).ok_or_else(|| TranslateFailure::invalid_input("Invalid unicode."))
+        Ok(value)
+    }
+
+    fn expect_unicode_escape_prefix(&mut self) -> Result<(), TranslateFailure> {
+        match (self.next_byte(), self.next_byte()) {
+            (Some(b'\\'), Some(b'u')) => Ok(()),
+            _ => Err(TranslateFailure::invalid_input("Invalid unicode escape.")),
+        }
     }
 
     fn consume_number(&mut self) {

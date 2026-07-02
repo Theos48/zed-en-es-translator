@@ -60,7 +60,7 @@ TranslateRequest
 - target_language: "es"
 - tone: "technical_neutral"
 - preserve_formatting: true
-- input_kind: "text" | "markdown" | "code"
+- input_kind: "text" | "markdown"
 
 Direct text variant:
 - source_text: string

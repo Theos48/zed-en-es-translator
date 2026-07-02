@@ -45,7 +45,6 @@ zed-en-es-translator/
 ├── docs/
 │   ├── adr/
 │   ├── research/
-│   ├── specs/
 │   ├── decisions.md
 │   ├── diagrams.md
 │   └── PLAN.md

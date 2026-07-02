@@ -1,4 +1,4 @@
-use crate::{ErrorCode, TranslateFailure};
+use crate::{secrets::contains_secret_pattern, ErrorCode, TranslateFailure};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RemoteProviderState {
@@ -35,13 +35,5 @@ pub fn check_remote_provider_gate(
 }
 
 pub fn contains_obvious_secret(source_text: &str) -> bool {
-    let lower = source_text.to_ascii_lowercase();
-    lower.contains("api_key")
-        || lower.contains("authorization: bearer")
-        || lower.contains("bearer ")
-        || lower.contains("-----begin private key-----")
-        || lower.contains(".env")
-        || lower.contains("_token=")
-        || lower.contains("service_token")
-        || lower.contains("database_url=")
+    contains_secret_pattern(source_text)
 }

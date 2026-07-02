@@ -63,4 +63,5 @@ Para una nueva iteracion:
 
 ## Nota sobre ubicacion
 
-El proyecto vive en `/home/theos/dev/zed-en-es-translator`. No se usa `/dev` porque es un filesystem especial del sistema para dispositivos.
+El proyecto vive en la raiz del repositorio. Usa rutas relativas al checkout en
+lugar de rutas absolutas del host.

@@ -1,4 +1,7 @@
-use std::fs;
+use std::fs::{self, File, Metadata};
+use std::io::Read;
+#[cfg(unix)]
+use std::os::unix::fs::MetadataExt;
 use std::path::{Component, Path, PathBuf};
 
 use crate::{ErrorCode, InputKind, TranslateFailure, MAX_INPUT_BYTES};
@@ -12,6 +15,15 @@ pub struct LoadedFile {
 pub fn load_allowed_file(
     file_path: &str,
     workspace_root: &str,
+) -> Result<LoadedFile, TranslateFailure> {
+    load_allowed_file_with_open_hook(file_path, workspace_root, || {})
+}
+
+#[doc(hidden)]
+pub fn load_allowed_file_with_open_hook(
+    file_path: &str,
+    workspace_root: &str,
+    before_open: impl FnOnce(),
 ) -> Result<LoadedFile, TranslateFailure> {
     let requested = Path::new(file_path);
     if has_parent_component(requested) {
@@ -42,11 +54,22 @@ pub fn load_allowed_file(
     ) {
         return Err(path_not_allowed());
     }
+    let validated_metadata = fs::metadata(&canonical_file).map_err(|_| {
+        TranslateFailure::new(ErrorCode::FileNotFound, "The requested file was not found.")
+    })?;
 
-    let metadata = fs::metadata(&canonical_file).map_err(|_| {
+    before_open();
+
+    let file = File::open(&canonical_file).map_err(|_| {
+        TranslateFailure::new(ErrorCode::FileNotFound, "The requested file was not found.")
+    })?;
+    let metadata = file.metadata().map_err(|_| {
         TranslateFailure::new(ErrorCode::FileNotFound, "The requested file was not found.")
     })?;
     if !metadata.is_file() {
+        return Err(path_not_allowed());
+    }
+    if !same_file(&validated_metadata, &metadata) {
         return Err(path_not_allowed());
     }
     if metadata.len() > MAX_INPUT_BYTES as u64 {
@@ -56,7 +79,9 @@ pub fn load_allowed_file(
         ));
     }
 
-    let bytes = fs::read(&canonical_file).map_err(|_| {
+    let mut bytes = Vec::new();
+    let mut limited_file = file.take((MAX_INPUT_BYTES + 1) as u64);
+    limited_file.read_to_end(&mut bytes).map_err(|_| {
         TranslateFailure::new(ErrorCode::FileNotFound, "The requested file was not found.")
     })?;
     if bytes.len() > MAX_INPUT_BYTES {
@@ -127,6 +152,16 @@ fn looks_binary(bytes: &[u8]) -> bool {
     bytes
         .iter()
         .any(|byte| *byte == 0 || (*byte < 0x20 && !matches!(*byte, b'\n' | b'\r' | b'\t')))
+}
+
+#[cfg(unix)]
+fn same_file(validated: &Metadata, opened: &Metadata) -> bool {
+    validated.dev() == opened.dev() && validated.ino() == opened.ino()
+}
+
+#[cfg(not(unix))]
+fn same_file(_: &Metadata, _: &Metadata) -> bool {
+    true
 }
 
 fn path_not_allowed() -> TranslateFailure {
