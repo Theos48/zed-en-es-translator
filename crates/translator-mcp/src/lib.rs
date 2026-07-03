@@ -76,4 +76,15 @@ mod tests {
         assert!(!error.to_string().contains("plain panic payload"));
         assert!(!error.stderr_diagnostic().contains("plain panic payload"));
     }
+
+    #[test]
+    fn stderr_diagnostic_redacts_initialize_error_details() {
+        let initialize_error = rmcp::service::ServerInitializeError::ConnectionClosed(
+            "Authorization: Bearer fake_test_token".to_string(),
+        );
+        let error = StdioServerError::Initialize(Box::new(initialize_error));
+
+        assert!(error.stderr_diagnostic().contains("[REDACTED]"));
+        assert!(!error.stderr_diagnostic().contains("fake_test_token"));
+    }
 }

@@ -53,7 +53,12 @@ fn translate_file_rejects_hidden_sensitive_files() {
     let value =
         common::translate_file_error_value(common::translate_file_params(&workspace, ".env"));
 
-    common::assert_tool_error_code(&value, "PATH_NOT_ALLOWED");
+    let workspace_text = workspace.to_string_lossy();
+    common::assert_tool_error_code_redacts_all(
+        &value,
+        "PATH_NOT_ALLOWED",
+        &[".env", "TOKEN=secret", workspace_text.as_ref()],
+    );
 }
 
 #[test]
@@ -64,7 +69,12 @@ fn translate_file_rejects_credential_like_filenames() {
     let value =
         common::translate_file_error_value(common::translate_file_params(&workspace, "secret.md"));
 
-    common::assert_tool_error_code(&value, "PATH_NOT_ALLOWED");
+    let workspace_text = workspace.to_string_lossy();
+    common::assert_tool_error_code_redacts_all(
+        &value,
+        "PATH_NOT_ALLOWED",
+        &["secret.md", workspace_text.as_ref()],
+    );
 }
 
 #[cfg(unix)]
@@ -82,5 +92,18 @@ fn translate_file_rejects_symlink_escape() {
     let value =
         common::translate_file_error_value(common::translate_file_params(&workspace, "linked.md"));
 
-    common::assert_tool_error_code(&value, "PATH_NOT_ALLOWED");
+    let root_text = root.to_string_lossy();
+    let workspace_text = workspace.to_string_lossy();
+    let outside_text = outside.to_string_lossy();
+    common::assert_tool_error_code_redacts_all(
+        &value,
+        "PATH_NOT_ALLOWED",
+        &[
+            "linked.md",
+            "outside.md",
+            root_text.as_ref(),
+            workspace_text.as_ref(),
+            outside_text.as_ref(),
+        ],
+    );
 }

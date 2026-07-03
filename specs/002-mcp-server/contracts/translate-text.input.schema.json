@@ -9,7 +9,7 @@
     "source_text": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 20480,
+      "pattern": "\\S",
       "description": "English text to translate."
     },
     "source_language": {

@@ -94,7 +94,7 @@ pub fn translate_text_input_schema() -> Value {
             "source_text": {
                 "type": "string",
                 "minLength": 1,
-                "maxLength": MAX_INPUT_BYTES,
+                "pattern": "\\S",
                 "description": "English text to translate."
             },
             "source_language": {
