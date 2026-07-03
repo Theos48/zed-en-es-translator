@@ -1,6 +1,5 @@
 mod common;
 
-use translator_mcp::protocol::TranslateFileParams;
 use translator_mcp::tools::TranslatorMcpServer;
 
 #[test]
@@ -17,14 +16,7 @@ fn translate_file_preserves_markdown_code_links_and_html_blocks() {
         ),
     );
 
-    let params = TranslateFileParams {
-        workspace_root: workspace.to_string_lossy().into_owned(),
-        file_path: "readme.md".to_string(),
-        source_language: Some("en".to_string()),
-        target_language: Some("es".to_string()),
-        tone: Some("technical_neutral".to_string()),
-        preserve_formatting: Some(true),
-    };
+    let params = common::translate_file_params(&workspace, "readme.md");
     let value = serde_json::to_value(TranslatorMcpServer::new().translate_file(params))
         .expect("serialize tool result");
     let translated = value["structuredContent"]["translated_text"]

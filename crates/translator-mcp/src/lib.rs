@@ -19,8 +19,8 @@ pub enum StdioServerError {
 impl fmt::Display for StdioServerError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            StdioServerError::Initialize(error) => {
-                write!(formatter, "MCP initialization failed: {error}")
+            StdioServerError::Initialize(_) => {
+                write!(formatter, "MCP initialization failed.")
             }
             StdioServerError::Join(_) => {
                 write!(formatter, "MCP service task failed.")
@@ -33,7 +33,7 @@ impl StdioServerError {
     /// Return a redacted diagnostic string suitable for stderr.
     pub fn stderr_diagnostic(&self) -> String {
         match self {
-            StdioServerError::Initialize(_) => translator_core::redact_text(&self.to_string()),
+            StdioServerError::Initialize(_) => self.to_string(),
             StdioServerError::Join(_) => "MCP service task failed.".to_string(),
         }
     }
@@ -78,13 +78,15 @@ mod tests {
     }
 
     #[test]
-    fn stderr_diagnostic_redacts_initialize_error_details() {
+    fn display_and_stderr_diagnostic_hide_initialize_error_details() {
         let initialize_error = rmcp::service::ServerInitializeError::ConnectionClosed(
             "Authorization: Bearer fake_test_token".to_string(),
         );
         let error = StdioServerError::Initialize(Box::new(initialize_error));
 
-        assert!(error.stderr_diagnostic().contains("[REDACTED]"));
+        assert_eq!(error.to_string(), "MCP initialization failed.");
+        assert_eq!(error.stderr_diagnostic(), "MCP initialization failed.");
+        assert!(!error.to_string().contains("fake_test_token"));
         assert!(!error.stderr_diagnostic().contains("fake_test_token"));
     }
 }

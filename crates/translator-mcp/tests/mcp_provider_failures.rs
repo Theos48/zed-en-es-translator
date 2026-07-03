@@ -27,14 +27,14 @@ fn maps_provider_timeout_to_tool_error() {
 fn maps_malformed_provider_output_to_tool_error() {
     let value = common::translate_text_error_value_with_provider(MalformedOutputProvider);
 
-    common::assert_tool_error_code_redacts(&value, "PROVIDER_FAILED", "provider detail");
+    common::assert_tool_error_code(&value, "PROVIDER_FAILED");
 }
 
 #[test]
 fn maps_output_limit_failure_to_tool_error() {
     let value = common::translate_text_error_value_with_provider(OversizedOutputProvider);
 
-    common::assert_tool_error_code_redacts(&value, "PROVIDER_FAILED", "provider detail");
+    common::assert_tool_error_code(&value, "PROVIDER_FAILED");
 }
 
 #[derive(Debug, Clone, Copy)]

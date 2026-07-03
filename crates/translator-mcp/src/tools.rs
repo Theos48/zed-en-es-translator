@@ -12,7 +12,9 @@ use rmcp::{
 };
 use serde::de::DeserializeOwned;
 use serde_json::Value;
-use translator_core::{translate_file, translate_text, MockProvider, Provider, TranslateFailure};
+use translator_core::{
+    translate_file, translate_text, ErrorCode, MockProvider, Provider, TranslateFailure,
+};
 
 use crate::protocol::{
     error_result, success_result, translate_file_input_schema, translate_text_input_schema,
@@ -58,11 +60,24 @@ where
 
     /// Execute `translate_file` and map expected failures to MCP tool errors.
     pub fn translate_file(&self, params: TranslateFileParams) -> CallToolResult {
-        match params.validate().and_then(|()| {
-            translate_file(&params.file_path, &params.workspace_root, &self.provider)
-        }) {
+        match translate_file_result(params, &self.provider) {
             Ok(success) => success_result(success),
             Err(failure) => error_result(failure),
+        }
+    }
+
+    async fn translate_file_blocking(&self, params: TranslateFileParams) -> CallToolResult
+    where
+        P: Clone + Send + 'static,
+    {
+        let provider = self.provider.clone();
+        match tokio::task::spawn_blocking(move || translate_file_result(params, &provider)).await {
+            Ok(Ok(success)) => success_result(success),
+            Ok(Err(failure)) => error_result(failure),
+            Err(_) => error_result(TranslateFailure::new(
+                ErrorCode::InternalError,
+                "Internal server task failed.",
+            )),
         }
     }
 }
@@ -75,7 +90,7 @@ impl Default for TranslatorMcpServer<MockProvider> {
 
 impl<P> ServerHandler for TranslatorMcpServer<P>
 where
-    P: Provider + Send + Sync + 'static,
+    P: Provider + Clone + Send + Sync + 'static,
 {
     fn get_info(&self) -> ServerInfo {
         ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
@@ -101,7 +116,7 @@ where
                 Err(failure) => error_result(failure),
             }),
             TRANSLATE_FILE_TOOL_NAME => Ok(match decode_params::<TranslateFileParams>(arguments) {
-                Ok(params) => self.translate_file(params),
+                Ok(params) => self.translate_file_blocking(params).await,
                 Err(failure) => error_result(failure),
             }),
             _ => Err(McpError::invalid_params("Unknown tool.", None)),
@@ -149,4 +164,13 @@ where
 {
     serde_json::from_value(Value::Object(arguments))
         .map_err(|_| TranslateFailure::invalid_input("Invalid tool arguments."))
+}
+
+fn translate_file_result(
+    params: TranslateFileParams,
+    provider: &impl Provider,
+) -> Result<translator_core::TranslateSuccess, TranslateFailure> {
+    params
+        .validate()
+        .and_then(|()| translate_file(&params.file_path, &params.workspace_root, provider))
 }

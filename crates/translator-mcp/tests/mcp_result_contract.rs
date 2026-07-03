@@ -95,7 +95,7 @@ fn result_contract_schema_rejects_extra_structured_fields() {
 }
 
 #[test]
-fn result_contract_schema_rejects_ambiguous_structured_content() {
+fn result_contract_schema_rejects_success_with_error_structured_fields() {
     let schema = tool_result_schema();
     let mut value = serde_json::to_value(success_result(
         TranslateSuccess::new("Lee la documentacion.").expect("valid success result"),
@@ -105,6 +105,36 @@ fn result_contract_schema_rejects_ambiguous_structured_content() {
     value["structuredContent"]["message"] = json!("The requested path is not allowed.");
 
     assert!(validate_tool_result(&schema, &value).is_err());
+}
+
+#[test]
+fn structured_content_validator_rejects_ambiguous_one_of_matches() {
+    let schema = json!({
+        "oneOf": [
+            {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["value"],
+                "properties": {
+                    "value": { "type": "string" }
+                }
+            },
+            {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["value"],
+                "properties": {
+                    "value": { "type": "string" }
+                }
+            }
+        ]
+    });
+    let value = json!({ "value": "same" });
+
+    let error = validate_structured_content(&schema, &value)
+        .expect_err("ambiguous oneOf match should be rejected");
+
+    assert!(error.contains("matched 2 oneOf variants"));
 }
 
 fn tool_result_schema() -> Value {

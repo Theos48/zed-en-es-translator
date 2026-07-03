@@ -9,7 +9,12 @@ fn translate_file_rejects_traversal() {
         "../secret.md",
     ));
 
-    common::assert_tool_error_code(&value, "PATH_NOT_ALLOWED");
+    let workspace_text = workspace.to_string_lossy();
+    common::assert_tool_error_code_redacts_all(
+        &value,
+        "PATH_NOT_ALLOWED",
+        &["secret.md", workspace_text.as_ref()],
+    );
 }
 
 #[test]
