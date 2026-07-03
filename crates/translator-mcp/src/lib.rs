@@ -22,9 +22,19 @@ impl fmt::Display for StdioServerError {
             StdioServerError::Initialize(error) => {
                 write!(formatter, "MCP initialization failed: {error}")
             }
-            StdioServerError::Join(error) => {
-                write!(formatter, "MCP service task failed: {error}")
+            StdioServerError::Join(_) => {
+                write!(formatter, "MCP service task failed.")
             }
+        }
+    }
+}
+
+impl StdioServerError {
+    /// Return a redacted diagnostic string suitable for stderr.
+    pub fn stderr_diagnostic(&self) -> String {
+        match self {
+            StdioServerError::Initialize(_) => translator_core::redact_text(&self.to_string()),
+            StdioServerError::Join(_) => "MCP service task failed.".to_string(),
         }
     }
 }
@@ -47,4 +57,23 @@ pub async fn run_stdio_server() -> Result<(), StdioServerError> {
 
     service.waiting().await.map_err(StdioServerError::Join)?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::StdioServerError;
+
+    #[tokio::test]
+    async fn stderr_diagnostic_hides_join_panic_payload() {
+        let join_error = tokio::spawn(async {
+            panic!("plain panic payload should stay private");
+        })
+        .await
+        .expect_err("task should panic");
+        let error = StdioServerError::Join(join_error);
+
+        assert_eq!(error.stderr_diagnostic(), "MCP service task failed.");
+        assert!(!error.to_string().contains("plain panic payload"));
+        assert!(!error.stderr_diagnostic().contains("plain panic payload"));
+    }
 }

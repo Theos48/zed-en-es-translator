@@ -8,9 +8,13 @@ use std::path::{Path, PathBuf};
 use std::process::Stdio;
 use std::time::Duration;
 
+use rmcp::model::CallToolResult;
 use serde_json::{json, Value};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::{Child, ChildStdin, ChildStdout, Command};
+use translator_core::Provider;
+use translator_mcp::protocol::{TranslateFileParams, TranslateTextParams};
+use translator_mcp::tools::TranslatorMcpServer;
 
 const READ_TIMEOUT: Duration = Duration::from_secs(5);
 
@@ -118,6 +122,56 @@ pub fn write_file(path: &Path, content: impl AsRef<[u8]>) {
         fs::create_dir_all(parent).expect("parent dir");
     }
     fs::write(path, content).expect("write file");
+}
+
+pub fn translate_text_params(source_text: &str) -> TranslateTextParams {
+    TranslateTextParams {
+        source_text: source_text.to_string(),
+        source_language: Some("en".to_string()),
+        target_language: Some("es".to_string()),
+        tone: Some("technical_neutral".to_string()),
+        preserve_formatting: Some(true),
+    }
+}
+
+pub fn translate_file_params(workspace: &Path, file_path: &str) -> TranslateFileParams {
+    TranslateFileParams {
+        workspace_root: workspace.to_string_lossy().into_owned(),
+        file_path: file_path.to_string(),
+        source_language: Some("en".to_string()),
+        target_language: Some("es".to_string()),
+        tone: Some("technical_neutral".to_string()),
+        preserve_formatting: Some(true),
+    }
+}
+
+pub fn translate_text_error_value(params: TranslateTextParams) -> Value {
+    tool_result_value(TranslatorMcpServer::new().translate_text(params))
+}
+
+pub fn translate_text_error_value_with_provider(provider: impl Provider) -> Value {
+    tool_result_value(
+        TranslatorMcpServer::with_provider(provider)
+            .translate_text(translate_text_params("Read the docs.")),
+    )
+}
+
+pub fn translate_file_error_value(params: TranslateFileParams) -> Value {
+    tool_result_value(TranslatorMcpServer::new().translate_file(params))
+}
+
+pub fn assert_tool_error_code(value: &Value, code: &str) {
+    assert_eq!(value["isError"], true);
+    assert_eq!(value["structuredContent"]["code"], code);
+}
+
+pub fn assert_tool_error_code_redacts(value: &Value, code: &str, forbidden: &str) {
+    assert_tool_error_code(value, code);
+    assert!(!value.to_string().contains(forbidden));
+}
+
+fn tool_result_value(result: CallToolResult) -> Value {
+    serde_json::to_value(result).expect("serialize tool result")
 }
 
 fn unique_suffix() -> u128 {

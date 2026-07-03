@@ -1,37 +1,40 @@
-use serde_json::Value;
+mod common;
+
 use translator_core::{
     ErrorCode, Language, Provider, ProviderRequest, ProviderResponse, Tone, TranslateFailure,
     MAX_OUTPUT_BYTES,
 };
-use translator_mcp::protocol::TranslateTextParams;
-use translator_mcp::tools::TranslatorMcpServer;
 
 #[test]
 fn maps_provider_failure_to_tool_error() {
-    let value = translate_text_error_value(FailingProvider(ErrorCode::ProviderFailed));
+    let value = common::translate_text_error_value_with_provider(FailingProvider(
+        ErrorCode::ProviderFailed,
+    ));
 
-    assert_error_code(&value, "PROVIDER_FAILED");
+    common::assert_tool_error_code_redacts(&value, "PROVIDER_FAILED", "provider detail");
 }
 
 #[test]
 fn maps_provider_timeout_to_tool_error() {
-    let value = translate_text_error_value(FailingProvider(ErrorCode::ProviderTimeout));
+    let value = common::translate_text_error_value_with_provider(FailingProvider(
+        ErrorCode::ProviderTimeout,
+    ));
 
-    assert_error_code(&value, "PROVIDER_TIMEOUT");
+    common::assert_tool_error_code_redacts(&value, "PROVIDER_TIMEOUT", "provider detail");
 }
 
 #[test]
 fn maps_malformed_provider_output_to_tool_error() {
-    let value = translate_text_error_value(MalformedOutputProvider);
+    let value = common::translate_text_error_value_with_provider(MalformedOutputProvider);
 
-    assert_error_code(&value, "PROVIDER_FAILED");
+    common::assert_tool_error_code_redacts(&value, "PROVIDER_FAILED", "provider detail");
 }
 
 #[test]
 fn maps_output_limit_failure_to_tool_error() {
-    let value = translate_text_error_value(OversizedOutputProvider);
+    let value = common::translate_text_error_value_with_provider(OversizedOutputProvider);
 
-    assert_error_code(&value, "PROVIDER_FAILED");
+    common::assert_tool_error_code_redacts(&value, "PROVIDER_FAILED", "provider detail");
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -69,21 +72,4 @@ impl Provider for OversizedOutputProvider {
             translated_segments: vec!["x".repeat(MAX_OUTPUT_BYTES + 1)],
         })
     }
-}
-
-fn translate_text_error_value(provider: impl Provider) -> Value {
-    let result = TranslatorMcpServer::with_provider(provider).translate_text(TranslateTextParams {
-        source_text: "Read the docs.".to_string(),
-        source_language: Some("en".to_string()),
-        target_language: Some("es".to_string()),
-        tone: Some("technical_neutral".to_string()),
-        preserve_formatting: Some(true),
-    });
-    serde_json::to_value(result).expect("serialize tool result")
-}
-
-fn assert_error_code(value: &Value, code: &str) {
-    assert_eq!(value["isError"], true);
-    assert_eq!(value["structuredContent"]["code"], code);
-    assert!(!value.to_string().contains("provider detail"));
 }
