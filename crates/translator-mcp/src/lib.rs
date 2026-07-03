@@ -19,8 +19,12 @@ pub enum StdioServerError {
 impl fmt::Display for StdioServerError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            StdioServerError::Initialize(_) => {
-                write!(formatter, "MCP initialization failed.")
+            StdioServerError::Initialize(error) => {
+                write!(
+                    formatter,
+                    "MCP initialization failed: {}.",
+                    initialize_error_variant(error.as_ref())
+                )
             }
             StdioServerError::Join(_) => {
                 write!(formatter, "MCP service task failed.")
@@ -36,6 +40,20 @@ impl StdioServerError {
             StdioServerError::Initialize(_) => self.to_string(),
             StdioServerError::Join(_) => "MCP service task failed.".to_string(),
         }
+    }
+}
+
+fn initialize_error_variant(error: &rmcp::service::ServerInitializeError) -> &'static str {
+    use rmcp::service::ServerInitializeError;
+
+    match error {
+        ServerInitializeError::ExpectedInitializeRequest(_) => "ExpectedInitializeRequest",
+        ServerInitializeError::ConnectionClosed(_) => "ConnectionClosed",
+        ServerInitializeError::UnexpectedInitializeResponse(_) => "UnexpectedInitializeResponse",
+        ServerInitializeError::InitializeFailed(_) => "InitializeFailed",
+        ServerInitializeError::TransportError { .. } => "TransportError",
+        ServerInitializeError::Cancelled => "Cancelled",
+        _ => "Unknown",
     }
 }
 
@@ -84,9 +102,26 @@ mod tests {
         );
         let error = StdioServerError::Initialize(Box::new(initialize_error));
 
-        assert_eq!(error.to_string(), "MCP initialization failed.");
-        assert_eq!(error.stderr_diagnostic(), "MCP initialization failed.");
+        assert_eq!(
+            error.to_string(),
+            "MCP initialization failed: ConnectionClosed."
+        );
+        assert_eq!(
+            error.stderr_diagnostic(),
+            "MCP initialization failed: ConnectionClosed."
+        );
         assert!(!error.to_string().contains("fake_test_token"));
         assert!(!error.stderr_diagnostic().contains("fake_test_token"));
+    }
+
+    #[test]
+    fn stderr_diagnostic_preserves_initialize_error_variant_without_payload() {
+        let error =
+            StdioServerError::Initialize(Box::new(rmcp::service::ServerInitializeError::Cancelled));
+
+        assert_eq!(
+            error.stderr_diagnostic(),
+            "MCP initialization failed: Cancelled."
+        );
     }
 }
