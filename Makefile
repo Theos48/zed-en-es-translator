@@ -23,12 +23,13 @@ HELP_LINES := \
 	'  make rust-version  Show rustc and cargo versions inside the container' \
 	'  make test          Run all Rust tests inside the container' \
 	'  make test-core     Run translator-core tests inside the container' \
+	'  make test-mcp      Run translator-mcp tests inside the container' \
 	'  make fmt           Check Rust formatting inside the container' \
 	'  make clippy        Run clippy inside the container' \
 	'  make shell         Open a shell inside the Rust container' \
 	'  make clean         Remove local Rust build/cache output'
 
-.PHONY: all help install pull-rust-base rust-image rust-version test test-core fmt clippy shell clean
+.PHONY: all help install pull-rust-base rust-image rust-version test test-core test-mcp fmt clippy shell clean
 
 all: test
 
@@ -52,6 +53,9 @@ test: rust-image
 
 test-core: rust-image
 	$(RUST_RUN) cargo test -p translator-core
+
+test-mcp: rust-image
+	$(RUST_RUN) cargo test -p translator-mcp
 
 fmt: rust-image
 	$(RUST_RUN) cargo fmt --all -- --check

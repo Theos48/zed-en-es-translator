@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://theos48.github.io/zed-en-es-translator/schemas/mcp/translate-text.input.schema.json",
+  "title": "TranslateTextToolInput",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source_text"],
+  "properties": {
+    "source_text": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "English text to translate."
+    },
+    "source_language": {
+      "type": "string",
+      "const": "en",
+      "default": "en"
+    },
+    "target_language": {
+      "type": "string",
+      "const": "es",
+      "default": "es"
+    },
+    "tone": {
+      "type": "string",
+      "enum": ["technical_neutral"],
+      "default": "technical_neutral"
+    },
+    "preserve_formatting": {
+      "type": "boolean",
+      "const": true,
+      "default": true
+    }
+  }
+}

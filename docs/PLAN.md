@@ -30,11 +30,22 @@ El primer ciclo formal entrega una base tecnica offline: core Rust, CLI Rust,
 Markdown/texto y pruebas negativas. La validacion registrada pasa con
 `make test` dentro del contenedor Rust fijado por el proyecto.
 
+La segunda feature formal fue implementada y validada:
+
+```text
+specs/002-mcp-server/
+```
+
+Esta iteracion expone el core de traduccion como servidor MCP con herramientas
+`translate_text` y `translate_file`, sin proveedor real, sin red, sin wrapper
+Zed y sin modificar buffers. La decision tecnica vigente es implementar el
+servidor MCP en Rust con `rmcp`, llamando a `translator-core` directamente.
+
 Queda fuera de esta feature:
 
 - proveedor real;
 - red;
-- servidor MCP;
+- servidor MCP por HTTP/red o publicacion en registro;
 - wrapper Zed;
 - edicion automatica de buffers;
 - soporte de archivo completo para codigo fuente.
@@ -75,13 +86,15 @@ Entregables:
 
 ### 2. Servidor MCP
 
-Siguiente iteracion sugerida. Exponer el core como herramientas MCP:
+Completado en la segunda feature formal de Spec Kit con TDD. Expone el core
+como herramientas MCP:
 
 - `translate_text`;
 - `translate_file`;
 - validacion de parametros;
 - errores MCP con `isError: true`;
 - tests de contrato MCP.
+- transporte stdio y crate Rust `crates/translator-mcp/`.
 
 ### 3. Wrapper Zed
 

@@ -1,5 +1,11 @@
 # Investigacion: contrato de traduccion y Provider
 
+> Nota de vigencia: esta investigacion conserva contexto de la planeacion
+> inicial. Las decisiones sobre el servidor MCP TypeScript y el puente
+> TypeScript -> CLI Rust fueron reemplazadas para F005 por ADR 0003 y
+> `specs/002-mcp-server/`: servidor MCP Rust con `rmcp`, stdio y llamada directa
+> a `translator-core`.
+
 ## Objetivo
 
 Definir el contrato minimo entre:

@@ -21,9 +21,10 @@ a feature formal:
 
 Estado actual:
 
-- En progreso formal: F001, F002 parcial, F003 y F008 parcial mediante
-  `specs/001-translation-core-contract/`.
-- Futuro: F004-F007 y F009.
+- Completado formal: F001, F002 parcial, F003 y F008 parcial mediante
+  `specs/001-translation-core-contract/`; F005 mediante
+  `specs/002-mcp-server/`.
+- Futuro: F004, F006, F007 y F009.
 
 ## F001: contrato de traduccion
 

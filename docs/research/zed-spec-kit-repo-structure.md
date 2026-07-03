@@ -1,5 +1,10 @@
 # Investigacion: estructura de repositorio compatible con Zed y Spec Kit
 
+> Nota de vigencia: esta investigacion conserva alternativas de estructura
+> previas a F005. La estructura vigente para el servidor MCP es
+> `crates/translator-mcp/`, definida en ADR 0003 y `specs/002-mcp-server/`. El
+> wrapper Zed sigue reservado para una iteracion posterior.
+
 ## Objetivo
 
 Definir una estructura de repositorio que:
