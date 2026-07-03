@@ -24,7 +24,7 @@ base segura:
 
 - core de traduccion independiente de Zed;
 - `MockProvider` determinista para TDD;
-- contrato CLI entre servidor MCP futuro y core Rust;
+- contrato CLI Rust para validar el core como frontera publica;
 - soporte inicial de `translate_file` para `.md`, `.markdown` y `.txt`;
 - limites, validaciones de ruta y pruebas negativas de seguridad;
 - privacidad remota default deny.

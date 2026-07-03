@@ -8,16 +8,21 @@ Permitir que una persona traduzca texto en ingles a espanol sin salir del editor
 
 ## Estado
 
-Primera feature formal implementada:
+Primeras dos features formales implementadas:
 
 ```text
 specs/001-translation-core-contract/
+specs/002-mcp-server/
 ```
 
 La primera feature entrega un MVP tecnico offline: core Rust, `MockProvider`,
 contrato CLI JSON por stdin/stdout, limites explicitos, lectura segura de
-Markdown/texto y pruebas negativas de seguridad. El proveedor real, MCP/Zed y
-el soporte completo de archivos de codigo quedan para ciclos posteriores.
+Markdown/texto y pruebas negativas de seguridad.
+
+La segunda feature agrega un servidor MCP Rust en `crates/translator-mcp/` con
+transporte stdio y dos tools: `translate_text` y `translate_file`. Mantiene el
+modo offline/mock, no agrega proveedor real, no abre red, no modifica buffers y
+delega lectura/seguridad de archivos al core existente.
 
 Rust se ejecuta mediante la imagen Docker oficial fijada en `Makefile`; no se
 instala `rustc` ni `cargo` globalmente para este proyecto por defecto.
@@ -26,10 +31,14 @@ Validacion principal:
 
 ```bash
 make test
+make test-mcp
+make fmt
+make clippy
 ```
 
-Resultado registrado: `make test` pasa dentro del contenedor Rust fijado por el
-proyecto.
+Resultado registrado para `specs/001-translation-core-contract/` y
+`specs/002-mcp-server/`: `make test`, `make test-mcp`, `make fmt` y
+`make clippy` pasan dentro del contenedor Rust fijado por el proyecto.
 
 ## Documentos
 
@@ -40,6 +49,7 @@ proyecto.
 - [Diagramas](docs/diagrams.md)
 - [ADR 0001: alcance tecnico inicial](docs/adr/0001-zed-extension-scope.md)
 - [ADR 0002: arquitectura y tecnologia inicial](docs/adr/0002-architecture-and-technology.md)
+- [ADR 0003: servidor MCP Rust con rmcp](docs/adr/0003-mcp-server-rust-rmcp.md)
 - [Investigacion: estructura Zed y Spec Kit](docs/research/zed-spec-kit-repo-structure.md)
 - [Investigacion: contrato de traduccion y Provider](docs/research/provider-contract.md)
 - [Investigacion: archivos y comentarios](docs/research/supported-files-and-comments.md)
