@@ -11,5 +11,6 @@ temp/
 *.log
 .env
 .env.*
+*.wasm
 Dockerfile*
 .dockerignore

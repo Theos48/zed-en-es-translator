@@ -46,8 +46,10 @@ reviews:
     - "crates/**"
     - "docker/**"
     - "docs/**"
+    - "scripts/**"
     - "specs/**"
     - "tests/**"
+    - "zed-extension/**"
     - "!.agents/**"
     - "!.cache/**"
     - "!.codex/**"
@@ -69,6 +71,8 @@ reviews:
     - "!*.log"
     - "!*.tmp"
     - "!*.bak"
+    - "!zed-extension/target/**"
+    - "!zed-extension/*.wasm"
 
   path_instructions:
     - path: "crates/**/*.rs"
@@ -85,12 +89,16 @@ reviews:
       instructions: "Trata docs como planeacion estrategica. Evita duplicar detalle operativo que ya pertenece a specs/<feature>/."
     - path: "docker/**"
       instructions: "Respeta la politica de host limpio: Rust y herramientas del proyecto deben quedar encapsuladas en Docker, sin instalar runtimes globales."
+    - path: "zed-extension/**"
+      instructions: "El wrapper Zed solo debe lanzar translator-mcp por comando directo, sin shell, red, descargas, provider real ni entorno heredado completo. Verifica redaccion de diagnosticos, allowlist de entorno y ausencia de mutacion de buffers/archivos."
+    - path: "scripts/**"
+      instructions: "Los scripts de preparacion deben ser idempotentes, correr solo herramientas ya definidas por el proyecto (Docker/Makefile) y no instalar dependencias globales en el host."
 
   pre_merge_checks:
     custom_checks:
       - name: "Spec Kit scope"
         mode: "warning"
-        instructions: "Falla si el cambio agrega proveedor real, red, MCP server, wrapper Zed, edicion de buffers o soporte completo de archivos de codigo dentro de la feature 001 sin actualizar spec, plan y decisiones."
+        instructions: "Falla si el cambio agrega proveedor real, llamadas de red/remoto, edicion automatica de buffers/archivos o publicacion en marketplace/registro sin actualizar spec, plan y decisiones de la feature activa en specs/<feature>/."
       - name: "Privacy and redaction"
         mode: "warning"
         instructions: "Falla si logs, stderr, errores, provider diagnostics o tests exponen source text sensible, traducciones completas, secretos, headers, tokens o paths sensibles."
