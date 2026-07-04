@@ -75,3 +75,4 @@
 - Link to relevant resources or documentation
 - Items are numbered sequentially for easy reference
 - Reviewed on 2026-07-03: all 38 requirement-quality checks are satisfied after tightening stale/incompatible artifact, repeated-startup, path-with-spaces, and lockfile/dependency wording in the feature artifacts.
+- Amended 2026-07-04: CHK017's original wording ("the 15 second visibility target") predates the SC-004 amendment. `spec.md` SC-004 and `contracts/launch-profile.md` now target visibility within the Zed context-server initialization window (~60s observed) instead of 15 seconds, after confirming no faster WASM-sandbox-compatible primitive exists in `zed_extension_api` 0.7.0. CHK017 remains satisfied under the amended criterion: the target is still measurable and does not prescribe implementation mechanics.

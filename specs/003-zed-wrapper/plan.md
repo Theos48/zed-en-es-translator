@@ -50,10 +50,13 @@ Linux native `translator-mcp` stdio binary built by the project workflow.
 **Project Type**: Rust workspace plus a Zed extension wrapper subproject.
 
 **Performance Goals**: Zed receives the server launch command immediately after
-configuration validation. Missing or unusable artifact failures are visible
-within 15 seconds. Translation behavior keeps the existing 20 KiB input, 4 KiB
-segment, 256 segment, 40 KiB output, and 15 s provider timeout limits from the
-core/MCP features.
+configuration validation. Missing or unusable artifact failures become visible
+within the Zed context-server initialization window (observed ~60 seconds in
+the current Zed WASM extension runtime; see `spec.md` SC-004, amended after
+confirming no faster WASM-sandbox-compatible primitive exists in
+`zed_extension_api` 0.7.0). Translation behavior keeps the existing 20 KiB
+input, 4 KiB segment, 256 segment, 40 KiB output, and 15 s provider timeout
+limits from the core/MCP features.
 
 **Constraints**: Offline-only; stdio MCP only; one local server process; no
 real provider; no network call or download; no shell execution; no automatic

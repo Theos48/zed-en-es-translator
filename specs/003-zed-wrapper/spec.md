@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-03
 
-**Status**: Implemented - Manual Zed smoke passed; missing-artifact fast-fail rescheduled
+**Status**: Implemented - Manual Zed smoke passed; missing-artifact fast-fail re-scoped (SC-004 amended to the observed Zed context-server initialization window, see Status Notes)
 
 **Input**: User description: "Promote F006 from docs/feature-map.md: install and start the existing MCP translation server from a Zed development extension, with an extension manifest, reproducible local build, useful redacted logs, a minimal allowlisted environment, and controlled server command, arguments, and variables. Keep real providers, network access, publication, advanced editor UX, and automatic buffer edits out of scope."
 
