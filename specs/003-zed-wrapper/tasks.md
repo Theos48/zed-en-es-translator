@@ -269,4 +269,4 @@ After Phase 2:
 
 ## Phase 7: Convergence
 
-- [ ] T058 Close or formally re-scope the SC-004 missing-artifact 15-second failure-visibility target: implement a Zed-WASM-compatible fast-fail mechanism, or run `/speckit-clarify`/amend `spec.md` SC-004 and `contracts/launch-profile.md` to reflect the observed ~60s Zed context-server timeout documented in `specs/003-zed-wrapper/quickstart.md` (Manual Failure Timing) per SC-004 (partial)
+- [X] T058 Close or formally re-scope the SC-004 missing-artifact 15-second failure-visibility target: implement a Zed-WASM-compatible fast-fail mechanism, or run `/speckit-clarify`/amend `spec.md` SC-004 and `contracts/launch-profile.md` to reflect the observed ~60s Zed context-server timeout documented in `specs/003-zed-wrapper/quickstart.md` (Manual Failure Timing) per SC-004 (partial) — resolved by re-scoping: confirmed via `zed_extension_api` 0.7.0 source that no viable WASM-sandbox-compatible fast-fail primitive exists, then amended `spec.md` SC-004 and `contracts/launch-profile.md` to the realistic ~60s Zed context-server initialization window and documented the platform-capability gap in `quickstart.md`

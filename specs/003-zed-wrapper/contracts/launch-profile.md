@@ -86,7 +86,11 @@ Failure messages must:
 - avoid full absolute paths;
 - avoid environment dumps;
 - avoid source text, translated text, segments, secrets, headers, and tokens;
-- become visible during manual validation within 15 seconds.
+- become visible during manual validation within the Zed context-server
+  initialization window (observed ~60 seconds in the current Zed WASM
+  extension runtime; see `spec.md` SC-004 and Status Notes). A sub-15-second
+  target is a future goal gated on a Zed extension API capability this
+  feature does not currently have.
 
 ## Repeatability
 

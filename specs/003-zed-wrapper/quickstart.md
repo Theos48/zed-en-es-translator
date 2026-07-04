@@ -295,9 +295,21 @@ Implementation note: Zed's WASM extension runtime could not reliably validate
 the artifact with `std::fs::metadata` or by running `translator-mcp` directly as
 a preflight command. A follow-up attempt with host-side `/usr/bin/test -e/-f/-x`
 also caused the Zed configuration modal to time out. The current wrapper avoids
-extension-side host probes in WASM to keep the valid-path startup path direct;
-the missing-artifact fast-fail requirement is therefore rescheduled for a future
-Zed API strategy or a different packaging path.
+extension-side host probes in WASM to keep the valid-path startup path direct.
+
+Follow-up review (2026-07-04, closing convergence task T058): inspected the
+`zed_extension_api` 0.7.0 crate source directly (vendored under
+`.cache/cargo/registry/src/.../zed_extension_api-0.7.0/src/process.rs`) and
+confirmed it exposes exactly one host-process primitive,
+`zed::process::Command::output()`, which maps to the same preflight mechanism
+already attempted and already reproduced the modal timeout. No worktree- or
+filesystem-scoped API exists in this crate version for validating an
+out-of-worktree absolute host path from inside the WASM sandbox. This is a
+platform capability gap, not an implementation bug, so the 15-second target in
+`spec.md` SC-004 and `contracts/launch-profile.md` was formally amended rather
+than left as an open TODO. Re-evaluate if a future `zed_extension_api` version
+exposes a fast synchronous path-exists check or a configurable/shorter
+context-server initialize timeout.
 
 ### Test-First Traceability
 

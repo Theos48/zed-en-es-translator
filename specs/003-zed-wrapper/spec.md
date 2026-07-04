@@ -189,7 +189,12 @@ time, and redacted.
   changes leaves the local extension setup consistent and free of duplicate or
   conflicting generated state.
 - **SC-004**: Startup failures for a missing or unusable server artifact become
-  visible to the user within 15 seconds and include the next corrective action.
+  visible to the user within the Zed context-server initialization window
+  (observed ~60 seconds in the current Zed WASM extension runtime, bounded by
+  Zed's own MCP client initialize timeout) and include the next corrective
+  action. A sub-15-second target remains a future goal, gated on a Zed
+  extension API capability this feature does not currently have access to
+  (see Status Notes).
 - **SC-005**: Environment validation confirms the launched service receives only
   documented allowlisted values needed for this feature.
 - **SC-006**: Log and diagnostic review for successful startup, failed startup,
@@ -215,6 +220,17 @@ time, and redacted.
   is validated end-to-end by `tests/integration/zed_extension_remote_denial.sh`
   against the real prepared `translator-mcp` artifact launched with the same
   command shape the wrapper uses, recorded in `quickstart.md`.
+- SC-004's original 15-second target is formally amended (not just deferred)
+  after confirming, via `zed_extension_api` 0.7.0 source, that no viable
+  primitive exists for this feature to validate an out-of-worktree host path
+  from inside the WASM sandbox: `std::fs::metadata` on `wasm32-wasip1` cannot
+  reliably resolve arbitrary absolute host paths (no WASI preopen for them),
+  and the crate's own `zed::process::Command::output()` host-process API
+  reproduced the same Zed configuration-modal timeout as the earlier
+  `/usr/bin/test` preflight attempt. Closing the gap to 15 seconds would
+  require a Zed platform capability (e.g. a fast synchronous path-exists check
+  or a shorter context-server initialize timeout) that is outside this
+  feature's control; re-evaluate when `zed_extension_api` exposes one.
 
 ## Assumptions
 
