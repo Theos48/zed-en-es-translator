@@ -51,6 +51,11 @@ Regla de sincronizacion:
 - Si solo avanza la implementacion esperada, actualizar `specs/<feature>/`.
 - Si cambia alcance, limites, seguridad, tecnologia, arquitectura o proceso,
   actualizar tambien `docs/decisions.md` o un ADR.
+- Si esa decision estable tiene un resumen narrativo en `README.md` o
+  `docs/PLAN.md` (por ejemplo el estado de una feature o un limite ya
+  cerrado), actualizar tambien ese resumen en el mismo cambio. Un ADR o una
+  fila en `docs/decisions.md` no basta si README/PLAN siguen describiendo el
+  estado anterior.
 - No duplicar en `docs/` el detalle operativo que ya vive en `specs/<feature>/`.
 - No borrar detalle del mapa de features: sirve como entrada para futuros
   ciclos `specify -> clarify -> plan -> tasks -> implement`.
