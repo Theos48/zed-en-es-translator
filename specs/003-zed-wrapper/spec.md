@@ -209,13 +209,15 @@ time, and redacted.
 
 - Manual Zed smoke is complete for the success path.
 - Missing or unusable binary diagnostics are implemented with redacted failure
-  categories and corrective actions, but the original 15-second manual
-  visibility target remains rescheduled because the current Zed runtime surfaced
-  a 60-second initialization timeout for the missing-artifact case.
+  categories and corrective actions. The original 15-second manual visibility
+  target was formally re-scoped (not left pending) after the current Zed
+  runtime surfaced a 60-second initialization timeout for the missing-artifact
+  case; see the SC-004 amendment note below for the evidence and rationale.
 - The feature remains acceptable within scope because offline-only behavior,
   redaction, environment minimization, and no-mutation guarantees are
-  satisfied; the fast-fail timing gap is explicitly deferred for a future Zed
-  API strategy or packaging approach.
+  satisfied; the original fast-fail timing gap is closed by the SC-004
+  amendment above, and only needs revisiting if a future `zed_extension_api`
+  version exposes a capability this feature does not currently have.
 - Offline-default denial of remote/provider behavior (FR-006, FR-013, SC-008)
   is validated end-to-end by `tests/integration/zed_extension_remote_denial.sh`
   against the real prepared `translator-mcp` artifact launched with the same
