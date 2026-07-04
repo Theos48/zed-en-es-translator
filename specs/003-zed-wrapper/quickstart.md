@@ -17,7 +17,8 @@ This feature validates only the local Zed wrapper:
 
 - included: `zed-extension/extension.toml`, Rust/WASM wrapper,
   `context_server_command`, local `translator-mcp` startup, redacted startup
-  diagnostics, minimal environment, and repeatable preparation;
+  diagnostics, wrapper-side environment minimization, and repeatable
+  preparation;
 - excluded: real providers, provider settings, remote/network calls, MCP
   registry or marketplace publication, advanced editor UX, selection
   replacement, and automatic buffer edits.
@@ -149,12 +150,19 @@ Expected:
 Start Zed from a shell containing unrelated variables and fake secrets, then
 request the context server.
 
-Expected:
+Expected (amended, see `docs/decisions.md` D064):
 
-- the launched `translator-mcp` process receives only allowlisted environment
-  values;
+- the wrapper itself adds only the allowlisted `RUST_LOG` value and never
+  reads or forwards its own inherited environment;
 - fake secrets and unrelated shell variables do not appear in diagnostics,
-  server logs, or test output.
+  server logs, or test output produced by this wrapper's own code;
+- confirmed platform limitation: the actually spawned `translator-mcp`
+  process also receives Zed's own full inherited environment, because Zed's
+  `stdio_transport.rs` spawns it with `std::process::Command` and calls
+  `.envs(...)` without `.env_clear()`. This is outside `zed_extension_api`
+  0.7.0's control, so this scenario cannot fully isolate the spawned process
+  from Zed's own environment; `translator-mcp` itself does not log or forward
+  arbitrary environment values anywhere, which bounds the practical exposure.
 
 ### Remote Provider Denial
 
@@ -227,6 +235,18 @@ remote denial ok
 
 `make test`, `make fmt`, and `make clippy` were re-run after this addition and
 remain PASS with no warnings.
+
+Re-verified 2026-07-04 after addressing CodeRabbit PR #3 review comments:
+
+- `make test-zed-extension`: PASS. Re-ran the Zed extension tests with
+  `toml::Value` manifest parsing, the WASM release build, the prepared
+  `translator-mcp` artifact build, and all wrapper integration scripts.
+- `make test`: PASS. Existing CLI, core, and MCP tests pass in the project
+  Docker workflow.
+- `make fmt`: PASS. Formatting checks pass for the root workspace and
+  `zed-extension/`.
+- `make clippy`: PASS. Clippy passes for the root workspace and
+  `zed-extension/` with warnings denied.
 
 ### User Story Validation
 

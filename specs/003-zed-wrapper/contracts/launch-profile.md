@@ -51,7 +51,24 @@ The wrapper must not:
 - launch HTTP or remote MCP transports;
 - pass text to translate through argv or environment;
 - pass workspace roots or requested file paths through argv or environment;
-- inherit the full process environment.
+- read or forward the wrapper's own inherited process environment into the
+  returned `zed::Command.env` (the wrapper only ever sets the optional
+  allowlisted `RUST_LOG` value; it never calls anything equivalent to
+  `std::env::vars()`).
+
+### Known platform limitation: Zed does not clear the environment before spawning
+
+Zed's own `context_server` transport (`crates/context_server/src/transport/stdio_transport.rs`
+in the Zed repository) builds the child process with `std::process::Command`
+and calls `.envs(binary.env)` without ever calling `.env_clear()` first. Since
+`std::process::Command` inherits the parent's full environment by default,
+the actually-spawned `translator-mcp` process ends up receiving Zed's entire
+inherited environment, merged with the wrapper's `env` entries on top; not
+just the wrapper's allowlisted entries. `zed_extension_api` 0.7.0 exposes no
+way for an extension to request a cleared environment for a `Command`. See
+`docs/decisions.md` D064 for the evidence and rationale; this is a Zed
+platform behavior outside this feature's control, not a defect in the
+wrapper's own code.
 
 ## Success Result
 

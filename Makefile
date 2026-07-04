@@ -70,13 +70,13 @@ zed-extension-server-release: rust-image
 zed-extension-prepare: zed-extension-server-release
 	ZED_EXTENSION_PREPARE_BUILT=1 ./scripts/zed-extension/prepare.sh
 
+# Single source of truth for the test-zed-extension script list, expanded by
+# make (not the shell) so `make -n test-zed-extension` still prints each
+# literal script path for tests/integration/zed_extension_make_targets.sh.
+ZED_EXTENSION_TESTS := prepare_artifact prepare_idempotent make_targets dependency_scope no_mutation remote_denial
+
 test-zed-extension: zed-extension-build zed-extension-prepare
-	./tests/integration/zed_extension_prepare_artifact.sh
-	./tests/integration/zed_extension_prepare_idempotent.sh
-	./tests/integration/zed_extension_make_targets.sh
-	./tests/integration/zed_extension_dependency_scope.sh
-	./tests/integration/zed_extension_no_mutation.sh
-	./tests/integration/zed_extension_remote_denial.sh
+	$(foreach t,$(ZED_EXTENSION_TESTS),./tests/integration/zed_extension_$(t).sh;)
 
 fmt: rust-image
 	$(RUST_RUN) cargo fmt --all -- --check

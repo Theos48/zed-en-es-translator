@@ -10,9 +10,9 @@ if [[ ! -x "$ARTIFACT" ]]; then
 fi
 
 # Launch the exact artifact the Zed wrapper's LaunchProfile would run: a direct
-# command, no arguments, and no inherited shell environment beyond PATH. This
-# proves offline-default denial through the same command shape Zed uses,
-# rather than a different invocation of translator-mcp.
+# command and no arguments. The test clears its own shell environment to keep
+# output deterministic; Zed's real context-server transport still inherits the
+# Zed process environment before applying wrapper-provided env values (D064).
 coproc MCP { env -i PATH="$PATH" "$ARTIFACT"; }
 
 cleanup() {
@@ -29,7 +29,7 @@ read_response_for_id() {
   local expected_id="$1"
   local line
   while IFS= read -r -t 5 -u "${MCP[0]}" line; do
-    if printf '%s' "$line" | grep -q "\"id\":$expected_id"; then
+    if printf '%s' "$line" | grep -qE "\"id\":$expected_id[,}]"; then
       printf '%s' "$line"
       return 0
     fi

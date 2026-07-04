@@ -32,5 +32,5 @@
 ## Notes
 
 - Validation passed on initial review.
-- Scope is limited to local Zed development wrapper, server startup, minimal environment, redacted diagnostics, reproducible preparation, and offline no-mutation behavior.
+- Scope is limited to local Zed development wrapper, server startup, wrapper-side environment minimization, redacted diagnostics, reproducible preparation, and offline no-mutation behavior.
 - Provider selection, remote/network providers, marketplace publication, advanced editor UX, and automatic buffer edits remain out of scope for this feature.

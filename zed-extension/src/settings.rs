@@ -134,7 +134,11 @@ fn set_binary_path(
 
     if let Some(existing) = launch_settings.binary_path() {
         if existing != trimmed {
-            return Err(unsafe_setting("binary_path"));
+            return Err(diagnostic_with_action(
+                DiagnosticPhase::Configuration,
+                DiagnosticCode::UnsafeLaunchConfiguration,
+                "Rejected conflicting `binary_path` values between command settings and context server settings.",
+            ));
         }
     }
 

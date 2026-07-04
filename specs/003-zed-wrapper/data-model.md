@@ -150,7 +150,12 @@ Validation rules:
   value, not as shell-split tokens.
 - Must not include source text, file paths to translate, translated text, or
   provider input in argv or environment.
-- Must not inherit the full Zed or shell environment.
+- The wrapper itself must not read or forward its own inherited process
+  environment into `env`; it only sets the optional allowlisted `RUST_LOG`
+  value. It cannot control whether Zed's own host process additionally
+  inherits its full environment into the spawned process; see
+  `contracts/launch-profile.md` (Known platform limitation) and
+  `docs/decisions.md` D064.
 - Must fail with a stable redacted diagnostic when the artifact is missing,
   unusable, or not configured.
 - Repeated startup attempts after a recoverable failure must revalidate

@@ -61,14 +61,20 @@ fn command_settings_input(command: Option<zed::settings::CommandSettings>) -> Co
         return CommandSettingsInput::default();
     };
 
-    let mut env = hashmap_to_sorted_pairs(command.env.unwrap_or_default());
-    env.sort_by(|left, right| left.0.cmp(&right.0));
+    let env = hashmap_to_sorted_pairs(command.env.unwrap_or_default());
 
     CommandSettingsInput::new(command.path, command.arguments.unwrap_or_default(), env)
 }
 
+/// Convert Zed's unordered command environment map into a deterministic,
+/// sorted list of pairs. Sorting happens here (not in the caller) so the
+/// function name and behavior stay in sync: callers must not have to
+/// remember to sort separately, or determinism guarantees like
+/// `repeated_startup_failure_revalidates_without_state` could silently break.
 fn hashmap_to_sorted_pairs(values: HashMap<String, String>) -> Vec<(String, String)> {
-    values.into_iter().collect()
+    let mut pairs: Vec<(String, String)> = values.into_iter().collect();
+    pairs.sort_by(|left, right| left.0.cmp(&right.0));
+    pairs
 }
 
 fn redact_internal_error(_error: String) -> String {

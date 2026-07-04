@@ -13,7 +13,7 @@ if [[ "$BEFORE" != "$AFTER" ]]; then
   exit 1
 fi
 
-if grep -R -E 'std::fs::write|OpenOptions|remove_file|rename\(' "$ROOT/zed-extension/src"; then
+if grep -R -E 'std::fs::write|OpenOptions|remove_file|rename\(|File::create|fs::copy|remove_dir|create_dir|set_var|write!\(' "$ROOT/zed-extension/src"; then
   printf 'extension source contains file mutation APIs\n' >&2
   exit 1
 fi

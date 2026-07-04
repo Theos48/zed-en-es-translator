@@ -18,7 +18,7 @@
 ## Requirement Clarity
 
 - [x] CHK007 Is "prepared server artifact" defined with clear identity, expected name, build mode, and usable states? [Clarity, Spec §Key Entities, Data Model §PreparedServerArtifact]
-- [x] CHK008 Is "minimal allowlisted environment" defined with explicit allowed and rejected values rather than a general privacy statement? [Clarity, Spec §FR-010, Contract `launch-profile.md`]
+- [x] CHK008 Is "wrapper-provided allowlisted environment" defined with explicit allowed and rejected values, plus the Zed host inheritance limitation, rather than a general privacy statement? [Clarity, Spec §FR-010, Contract `launch-profile.md`]
 - [x] CHK009 Is the meaning of "redacted diagnostic" specific enough to distinguish allowed status fields from forbidden sensitive content? [Clarity, Spec §FR-008, Spec §FR-009, Data Model §RedactedDiagnosticEvent]
 - [x] CHK010 Is "local development extension" scoped clearly enough to avoid accidental marketplace or registry publication tasks? [Clarity, Spec §Assumptions, Plan §Summary]
 - [x] CHK011 Is the Zed host prerequisite caveat precise enough to guide tasks without authorizing global Rust or rustup installation? [Clarity, Plan §Constitution Check, Quickstart §Prerequisites]
@@ -33,8 +33,8 @@
 
 ## Acceptance Criteria Quality
 
-- [x] CHK017 Are startup failure criteria measurable enough to assess the 15 second visibility target without prescribing implementation mechanics? [Measurability, Spec §SC-004, Contract `launch-profile.md`]
-- [x] CHK018 Are environment minimization outcomes objectively measurable from the requirements and contracts? [Measurability, Spec §SC-005, Quickstart §Environment Minimization]
+- [x] CHK017 Are startup failure criteria measurable enough to assess the ~60-second context-server initialization visibility target without prescribing implementation mechanics? [Measurability, Spec §SC-004, Contract `launch-profile.md`]
+- [x] CHK018 Are wrapper-side environment minimization outcomes objectively measurable from the requirements and contracts? [Measurability, Spec §SC-005, Quickstart §Environment Minimization]
 - [x] CHK019 Are repeatability outcomes defined with observable absence of duplicate or conflicting generated state? [Measurability, Spec §SC-003, Contract `launch-profile.md`]
 - [x] CHK020 Are diagnostic redaction outcomes objectively assessable across successful startup, failed startup, and failed translation? [Measurability, Spec §SC-006, Data Model §RedactedDiagnosticEvent]
 - [x] CHK021 Are manual Zed smoke outcomes defined well enough to separate a valid product failure from a blocked host-prerequisite condition? [Acceptance Criteria, Quickstart §Manual Zed Smoke Validation]
@@ -51,7 +51,7 @@
 
 - [x] CHK027 Are path-with-spaces and command-invocation edge cases addressed in requirements or explicitly deferred to task design? [Edge Case, Spec §Edge Cases]
 - [x] CHK028 Are stale artifact and incompatible checkout cases defined with enough specificity to avoid ambiguous task decomposition? [Edge Case, Spec §Edge Cases, Data Model §PreparedServerArtifact]
-- [x] CHK029 Are unexpected inherited Zed, shell, token, and workspace variables covered as forbidden environment inputs? [Edge Case, Spec §Edge Cases, Contract `launch-profile.md`]
+- [x] CHK029 Are unexpected Zed, shell, token, and workspace variables covered as forbidden wrapper inputs, with Zed host inheritance documented as a platform limitation? [Edge Case, Spec §Edge Cases, Contract `launch-profile.md`]
 - [x] CHK030 Are server warning, panic, provider error, and validation error diagnostics covered by the same redaction requirements? [Edge Case, Spec §Edge Cases, Spec §FR-009]
 
 ## Dependencies & Assumptions
@@ -76,3 +76,4 @@
 - Items are numbered sequentially for easy reference
 - Reviewed on 2026-07-03: all 38 requirement-quality checks are satisfied after tightening stale/incompatible artifact, repeated-startup, path-with-spaces, and lockfile/dependency wording in the feature artifacts.
 - Amended 2026-07-04: CHK017's original wording ("the 15 second visibility target") predates the SC-004 amendment. `spec.md` SC-004 and `contracts/launch-profile.md` now target visibility within the Zed context-server initialization window (~60s observed) instead of 15 seconds, after confirming no faster WASM-sandbox-compatible primitive exists in `zed_extension_api` 0.7.0. CHK017 remains satisfied under the amended criterion: the target is still measurable and does not prescribe implementation mechanics.
+- Amended 2026-07-04: CHK008/CHK018/CHK029 now refer to wrapper-side environment controls after D064 confirmed that Zed's context-server stdio transport does not clear its inherited process environment before spawning.

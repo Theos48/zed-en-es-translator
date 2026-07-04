@@ -45,8 +45,10 @@ Rationale:
 
 - The existing MCP server already implements tool discovery, `translate_text`,
   `translate_file`, error mapping, redaction, recovery, and stdio behavior.
-- Returning a direct command avoids shell execution, avoids argv text payloads,
-  and avoids inheriting the full Zed or user shell environment.
+- Returning a direct command avoids shell execution and argv text payloads. The
+  wrapper also avoids reading or forwarding its own inherited environment, but
+  Zed's host-side stdio context-server transport still inherits the Zed process
+  environment before applying `.envs(...)`; see D064.
 - Using a local path setting avoids relying on undocumented assumptions about
   extension-relative process resolution.
 - A missing or unusable binary can fail with a stable redacted error that tells
@@ -111,7 +113,8 @@ Alternatives considered:
 - Expose provider or remote settings now: rejected because real providers and
   remote calls are explicitly out of scope.
 - Read provider settings from environment variables: rejected because the
-  wrapper must not inherit user shell secrets.
+  wrapper must not read or forward user shell secrets; Zed's host-side inherited
+  environment behavior is documented separately in D064.
 
 ## Decision: Treat Zed MCP extension deprecation as a publication risk, not a blocker
 

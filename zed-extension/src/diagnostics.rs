@@ -161,12 +161,82 @@ pub fn diagnostic_with_action(
     )
 }
 
-/// Redact source text, translations, secrets, env dumps, URLs, and full paths.
+/// Redact source/translation assignments, secrets, env dumps, URLs, and full
+/// paths from a diagnostic message.
+///
+/// This wrapper never handles real translation content (that stays inside
+/// `translator-mcp`, per FR-005), but diagnostics still redact obvious
+/// `source_text=` / `translated_text=` style assignments as defense in depth.
 pub fn redact_sensitive(input: &str) -> String {
-    let replaced = input
+    let replaced = redact_content_assignments(input)
         .replace("Read the docs.", "[redacted-content]")
         .replace("Lee la documentacion.", "[redacted-content]");
     redact_words(&replaced)
+}
+
+fn redact_content_assignments(input: &str) -> String {
+    const CONTENT_LABELS: &[&str] = &["source_text=", "translated_text=", "source=", "translated="];
+
+    let mut output = String::new();
+    let mut index = 0;
+
+    while index < input.len() {
+        if let Some(label) = CONTENT_LABELS.iter().copied().find(|label| {
+            is_assignment_boundary(input, index) && input[index..].starts_with(*label)
+        }) {
+            output.push_str(label);
+            output.push_str("[redacted-content]");
+            index += label.len();
+
+            if let Some(quote) = input[index..]
+                .chars()
+                .next()
+                .filter(|character| matches!(character, '"' | '\''))
+            {
+                index += quote.len_utf8();
+                while index < input.len() {
+                    let Some(character) = input[index..].chars().next() else {
+                        break;
+                    };
+                    index += character.len_utf8();
+                    if character == quote {
+                        break;
+                    }
+                }
+            } else {
+                while index < input.len() {
+                    let Some(character) = input[index..].chars().next() else {
+                        break;
+                    };
+                    if character.is_whitespace() {
+                        break;
+                    }
+                    index += character.len_utf8();
+                }
+            }
+
+            continue;
+        }
+
+        let Some(character) = input[index..].chars().next() else {
+            break;
+        };
+        output.push(character);
+        index += character.len_utf8();
+    }
+
+    output
+}
+
+fn is_assignment_boundary(input: &str, index: usize) -> bool {
+    if index == 0 {
+        return true;
+    }
+
+    input[..index]
+        .chars()
+        .next_back()
+        .is_none_or(|character| !character.is_ascii_alphanumeric() && character != '_')
 }
 
 fn redact_words(input: &str) -> String {
@@ -181,7 +251,7 @@ fn redact_words(input: &str) -> String {
         }
 
         let lower = raw_word.to_ascii_lowercase();
-        if lower == "bearer" || lower.ends_with(":bearer") || lower.ends_with("bearer") {
+        if lower.ends_with("bearer") {
             output.push(raw_word.to_string());
             redact_next = true;
             continue;

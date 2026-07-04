@@ -28,11 +28,12 @@ delega lectura/seguridad de archivos al core existente.
 La tercera feature agrega una extension local de desarrollo para Zed en
 `zed-extension/`. La extension declara el context server `translator-en-es`,
 devuelve un comando controlado para arrancar el binario release
-`translator-mcp`, minimiza el entorno, rechaza configuracion de
+`translator-mcp`, no agrega entorno arbitrario propio, rechaza configuracion de
 provider/remoto/args/env arbitrarios y emite diagnosticos redaccionados. La
-validacion de filesystem del artifact dentro del runtime WASM de Zed sigue
-abierta por timeouts observados en la modal. No agrega provider real, red,
-publicacion ni edicion automatica de buffers.
+validacion de filesystem y el aislamiento total del entorno del proceso lanzado
+quedan acotados por limitaciones confirmadas del runtime de Zed; ver
+`specs/003-zed-wrapper/` y `docs/decisions.md` D063/D064. No agrega provider
+real, red, publicacion ni edicion automatica de buffers.
 
 Rust se ejecuta mediante la imagen Docker oficial fijada en `Makefile`; no se
 instala `rustc` ni `cargo` globalmente para este proyecto por defecto.
@@ -55,11 +56,8 @@ Resultado registrado para `specs/001-translation-core-contract/` y
 Resultado registrado para `specs/003-zed-wrapper/`: `make
 zed-extension-prepare`, `make test-zed-extension`, `make test`, `make fmt` y
 `make clippy` pasan. El smoke manual interactivo en Zed pasa con la modal de
-configuracion de la extension. El objetivo original de diagnostico rapido de
-15s para artifact faltante se re-especifico formalmente (SC-004 en el spec) a
-la ventana real de inicializacion del context server de Zed (~60 segundos
-observados), tras confirmar que `zed_extension_api` 0.7.0 no expone una
-primitiva viable para validar la ruta del artifact dentro del sandbox WASM.
+configuracion de la extension. Los limites de diagnostico rapido y aislamiento
+de entorno quedaron documentados en el spec y en D063/D064.
 
 ## Documentos
 

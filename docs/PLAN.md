@@ -51,26 +51,19 @@ Queda fuera de esta feature:
 - soporte de archivo completo para codigo fuente.
 
 La tercera feature formal tiene validacion automatizada completa y smoke manual
-interactivo en Zed aprobado. El objetivo original de diagnostico rapido de 15s
-para artifact faltante se re-especifico formalmente (SC-004) a la ventana real
-de inicializacion del context server de Zed (~60 segundos observados), tras
-confirmar que `zed_extension_api` 0.7.0 no expone una primitiva viable para
-validar la ruta del artifact dentro del sandbox WASM:
+interactivo en Zed aprobado. Sus criterios de diagnostico y entorno quedaron
+re-especificados segun las limitaciones confirmadas del runtime de extension de
+Zed; el detalle operativo vive en `specs/003-zed-wrapper/` y las decisiones
+estables en D063/D064:
 
 ```text
 specs/003-zed-wrapper/
 ```
 
 Esta iteracion empaqueta el servidor MCP existente como extension local de
-desarrollo de Zed en `zed-extension/`. Declara el context server
-`translator-en-es`, prepara el artifact release `translator-mcp`, devuelve un
-launch profile directo con args vacios y entorno allowlisted, y cubre
-diagnosticos redaccionados, idempotencia, dependency scope y no-mutacion. En
-runtime WASM de Zed, la validacion de artifact por filesystem o preflight de
-host queda fuera de esta feature porque las pruebas manuales provocaron timeout
-de la modal o del arranque del context server; ver `docs/decisions.md` D063.
-No incluye proveedor real, red, publicacion, UX avanzada ni edicion automatica
-de buffers.
+desarrollo de Zed en `zed-extension/` y cubre startup local, diagnosticos
+redaccionados, preparacion reproducible y no-mutacion. No incluye proveedor
+real, red, publicacion, UX avanzada ni edicion automatica de buffers.
 
 ## Flujo por feature
 

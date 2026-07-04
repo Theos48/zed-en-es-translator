@@ -23,6 +23,31 @@ fn redaction_removes_source_and_translation_samples() {
 }
 
 #[test]
+fn redaction_removes_arbitrary_quoted_source_and_translation_assignments() {
+    let source = "Please inspect the generated changelog.";
+    let translated = "Revisa la salida generada antes de publicar.";
+    let message = DiagnosticEvent::new(
+        DiagnosticPhase::ServerRuntime,
+        DiagnosticCode::InternalExtensionError,
+        format!("source_text=\"{source}\" translated_text=\"{translated}\""),
+    )
+    .to_user_message();
+
+    assert!(!message.contains(source));
+    assert!(!message.contains(translated));
+}
+
+#[test]
+fn redaction_removes_secrets_from_arbitrary_sentences_not_in_the_fixed_pair() {
+    let redacted = redact_sensitive(
+        "Startup log: Authorization: Bearer another_fake_token for /home/theos/other/app",
+    );
+
+    assert!(!redacted.contains("another_fake_token"));
+    assert!(!redacted.contains("/home/theos/other"));
+}
+
+#[test]
 fn redaction_removes_tokens_env_dumps_urls_and_full_paths() {
     let redacted = redact_sensitive(
         "Authorization: Bearer fake_token OPENAI_API_KEY=super_sensitive_value PATH=/home/theos/bin url=https://example.invalid /home/theos/project/file.md",

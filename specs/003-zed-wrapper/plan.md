@@ -14,7 +14,10 @@ extension. The feature adds a `zed-extension/` Rust/WASM wrapper with
 `extension.toml`, registers one MCP context server, and returns a controlled
 `zed::Command` that launches the already implemented `translator-mcp` stdio
 server. The launch profile uses a prepared local server artifact, structured
-arguments, and an explicit environment allowlist.
+arguments, and an explicit wrapper-provided environment allowlist. Zed's host
+runtime still merges that allowlist with its inherited process environment
+before spawning the context server; this platform limitation is documented in
+`spec.md`, `contracts/launch-profile.md`, and `docs/decisions.md` D064.
 
 This feature intentionally excludes real providers, network transports,
 marketplace or registry publication, advanced editor UX, selection replacement,
@@ -60,9 +63,11 @@ limits from the core/MCP features.
 
 **Constraints**: Offline-only; stdio MCP only; one local server process; no
 real provider; no network call or download; no shell execution; no automatic
-buffer/source-file mutation; no inherited full Zed/shell environment; no source
-text, translated text, secrets, environment dumps, tokens, headers, or
-sensitive unredacted paths in diagnostics.
+buffer/source-file mutation; no arbitrary environment added by the wrapper; no
+source text, translated text, secrets, environment dumps, tokens, headers, or
+sensitive unredacted paths in diagnostics. Zed's stdio context-server transport
+does not clear its inherited process environment before spawning; this is a
+known platform limitation outside the wrapper's control.
 
 **Scale/Scope**: One Zed local development extension, one context server entry,
 one prepared `translator-mcp` artifact, one launch profile, and the two existing

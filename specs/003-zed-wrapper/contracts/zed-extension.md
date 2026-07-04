@@ -99,8 +99,10 @@ Validation:
 
 - Missing `binary_path` must produce an actionable redacted diagnostic.
 - Invalid or unusable `binary_path` must not be echoed in logs or errors.
-- The extension must not inherit arbitrary shell or Zed environment values to
-  compensate for missing settings.
+- The extension must not read or forward arbitrary shell or Zed environment
+  values to compensate for missing settings. Zed's host-side context-server
+  transport may still inherit the Zed process environment before spawning; see
+  `launch-profile.md` and D064.
 
 ## Manual Zed Contract
 

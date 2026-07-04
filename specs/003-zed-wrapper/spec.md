@@ -88,9 +88,9 @@ time, and redacted.
 1. **Given** the server artifact is missing or not prepared, **When** Zed tries
    to start the translation service, **Then** the user receives a clear redacted
    failure that identifies the missing preparation step.
-2. **Given** the extension receives unexpected or unsafe environment data,
-   **When** it starts the translation service, **Then** only documented
-   allowlisted environment values are passed to the server.
+2. **Given** the extension receives unexpected or unsafe environment settings,
+   **When** it builds the launch profile, **Then** the wrapper rejects them and
+   only adds documented allowlisted values of its own.
 3. **Given** startup or translation fails, **When** logs are inspected, **Then**
    they contain useful status, error category, and timing information without
    source text, translations, secrets, tokens, headers, or sensitive paths.
@@ -108,8 +108,9 @@ time, and redacted.
 - Project paths contain spaces or characters that commonly break command
   invocation; the launch requirement still treats the configured artifact as one
   command value rather than shell-splitting it.
-- Zed passes a larger environment than expected, including workspace variables,
-  shell variables, tokens, or unrelated user configuration.
+- Zed's host process passes a larger inherited environment than the wrapper can
+  control, including workspace variables, shell variables, tokens, or unrelated
+  user configuration.
 - The server writes warnings, panics, provider errors, or validation errors to
   diagnostics.
 - A translation request asks for remote provider use or network behavior.
@@ -145,8 +146,12 @@ time, and redacted.
 - **FR-009**: Logs, errors, and diagnostics MUST NOT contain source text,
   translated text, translatable segments, secrets, headers, tokens, environment
   dumps, or sensitive unredacted paths.
-- **FR-010**: Unsafe or unexpected inherited environment values MUST be excluded
-  from the launched service unless explicitly allowlisted for this feature.
+- **FR-010**: The wrapper itself MUST NOT read or forward its own inherited
+  environment into the launched service; it MUST only ever set the explicit
+  allowlisted `RUST_LOG` value. Whether the launched service additionally
+  inherits environment values through Zed's own host process is a Zed
+  platform behavior outside this feature's control (see Status Notes and
+  `docs/decisions.md` D064).
 - **FR-011**: The system MUST fail with an actionable redacted message when the
   server artifact is missing, stale, not executable, or cannot start. For this
   feature, "actionable" means the diagnostic includes both a stable error
@@ -195,8 +200,13 @@ time, and redacted.
   action. A sub-15-second target remains a future goal, gated on a Zed
   extension API capability this feature does not currently have access to
   (see Status Notes).
-- **SC-005**: Environment validation confirms the launched service receives only
-  documented allowlisted values needed for this feature.
+- **SC-005**: Environment validation confirms the wrapper itself adds only the
+  documented allowlisted values needed for this feature (no arbitrary or
+  inherited values sourced from the wrapper's own code). Whether the actually
+  spawned process additionally receives Zed's own inherited environment is a
+  confirmed Zed platform behavior outside this feature's control (see Status
+  Notes and `docs/decisions.md` D064), not something this success criterion
+  can guarantee end-to-end.
 - **SC-006**: Log and diagnostic review for successful startup, failed startup,
   and failed translation confirms no source text, translated text, secrets,
   tokens, headers, environment dumps, or sensitive unredacted paths are exposed.
@@ -214,10 +224,11 @@ time, and redacted.
   runtime surfaced a 60-second initialization timeout for the missing-artifact
   case; see the SC-004 amendment note below for the evidence and rationale.
 - The feature remains acceptable within scope because offline-only behavior,
-  redaction, environment minimization, and no-mutation guarantees are
-  satisfied; the original fast-fail timing gap is closed by the SC-004
-  amendment above, and only needs revisiting if a future `zed_extension_api`
-  version exposes a capability this feature does not currently have.
+  redaction, wrapper-side environment minimization, and no-mutation guarantees
+  are satisfied within the platform controls available to `zed_extension_api`
+  0.7.0; the original fast-fail timing gap is closed by the SC-004 amendment
+  above, and only needs revisiting if a future Zed API version exposes a
+  capability this feature does not currently have.
 - Offline-default denial of remote/provider behavior (FR-006, FR-013, SC-008)
   is validated end-to-end by `tests/integration/zed_extension_remote_denial.sh`
   against the real prepared `translator-mcp` artifact launched with the same
@@ -233,6 +244,17 @@ time, and redacted.
   require a Zed platform capability (e.g. a fast synchronous path-exists check
   or a shorter context-server initialize timeout) that is outside this
   feature's control; re-evaluate when `zed_extension_api` exposes one.
+- FR-010/SC-005 are similarly amended after confirming, directly in Zed's
+  `crates/context_server/src/transport/stdio_transport.rs`, that Zed builds
+  the spawned process with `std::process::Command` and calls `.envs(...)`
+  without ever calling `.env_clear()`. Because `std::process::Command`
+  inherits the parent environment by default, the actually spawned
+  `translator-mcp` process receives Zed's full inherited environment merged
+  with the wrapper's allowlisted entries, not just the allowlisted entries
+  alone. This wrapper's own code never reads or forwards its inherited
+  environment (it only ever sets `RUST_LOG`), but it cannot make Zed clear the
+  child environment before spawning; `zed_extension_api` 0.7.0 exposes no such
+  control. See `docs/decisions.md` D064.
 
 ## Assumptions
 
