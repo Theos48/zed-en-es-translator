@@ -1,0 +1,22 @@
+[package]
+name = "zed-en-es-translator-extension"
+version = "0.0.1"
+edition = "2021"
+license = "MIT"
+publish = false
+
+[workspace]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+path = "src/lib.rs"
+
+[dependencies]
+zed_extension_api = "0.7.0"
+
+[lints.rust]
+future-incompatible = "warn"
+nonstandard-style = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }

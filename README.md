@@ -8,11 +8,12 @@ Permitir que una persona traduzca texto en ingles a espanol sin salir del editor
 
 ## Estado
 
-Primeras dos features formales implementadas:
+Primeras tres features formales implementadas:
 
 ```text
 specs/001-translation-core-contract/
 specs/002-mcp-server/
+specs/003-zed-wrapper/
 ```
 
 La primera feature entrega un MVP tecnico offline: core Rust, `MockProvider`,
@@ -24,12 +25,23 @@ transporte stdio y dos tools: `translate_text` y `translate_file`. Mantiene el
 modo offline/mock, no agrega proveedor real, no abre red, no modifica buffers y
 delega lectura/seguridad de archivos al core existente.
 
+La tercera feature agrega una extension local de desarrollo para Zed en
+`zed-extension/`. La extension declara el context server `translator-en-es`,
+devuelve un comando controlado para arrancar el binario release
+`translator-mcp`, minimiza el entorno, rechaza configuracion de
+provider/remoto/args/env arbitrarios y emite diagnosticos redaccionados. La
+validacion de filesystem del artifact dentro del runtime WASM de Zed sigue
+abierta por timeouts observados en la modal. No agrega provider real, red,
+publicacion ni edicion automatica de buffers.
+
 Rust se ejecuta mediante la imagen Docker oficial fijada en `Makefile`; no se
 instala `rustc` ni `cargo` globalmente para este proyecto por defecto.
 
 Validacion principal:
 
 ```bash
+make zed-extension-prepare
+make test-zed-extension
 make test
 make test-mcp
 make fmt
@@ -39,6 +51,13 @@ make clippy
 Resultado registrado para `specs/001-translation-core-contract/` y
 `specs/002-mcp-server/`: `make test`, `make test-mcp`, `make fmt` y
 `make clippy` pasan dentro del contenedor Rust fijado por el proyecto.
+
+Resultado registrado para `specs/003-zed-wrapper/`: `make
+zed-extension-prepare`, `make test-zed-extension`, `make test`, `make fmt` y
+`make clippy` pasan. El smoke manual interactivo en Zed pasa con la modal de
+configuracion de la extension. El diagnostico rapido para artifact faltante fue
+reprogramado: en el runtime actual de Zed cae en timeout de inicializacion de 60
+segundos.
 
 ## Documentos
 

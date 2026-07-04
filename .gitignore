@@ -198,6 +198,13 @@ benchmark-results/
 !zed-extension/**
 !crates/
 !crates/**
+
+# La extension Zed es un crate Rust/WASM aislado: su target/ y su .wasm
+# compilado son artefactos de build, no fuente versionable.
+zed-extension/target/
+zed-extension/**/target/
+zed-extension/*.wasm
+zed-extension/**/*.wasm
 !mcp-server/
 !mcp-server/**
 !tests/

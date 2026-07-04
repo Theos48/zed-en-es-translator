@@ -29,12 +29,19 @@ pub struct McpServerProcess {
 
 impl McpServerProcess {
     pub async fn initialize(&mut self) -> Result<Value, Box<dyn std::error::Error>> {
+        self.initialize_with_protocol("2025-11-25").await
+    }
+
+    pub async fn initialize_with_protocol(
+        &mut self,
+        protocol_version: &str,
+    ) -> Result<Value, Box<dyn std::error::Error>> {
         self.send_json(&json!({
             "jsonrpc": "2.0",
             "id": 1,
             "method": "initialize",
             "params": {
-                "protocolVersion": "2025-11-25",
+                "protocolVersion": protocol_version,
                 "capabilities": {},
                 "clientInfo": {
                     "name": "translator-mcp-test",

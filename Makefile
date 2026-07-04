@@ -24,12 +24,15 @@ HELP_LINES := \
 	'  make test          Run all Rust tests inside the container' \
 	'  make test-core     Run translator-core tests inside the container' \
 	'  make test-mcp      Run translator-mcp tests inside the container' \
+	'  make zed-extension-build Build and test the local Zed extension crate' \
+	'  make zed-extension-prepare Prepare the local translator-mcp artifact path' \
+	'  make test-zed-extension Run Zed wrapper validation checks' \
 	'  make fmt           Check Rust formatting inside the container' \
 	'  make clippy        Run clippy inside the container' \
 	'  make shell         Open a shell inside the Rust container' \
 	'  make clean         Remove local Rust build/cache output'
 
-.PHONY: all help install pull-rust-base rust-image rust-version test test-core test-mcp fmt clippy shell clean
+.PHONY: all help install pull-rust-base rust-image rust-version test test-core test-mcp zed-extension-build zed-extension-server-release zed-extension-prepare test-zed-extension fmt clippy shell clean
 
 all: test
 
@@ -57,11 +60,31 @@ test-core: rust-image
 test-mcp: rust-image
 	$(RUST_RUN) cargo test -p translator-mcp
 
+zed-extension-build: rust-image
+	$(RUST_RUN) cargo test --manifest-path zed-extension/Cargo.toml --locked
+	$(RUST_RUN) cargo build --manifest-path zed-extension/Cargo.toml --target wasm32-wasip1 --release --locked
+
+zed-extension-server-release: rust-image
+	$(RUST_RUN) cargo build -p translator-mcp --release --locked
+
+zed-extension-prepare: zed-extension-server-release
+	ZED_EXTENSION_PREPARE_BUILT=1 ./scripts/zed-extension/prepare.sh
+
+test-zed-extension: zed-extension-build zed-extension-prepare
+	./tests/integration/zed_extension_prepare_artifact.sh
+	./tests/integration/zed_extension_prepare_idempotent.sh
+	./tests/integration/zed_extension_make_targets.sh
+	./tests/integration/zed_extension_dependency_scope.sh
+	./tests/integration/zed_extension_no_mutation.sh
+	./tests/integration/zed_extension_remote_denial.sh
+
 fmt: rust-image
 	$(RUST_RUN) cargo fmt --all -- --check
+	$(RUST_RUN) cargo fmt --manifest-path zed-extension/Cargo.toml --all -- --check
 
 clippy: rust-image
 	$(RUST_RUN) cargo clippy --all-targets --all-features -- -D warnings
+	$(RUST_RUN) cargo clippy --manifest-path zed-extension/Cargo.toml --all-targets --all-features --locked -- -D warnings
 
 shell: rust-image
 	$(RUST_RUN) bash

@@ -50,6 +50,25 @@ Queda fuera de esta feature:
 - edicion automatica de buffers;
 - soporte de archivo completo para codigo fuente.
 
+La tercera feature formal tiene validacion automatizada completa y smoke manual
+interactivo en Zed aprobado. El diagnostico rapido de artifact faltante queda
+reprogramado porque el runtime actual de Zed cae en timeout de inicializacion de
+60 segundos:
+
+```text
+specs/003-zed-wrapper/
+```
+
+Esta iteracion empaqueta el servidor MCP existente como extension local de
+desarrollo de Zed en `zed-extension/`. Declara el context server
+`translator-en-es`, prepara el artifact release `translator-mcp`, devuelve un
+launch profile directo con args vacios y entorno allowlisted, y cubre
+diagnosticos redaccionados, idempotencia, dependency scope y no-mutacion. En
+runtime WASM de Zed, la validacion de artifact por filesystem o preflight de
+host queda fuera de esta feature porque las pruebas manuales provocaron timeout
+de la modal o del arranque del context server. No incluye proveedor real, red,
+publicacion, UX avanzada ni edicion automatica de buffers.
+
 ## Flujo por feature
 
 Para cada iteracion:
@@ -98,12 +117,15 @@ como herramientas MCP:
 
 ### 3. Wrapper Zed
 
-Empaquetar el servidor como extension de desarrollo:
+Completado en la tercera feature formal de Spec Kit con TDD. Empaqueta el
+servidor como extension local de desarrollo:
 
 - `zed-extension/extension.toml`;
-- wrapper Rust si hace falta arrancar el servidor;
-- instalacion dev en Zed;
-- revision de logs sin contenido sensible.
+- crate Rust/WASM aislada con `zed_extension_api = "0.7.0"`;
+- `context_server_command` para arrancar `translator-mcp` como comando directo;
+- preparacion reproducible mediante `make zed-extension-prepare`;
+- validacion con `make test-zed-extension`;
+- diagnosticos redaccionados y revision de no-mutacion.
 
 ### 4. UX de lectura
 
