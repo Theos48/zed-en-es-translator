@@ -8,12 +8,12 @@ Permitir que una persona traduzca texto en ingles a espanol sin salir del editor
 
 ## Estado
 
-Primeras tres features formales implementadas:
+Estado de las features formales:
 
 ```text
-specs/001-translation-core-contract/
-specs/002-mcp-server/
-specs/003-zed-wrapper/
+specs/001-translation-core-contract/  completada formal
+specs/002-mcp-server/                 completada formal
+specs/003-zed-wrapper/                activa formal, pendiente de merge
 ```
 
 La primera feature entrega un MVP tecnico offline: core Rust, `MockProvider`,
@@ -25,7 +25,7 @@ transporte stdio y dos tools: `translate_text` y `translate_file`. Mantiene el
 modo offline/mock, no agrega proveedor real, no abre red, no modifica buffers y
 delega lectura/seguridad de archivos al core existente.
 
-La tercera feature agrega una extension local de desarrollo para Zed en
+La tercera feature activa agrega una extension local de desarrollo para Zed en
 `zed-extension/`. La extension declara el context server `translator-en-es`,
 devuelve un comando controlado para arrancar el binario release
 `translator-mcp`, no agrega entorno arbitrario propio, rechaza configuracion de

@@ -38,6 +38,20 @@ fn redaction_removes_arbitrary_quoted_source_and_translation_assignments() {
 }
 
 #[test]
+fn redaction_removes_unquoted_source_and_translation_assignments() {
+    let message = DiagnosticEvent::new(
+        DiagnosticPhase::ServerRuntime,
+        DiagnosticCode::InternalExtensionError,
+        "source_text=unquoted_secret_value translated_text=valor_no_citado status=kept",
+    )
+    .to_user_message();
+
+    assert!(!message.contains("unquoted_secret_value"));
+    assert!(!message.contains("valor_no_citado"));
+    assert!(message.contains("status=kept"));
+}
+
+#[test]
 fn redaction_removes_secrets_from_arbitrary_sentences_not_in_the_fixed_pair() {
     let redacted = redact_sensitive(
         "Startup log: Authorization: Bearer another_fake_token for /home/theos/other/app",

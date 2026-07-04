@@ -129,7 +129,7 @@ fn set_binary_path(
 ) -> Result<(), DiagnosticEvent> {
     let trimmed = path.trim();
     if trimmed.is_empty() {
-        return Err(unsafe_setting(source));
+        return Err(empty_binary_path(source));
     }
 
     if let Some(existing) = launch_settings.binary_path() {
@@ -151,6 +151,14 @@ fn unsafe_setting(name: &str) -> DiagnosticEvent {
         DiagnosticPhase::Configuration,
         DiagnosticCode::UnsafeLaunchConfiguration,
         format!("Rejected unsupported Zed context server setting `{name}`."),
+    )
+}
+
+fn empty_binary_path(source: &str) -> DiagnosticEvent {
+    diagnostic_with_action(
+        DiagnosticPhase::Configuration,
+        DiagnosticCode::BinaryPathNotConfigured,
+        format!("Rejected empty `{source}` value."),
     )
 }
 

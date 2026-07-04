@@ -76,7 +76,7 @@ zed-extension-prepare: zed-extension-server-release
 ZED_EXTENSION_TESTS := prepare_artifact prepare_idempotent make_targets dependency_scope no_mutation remote_denial
 
 test-zed-extension: zed-extension-build zed-extension-prepare
-	$(foreach t,$(ZED_EXTENSION_TESTS),./tests/integration/zed_extension_$(t).sh;)
+	$(foreach t,$(ZED_EXTENSION_TESTS),./tests/integration/zed_extension_$(t).sh &&) true
 
 fmt: rust-image
 	$(RUST_RUN) cargo fmt --all -- --check

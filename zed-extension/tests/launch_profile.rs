@@ -23,6 +23,17 @@ fn launch_settings_accepts_allowed_binary_path() {
 }
 
 #[test]
+fn launch_settings_rejects_empty_binary_path_with_specific_diagnostic() {
+    let error = LaunchSettings::from_json_value(Some(&json!({
+        "binary_path": "  "
+    })))
+    .expect_err("empty binary_path should be rejected");
+
+    assert_eq!(error.code, DiagnosticCode::BinaryPathNotConfigured);
+    assert!(!error.to_user_message().contains("unsupported"));
+}
+
+#[test]
 fn launch_settings_rejects_provider_settings() {
     for key in FORBIDDEN_SETTING_NAMES {
         let error = LaunchSettings::from_json_value(Some(&json!({
