@@ -24,7 +24,10 @@ Estado actual:
 - Completado formal: F001, F002 parcial, F003 y F008 parcial mediante
   `specs/001-translation-core-contract/`; F005 mediante
   `specs/002-mcp-server/`.
-- Activo formal: F006 mediante `specs/003-zed-wrapper/`.
+- Activo formal: F006 mediante `specs/003-zed-wrapper/`. Implementacion,
+  `/speckit-analyze` y `/speckit-converge` completos; PR abierto contra
+  `main` y pendiente de merge. Pasa a "Completado formal" cuando se fusione,
+  siguiendo el mismo criterio usado para F001/F005.
 - Futuro: F004, F007 y F009.
 
 ## F001: contrato de traduccion

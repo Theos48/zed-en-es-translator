@@ -51,9 +51,11 @@ Queda fuera de esta feature:
 - soporte de archivo completo para codigo fuente.
 
 La tercera feature formal tiene validacion automatizada completa y smoke manual
-interactivo en Zed aprobado. El diagnostico rapido de artifact faltante queda
-reprogramado porque el runtime actual de Zed cae en timeout de inicializacion de
-60 segundos:
+interactivo en Zed aprobado. El objetivo original de diagnostico rapido de 15s
+para artifact faltante se re-especifico formalmente (SC-004) a la ventana real
+de inicializacion del context server de Zed (~60 segundos observados), tras
+confirmar que `zed_extension_api` 0.7.0 no expone una primitiva viable para
+validar la ruta del artifact dentro del sandbox WASM:
 
 ```text
 specs/003-zed-wrapper/
@@ -66,8 +68,9 @@ launch profile directo con args vacios y entorno allowlisted, y cubre
 diagnosticos redaccionados, idempotencia, dependency scope y no-mutacion. En
 runtime WASM de Zed, la validacion de artifact por filesystem o preflight de
 host queda fuera de esta feature porque las pruebas manuales provocaron timeout
-de la modal o del arranque del context server. No incluye proveedor real, red,
-publicacion, UX avanzada ni edicion automatica de buffers.
+de la modal o del arranque del context server; ver `docs/decisions.md` D063.
+No incluye proveedor real, red, publicacion, UX avanzada ni edicion automatica
+de buffers.
 
 ## Flujo por feature
 

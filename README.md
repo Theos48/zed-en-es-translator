@@ -55,9 +55,11 @@ Resultado registrado para `specs/001-translation-core-contract/` y
 Resultado registrado para `specs/003-zed-wrapper/`: `make
 zed-extension-prepare`, `make test-zed-extension`, `make test`, `make fmt` y
 `make clippy` pasan. El smoke manual interactivo en Zed pasa con la modal de
-configuracion de la extension. El diagnostico rapido para artifact faltante fue
-reprogramado: en el runtime actual de Zed cae en timeout de inicializacion de 60
-segundos.
+configuracion de la extension. El objetivo original de diagnostico rapido de
+15s para artifact faltante se re-especifico formalmente (SC-004 en el spec) a
+la ventana real de inicializacion del context server de Zed (~60 segundos
+observados), tras confirmar que `zed_extension_api` 0.7.0 no expone una
+primitiva viable para validar la ruta del artifact dentro del sandbox WASM.
 
 ## Documentos
 
