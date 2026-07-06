@@ -25,7 +25,7 @@ if find "$ROOT/zed-extension" \( -name '.env' -o -name '.env.*' -o -name '*secre
   exit 1
 fi
 
-if grep -Eiq 'api_key|base_url|remote_confirmation|headers' "$ROOT/zed-extension/extension.toml"; then
+if grep -Eiq 'provider|api_key|base_url|remote_confirmation|remote|headers|extra_env|extra_args' "$ROOT/zed-extension/extension.toml"; then
   printf 'extension manifest contains provider or secret configuration\n' >&2
   exit 1
 fi

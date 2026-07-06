@@ -320,6 +320,6 @@ fn is_path_like(value: &str) -> bool {
         || trimmed.contains("\\Users\\")
 }
 
-fn is_safe_rust_log(value: &str) -> bool {
+pub(crate) fn is_safe_rust_log(value: &str) -> bool {
     matches!(value, "error" | "warn" | "info" | "debug" | "trace")
 }

@@ -4,7 +4,7 @@ use std::path::Path;
 use zed_extension_api::serde_json::Value;
 
 use crate::diagnostics::{
-    diagnostic_with_action, DiagnosticCode, DiagnosticEvent, DiagnosticPhase,
+    diagnostic_with_action, is_safe_rust_log, DiagnosticCode, DiagnosticEvent, DiagnosticPhase,
 };
 
 /// The only nested context-server setting accepted by this feature.
@@ -180,8 +180,4 @@ fn relative_binary_path(source: &str) -> DiagnosticEvent {
         DiagnosticCode::UnsafeLaunchConfiguration,
         format!("Rejected `{source}` because it must be an absolute path."),
     )
-}
-
-fn is_safe_rust_log(value: &str) -> bool {
-    matches!(value, "error" | "warn" | "info" | "debug" | "trace")
 }

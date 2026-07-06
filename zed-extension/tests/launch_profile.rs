@@ -99,10 +99,11 @@ fn launch_settings_rejects_extra_args_and_arbitrary_env() {
 
 #[test]
 fn launch_settings_accepts_only_allowlisted_rust_log_env() {
+    let artifact = executable_artifact("rust-log-env");
     let settings = LaunchSettings::from_parts(
         None,
         CommandSettingsInput::new(
-            Some("/tmp/translator-mcp".to_string()),
+            Some(artifact.display().to_string()),
             Vec::new(),
             vec![("RUST_LOG".to_string(), "warn".to_string())],
         ),
@@ -110,6 +111,13 @@ fn launch_settings_accepts_only_allowlisted_rust_log_env() {
     .expect("RUST_LOG=warn should be accepted");
 
     assert_eq!(settings.rust_log(), Some("warn"));
+
+    let profile =
+        build_launch_profile(CONTEXT_SERVER_ID, &settings).expect("launch profile should build");
+    assert_eq!(
+        profile.env,
+        vec![("RUST_LOG".to_string(), "warn".to_string())]
+    );
 }
 
 #[test]
