@@ -120,8 +120,10 @@ En el MVP tecnico:
 
 - no se versionan `.env` reales;
 - no se requiere proveedor real;
-- el proceso MCP/CLI no hereda todo el entorno de Zed por defecto;
-- se usa allowlist de variables cuando exista configuracion;
+- el MCP/CLI usa allowlist de variables cuando la plataforma de lanzamiento
+  permita limpiar el entorno heredado;
+- para el context server de Zed en F006, D064 documenta que el proceso lanzado
+  hereda el entorno del proceso Zed por limitacion de plataforma;
 - errores y logs redaccionan valores sensibles.
 
 La ubicacion final de configuracion de proveedor se decidira cuando se implemente proveedor real.

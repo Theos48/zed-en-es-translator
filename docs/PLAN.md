@@ -50,6 +50,21 @@ Queda fuera de esta feature:
 - edicion automatica de buffers;
 - soporte de archivo completo para codigo fuente.
 
+La tercera feature formal tiene validacion automatizada completa y smoke manual
+interactivo en Zed aprobado. Sus criterios de diagnostico y entorno quedaron
+re-especificados segun las limitaciones confirmadas del runtime de extension de
+Zed; el detalle operativo vive en `specs/003-zed-wrapper/` y las decisiones
+estables en D063/D064:
+
+```text
+specs/003-zed-wrapper/
+```
+
+Esta iteracion empaqueta el servidor MCP existente como extension local de
+desarrollo de Zed en `zed-extension/` y cubre startup local, diagnosticos
+redaccionados, preparacion reproducible y no-mutacion. No incluye proveedor
+real, red, publicacion, UX avanzada ni edicion automatica de buffers.
+
 ## Flujo por feature
 
 Para cada iteracion:
@@ -98,12 +113,15 @@ como herramientas MCP:
 
 ### 3. Wrapper Zed
 
-Empaquetar el servidor como extension de desarrollo:
+Completado en la tercera feature formal de Spec Kit con TDD. Empaqueta el
+servidor como extension local de desarrollo:
 
 - `zed-extension/extension.toml`;
-- wrapper Rust si hace falta arrancar el servidor;
-- instalacion dev en Zed;
-- revision de logs sin contenido sensible.
+- crate Rust/WASM aislada con `zed_extension_api = "0.7.0"`;
+- `context_server_command` para arrancar `translator-mcp` como comando directo;
+- preparacion reproducible mediante `make zed-extension-prepare`;
+- validacion con `make test-zed-extension`;
+- diagnosticos redaccionados y revision de no-mutacion.
 
 ### 4. UX de lectura
 

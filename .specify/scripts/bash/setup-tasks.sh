@@ -20,9 +20,18 @@ done
 
 # Source common functions
 SCRIPT_DIR="$(CDPATH="" cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=.specify/scripts/bash/common.sh
 source "$SCRIPT_DIR/common.sh"
 
 # Get feature paths
+REPO_ROOT=''
+FEATURE_DIR=''
+FEATURE_SPEC=''
+IMPL_PLAN=''
+RESEARCH=''
+DATA_MODEL=''
+QUICKSTART=''
+CONTRACTS_DIR=''
 _paths_output=$(get_feature_paths) || { echo "ERROR: Failed to resolve feature paths" >&2; exit 1; }
 eval "$_paths_output"
 unset _paths_output

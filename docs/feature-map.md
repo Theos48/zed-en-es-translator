@@ -24,7 +24,11 @@ Estado actual:
 - Completado formal: F001, F002 parcial, F003 y F008 parcial mediante
   `specs/001-translation-core-contract/`; F005 mediante
   `specs/002-mcp-server/`.
-- Futuro: F004, F006, F007 y F009.
+- Activo formal: F006 mediante `specs/003-zed-wrapper/`. Implementacion,
+  `/speckit-analyze` y `/speckit-converge` completos; PR abierto contra
+  `main` y pendiente de merge. Pasa a "Completado formal" cuando se fusione,
+  siguiendo el mismo criterio usado para F001/F005.
+- Futuro: F004, F007 y F009.
 
 ## F001: contrato de traduccion
 
@@ -107,8 +111,10 @@ Criterios:
 - manifest `extension.toml`;
 - build reproducible;
 - logs utiles y redaccionados conforme a la constitucion;
-- entorno minimo por allowlist;
-- arranque del servidor MCP con comando, argumentos y variables controladas.
+- entorno agregado por el wrapper limitado por allowlist, con la limitacion de
+  herencia del proceso Zed documentada en D064;
+- arranque del servidor MCP con comando, argumentos y variables controladas por
+  el wrapper.
 
 ## F007: flujo UX dentro de Zed
 
@@ -133,7 +139,8 @@ Criterios:
 - secretos fuera del repositorio;
 - remoto default deny;
 - controles de privacidad antes de cualquier llamada remota;
-- entorno heredado minimo entre Zed, MCP y CLI;
+- entorno heredado minimo entre Zed, MCP y CLI cuando la plataforma lo permita;
+  para el context server Zed actual, considerar la limitacion D064;
 - pruebas negativas de privacidad proporcionales al proveedor habilitado.
 
 ## F009: empaquetado y publicacion

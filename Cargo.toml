@@ -10,3 +10,10 @@ resolver = "2"
 edition = "2021"
 license = "MIT"
 publish = false
+
+[workspace.lints.rust]
+future-incompatible = "warn"
+nonstandard-style = "deny"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
