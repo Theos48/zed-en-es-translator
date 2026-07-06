@@ -27,12 +27,13 @@ HELP_LINES := \
 	'  make zed-extension-build Build and test the local Zed extension crate' \
 	'  make zed-extension-prepare Prepare the local translator-mcp artifact path' \
 	'  make test-zed-extension Run Zed wrapper validation checks' \
+	'  make test-zed-ux-flow Run Zed UX flow documentation contract checks' \
 	'  make fmt           Check Rust formatting inside the container' \
 	'  make clippy        Run clippy inside the container' \
 	'  make shell         Open a shell inside the Rust container' \
 	'  make clean         Remove local Rust build/cache output'
 
-.PHONY: all help install pull-rust-base rust-image rust-version test test-core test-mcp zed-extension-build zed-extension-server-release zed-extension-prepare test-zed-extension fmt clippy shell clean
+.PHONY: all help install pull-rust-base rust-image rust-version test test-core test-mcp zed-extension-build zed-extension-server-release zed-extension-prepare test-zed-extension test-zed-ux-flow fmt clippy shell clean
 
 all: test
 
@@ -77,6 +78,11 @@ ZED_EXTENSION_TESTS := prepare_artifact prepare_idempotent make_targets dependen
 
 test-zed-extension: zed-extension-build zed-extension-prepare
 	$(foreach t,$(ZED_EXTENSION_TESTS),./tests/integration/zed_extension_$(t).sh &&) true
+
+ZED_UX_FLOW_TESTS := make_targets docs_contract evidence_contract privacy_contract failure_contract redaction_contract
+
+test-zed-ux-flow:
+	$(foreach t,$(ZED_UX_FLOW_TESTS),./tests/integration/zed_ux_flow_$(t).sh &&) true
 
 fmt: rust-image
 	$(RUST_RUN) cargo fmt --all -- --check

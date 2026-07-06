@@ -23,12 +23,13 @@ Estado actual:
 
 - Completado formal: F001, F002 parcial, F003 y F008 parcial mediante
   `specs/001-translation-core-contract/`; F005 mediante
-  `specs/002-mcp-server/`.
-- Activo formal: F006 mediante `specs/003-zed-wrapper/`. Implementacion,
-  `/speckit-analyze` y `/speckit-converge` completos; PR abierto contra
-  `main` y pendiente de merge. Pasa a "Completado formal" cuando se fusione,
-  siguiendo el mismo criterio usado para F001/F005.
-- Futuro: F004, F007 y F009.
+  `specs/002-mcp-server/`; F006 mediante `specs/003-zed-wrapper/` tras merge
+  en `main`.
+- Activo formal: F007 mediante `specs/004-zed-ux-flow/`. Esta rama esta en
+  fase de implementacion y validacion; la guia operativa vive en
+  `docs/zed-ux-flow.md` y los contratos documentales corren con `make
+  test-zed-ux-flow`.
+- Futuro: F004, F009 y F010.
 
 ## F001: contrato de traduccion
 
@@ -129,6 +130,13 @@ Criterios:
 - entradas permitidas definidas por el contrato activo;
 - validacion manual del flujo real de seleccion antes de ampliar alcance.
 
+Estado actual: feature formal activa en `specs/004-zed-ux-flow/`, con guia de
+revision, plantilla de evidencia y checks documentales en implementacion.
+
+Nota de producto: esta feature valida el camino Agent Panel como puente
+intermedio sobre las tools MCP existentes. No representa la experiencia final
+del producto; ver D065 y F010.
+
 ## F008: privacidad y configuracion
 
 Objetivo: que el usuario entienda y controle que texto se envia.
@@ -153,3 +161,31 @@ Criterios:
 - README final;
 - checklist de publicacion;
 - lockfiles y auditoria de dependencias antes de publicar.
+
+## F010: flujo directo de extension Zed sin Agent
+
+Objetivo: ofrecer la experiencia final de producto dentro de Zed sin requerir
+que el usuario configure o use Agent Panel. Debe sentirse como una extension
+nativa de traduccion para Zed, disenada como producto propio con control fuerte
+para trabajo tecnico, privacidad y preservacion de formato.
+
+Criterios:
+
+- accion propia de la extension accesible desde menu contextual, comando de
+  Zed o boton cuando la API lo permita;
+- traduccion de texto seleccionado en un documento abierto;
+- opcion de traducir contenido permitido del documento abierto sin pedir al
+  usuario escribir prompts;
+- resultado visible dentro de Zed, preferentemente en un panel, modal, buffer
+  temporal o vista de solo lectura;
+- preview claro antes de insertar o reemplazar cualquier contenido;
+- acciones explicitas para copiar, insertar o aplicar traduccion cuando sea
+  seguro;
+- el buffer original no se modifica automaticamente;
+- no requiere configurar Agent, perfil Agent ni modelo Agent;
+- preservacion de Markdown, listas, enlaces, bloques de codigo e inline code;
+- camino futuro para comentarios/docstrings en codigo con segmentacion segura;
+- proveedor local o gratuito/no pago como objetivo de producto; cualquier
+  remoto requiere configuracion explicita y confirmacion por solicitud;
+- conserva los contratos activos de limites, redaccion, no-mutacion y acceso
+  workspace-only.
