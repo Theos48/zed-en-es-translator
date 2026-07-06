@@ -9,7 +9,7 @@ if [[ "$(basename "$ARTIFACT")" != "translator-mcp" ]]; then
   exit 1
 fi
 
-if [[ ! -x "$ARTIFACT" ]]; then
+if [[ ! -f "$ARTIFACT" || ! -x "$ARTIFACT" ]]; then
   printf 'prepared artifact is not executable: %s\n' "$ARTIFACT" >&2
   exit 1
 fi

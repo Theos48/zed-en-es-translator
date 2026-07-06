@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use std::path::Path;
 
 use zed_extension_api::serde_json::Value;
 
@@ -113,7 +114,7 @@ fn parse_nested_settings(
 
         if key == "binary_path" {
             let Some(path) = value.as_str() else {
-                return Err(unsafe_setting("binary_path"));
+                return Err(invalid_binary_path_type());
             };
             set_binary_path(launch_settings, path.to_string(), "binary_path")?;
         }
@@ -130,6 +131,9 @@ fn set_binary_path(
     let trimmed = path.trim();
     if trimmed.is_empty() {
         return Err(empty_binary_path(source));
+    }
+    if !Path::new(trimmed).is_absolute() {
+        return Err(relative_binary_path(source));
     }
 
     if let Some(existing) = launch_settings.binary_path() {
@@ -159,6 +163,22 @@ fn empty_binary_path(source: &str) -> DiagnosticEvent {
         DiagnosticPhase::Configuration,
         DiagnosticCode::BinaryPathNotConfigured,
         format!("Rejected empty `{source}` value."),
+    )
+}
+
+fn invalid_binary_path_type() -> DiagnosticEvent {
+    diagnostic_with_action(
+        DiagnosticPhase::Configuration,
+        DiagnosticCode::UnsafeLaunchConfiguration,
+        "Rejected `binary_path` because it must be a string.",
+    )
+}
+
+fn relative_binary_path(source: &str) -> DiagnosticEvent {
+    diagnostic_with_action(
+        DiagnosticPhase::Configuration,
+        DiagnosticCode::UnsafeLaunchConfiguration,
+        format!("Rejected `{source}` because it must be an absolute path."),
     )
 }
 

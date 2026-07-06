@@ -29,7 +29,7 @@ read_response_for_id() {
   local expected_id="$1"
   local line
   while IFS= read -r -t 5 -u "${MCP[0]}" line; do
-    if printf '%s' "$line" | grep -qE "\"id\":$expected_id[,}]"; then
+    if printf '%s' "$line" | grep -qE "\"id\":${expected_id}[,}]"; then
       printf '%s' "$line"
       return 0
     fi

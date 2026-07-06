@@ -34,6 +34,43 @@ fn launch_settings_rejects_empty_binary_path_with_specific_diagnostic() {
 }
 
 #[test]
+fn launch_settings_rejects_non_string_binary_path_with_type_diagnostic() {
+    let error = LaunchSettings::from_json_value(Some(&json!({
+        "binary_path": true
+    })))
+    .expect_err("non-string binary_path should be rejected");
+
+    assert_eq!(error.code, DiagnosticCode::UnsafeLaunchConfiguration);
+    assert!(error.to_user_message().contains("must be a string"));
+    assert!(!error.to_user_message().contains("unsupported"));
+}
+
+#[test]
+fn launch_settings_rejects_relative_binary_path_with_specific_diagnostic() {
+    let error = LaunchSettings::from_json_value(Some(&json!({
+        "binary_path": "./translator-mcp"
+    })))
+    .expect_err("relative binary_path should be rejected");
+
+    assert_eq!(error.code, DiagnosticCode::UnsafeLaunchConfiguration);
+    assert!(error.to_user_message().contains("absolute path"));
+    assert!(!error.to_user_message().contains("unsupported"));
+}
+
+#[test]
+fn command_settings_rejects_relative_binary_path_with_specific_diagnostic() {
+    let error = LaunchSettings::from_parts(
+        None,
+        CommandSettingsInput::new(Some("translator-mcp".to_string()), Vec::new(), Vec::new()),
+    )
+    .expect_err("relative command path should be rejected");
+
+    assert_eq!(error.code, DiagnosticCode::UnsafeLaunchConfiguration);
+    assert!(error.to_user_message().contains("absolute path"));
+    assert!(!error.to_user_message().contains("unsupported"));
+}
+
+#[test]
 fn launch_settings_rejects_provider_settings() {
     for key in FORBIDDEN_SETTING_NAMES {
         let error = LaunchSettings::from_json_value(Some(&json!({
