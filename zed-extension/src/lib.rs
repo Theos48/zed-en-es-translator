@@ -99,6 +99,29 @@ fn settings_schema() -> String {
     "binary_path": {
       "type": "string",
       "description": "Absolute path printed by make zed-extension-prepare for target/release/translator-mcp."
+    },
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["mock", "libretranslate"],
+          "default": "mock"
+        },
+        "url": {
+          "type": "string",
+          "default": ""
+        },
+        "api_key_env": {
+          "type": "string",
+          "default": ""
+        },
+        "allow_remote": {
+          "type": "boolean",
+          "default": false
+        }
+      }
     }
   }
 }"#
@@ -107,7 +130,13 @@ fn settings_schema() -> String {
 
 fn default_settings() -> String {
     r#"{
-  "binary_path": ""
+  "binary_path": "",
+  "provider": {
+    "mode": "mock",
+    "url": "",
+    "api_key_env": "",
+    "allow_remote": false
+  }
 }"#
     .to_string()
 }

@@ -8,11 +8,10 @@ use crate::diagnostics::{
 };
 
 /// The only nested context-server setting accepted by this feature.
-pub const ALLOWED_SETTING_NAMES: &[&str] = &["binary_path"];
+pub const ALLOWED_SETTING_NAMES: &[&str] = &["binary_path", "provider"];
 
 /// Configuration keys that remain out of scope for the local wrapper.
 pub const FORBIDDEN_SETTING_NAMES: &[&str] = &[
-    "provider",
     "api_key",
     "base_url",
     "remote",
@@ -49,6 +48,7 @@ impl CommandSettingsInput {
 pub struct LaunchSettings {
     binary_path: Option<String>,
     rust_log: Option<String>,
+    provider: ProviderSettings,
 }
 
 impl LaunchSettings {
@@ -96,6 +96,58 @@ impl LaunchSettings {
     pub fn rust_log(&self) -> Option<&str> {
         self.rust_log.as_deref()
     }
+
+    /// Controlled provider environment entries passed to `translator-mcp`.
+    pub fn provider_env(&self) -> Vec<(String, String)> {
+        self.provider.env()
+    }
+}
+
+/// Controlled provider settings accepted from Zed.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ProviderSettings {
+    mode: String,
+    url: Option<String>,
+    api_key_env: Option<String>,
+    allow_remote: bool,
+}
+
+impl Default for ProviderSettings {
+    fn default() -> Self {
+        Self {
+            mode: "mock".to_string(),
+            url: None,
+            api_key_env: None,
+            allow_remote: false,
+        }
+    }
+}
+
+impl ProviderSettings {
+    fn env(&self) -> Vec<(String, String)> {
+        if self.mode == "mock" {
+            return Vec::new();
+        }
+
+        let mut env = vec![
+            ("TRANSLATOR_PROVIDER".to_string(), self.mode.clone()),
+            (
+                "TRANSLATOR_PROVIDER_URL".to_string(),
+                self.url.clone().unwrap_or_default(),
+            ),
+        ];
+        if let Some(api_key_env) = &self.api_key_env {
+            env.push((
+                "TRANSLATOR_PROVIDER_API_KEY_ENV".to_string(),
+                api_key_env.clone(),
+            ));
+        }
+        env.push((
+            "TRANSLATOR_ALLOW_REMOTE_PROVIDER".to_string(),
+            self.allow_remote.to_string(),
+        ));
+        env
+    }
 }
 
 fn parse_nested_settings(
@@ -117,10 +169,125 @@ fn parse_nested_settings(
                 return Err(invalid_binary_path_type());
             };
             set_binary_path(launch_settings, path.to_string(), "binary_path")?;
+        } else if key == "provider" {
+            launch_settings.provider = parse_provider_settings(value)?;
         }
     }
 
     Ok(())
+}
+
+fn parse_provider_settings(value: &Value) -> Result<ProviderSettings, DiagnosticEvent> {
+    let Some(object) = value.as_object() else {
+        return Err(unsafe_setting("provider"));
+    };
+
+    let mut provider = ProviderSettings::default();
+    for (key, value) in object {
+        match key.as_str() {
+            "mode" => {
+                let Some(mode) = value.as_str() else {
+                    return Err(unsafe_setting("provider.mode"));
+                };
+                provider.mode = parse_provider_mode(mode)?;
+            }
+            "url" => {
+                let Some(url) = value.as_str() else {
+                    return Err(unsafe_setting("provider.url"));
+                };
+                provider.url = parse_provider_url(url)?;
+            }
+            "api_key_env" => {
+                let Some(api_key_env) = value.as_str() else {
+                    return Err(unsafe_setting("provider.api_key_env"));
+                };
+                provider.api_key_env = parse_api_key_env(api_key_env)?;
+            }
+            "allow_remote" => {
+                let Some(allow_remote) = value.as_bool() else {
+                    return Err(unsafe_setting("provider.allow_remote"));
+                };
+                provider.allow_remote = allow_remote;
+            }
+            _ => return Err(unsafe_setting(key)),
+        }
+    }
+
+    if provider.mode == "libretranslate" && provider.url.is_none() {
+        return Err(unsafe_setting("provider.url"));
+    }
+    if let Some(url) = &provider.url {
+        if is_non_local_url(url) && !provider.allow_remote {
+            return Err(unsafe_setting("provider.allow_remote"));
+        }
+    }
+
+    Ok(provider)
+}
+
+fn parse_provider_mode(mode: &str) -> Result<String, DiagnosticEvent> {
+    match mode.trim() {
+        "" | "mock" => Ok("mock".to_string()),
+        "libretranslate" => Ok("libretranslate".to_string()),
+        _ => Err(unsafe_setting("provider.mode")),
+    }
+}
+
+fn parse_provider_url(url: &str) -> Result<Option<String>, DiagnosticEvent> {
+    let trimmed = url.trim().trim_end_matches('/');
+    if trimmed.is_empty() {
+        return Ok(None);
+    }
+    let Some(after_scheme) = trimmed
+        .strip_prefix("http://")
+        .or_else(|| trimmed.strip_prefix("https://"))
+    else {
+        return Err(unsafe_setting("provider.url"));
+    };
+    let authority = after_scheme
+        .split(['/', '?', '#'])
+        .next()
+        .unwrap_or_default();
+    if authority.is_empty() || authority.contains('@') {
+        return Err(unsafe_setting("provider.url"));
+    }
+    Ok(Some(trimmed.to_string()))
+}
+
+fn parse_api_key_env(value: &str) -> Result<Option<String>, DiagnosticEvent> {
+    let trimmed = value.trim();
+    if trimmed.is_empty() {
+        return Ok(None);
+    }
+    let mut chars = trimmed.chars();
+    let Some(first) = chars.next() else {
+        return Ok(None);
+    };
+    if !(first == '_' || first.is_ascii_alphabetic())
+        || !chars.all(|ch| ch == '_' || ch.is_ascii_alphanumeric())
+    {
+        return Err(unsafe_setting("provider.api_key_env"));
+    }
+    Ok(Some(trimmed.to_string()))
+}
+
+fn is_non_local_url(url: &str) -> bool {
+    let Some(after_scheme) = url
+        .strip_prefix("http://")
+        .or_else(|| url.strip_prefix("https://"))
+    else {
+        return true;
+    };
+    let authority = after_scheme
+        .split(['/', '?', '#'])
+        .next()
+        .unwrap_or_default();
+    let host = if let Some(rest) = authority.strip_prefix('[') {
+        rest.split_once(']').map(|(host, _)| host).unwrap_or("")
+    } else {
+        authority.split(':').next().unwrap_or("")
+    };
+    !(host.eq_ignore_ascii_case("localhost") || host == "127.0.0.1" || host == "::1")
 }
 
 fn set_binary_path(

@@ -77,10 +77,10 @@ pub fn build_launch_profile(
         return Err(diagnostic_for_artifact_status(status));
     }
 
-    let env = settings
-        .rust_log()
-        .map(|value| vec![("RUST_LOG".to_string(), value.to_string())])
-        .unwrap_or_default();
+    let mut env = settings.provider_env();
+    if let Some(value) = settings.rust_log() {
+        env.push(("RUST_LOG".to_string(), value.to_string()));
+    }
 
     Ok(LaunchProfile {
         command: binary_path.to_string(),

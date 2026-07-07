@@ -24,9 +24,10 @@ Estado actual:
 - Completado formal: F001, F002 parcial, F003 y F008 parcial mediante
   `specs/001-translation-core-contract/`; F005 mediante
   `specs/002-mcp-server/`; F006 mediante `specs/003-zed-wrapper/` tras merge
-  en `main`.
-- Activo formal: F007 mediante `specs/004-zed-ux-flow/`.
-- Futuro: F004, F009 y F010.
+  en `main`; F007 mediante `specs/004-zed-ux-flow/`; F004 mediante
+  `specs/005-real-provider-config/`.
+- Activo formal: ninguno.
+- Futuro: F009 y F010.
 
 ## F001: contrato de traduccion
 
@@ -79,6 +80,12 @@ Criterios:
 
 Objetivo: conectar el contrato a un backend real sin acoplar el core.
 
+Estado actual: feature formal completada en
+`specs/005-real-provider-config/`. Implementa un proveedor local/self-hosted
+compatible con LibreTranslate como primer camino real, mantiene mock/offline
+como default, modela remoto como default-deny con confirmacion por solicitud y
+mantiene la configuracion fuera del texto traducido.
+
 Criterios:
 
 - proveedor elegido de forma explicita y configurable;
@@ -127,7 +134,7 @@ Criterios:
 - entradas permitidas definidas por el contrato activo;
 - validacion manual del flujo real de seleccion antes de ampliar alcance.
 
-Estado actual: feature formal activa en `specs/004-zed-ux-flow/`.
+Estado actual: feature formal completada en `specs/004-zed-ux-flow/`.
 
 Nota de producto: esta feature valida el camino Agent Panel como puente
 intermedio sobre las tools MCP existentes. No representa la experiencia final

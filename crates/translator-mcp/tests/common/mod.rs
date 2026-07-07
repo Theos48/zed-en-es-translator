@@ -189,6 +189,7 @@ pub fn translate_text_params(source_text: &str) -> TranslateTextParams {
         target_language: Some("es".to_string()),
         tone: Some("technical_neutral".to_string()),
         preserve_formatting: Some(true),
+        remote_confirmed: None,
     }
 }
 
@@ -200,6 +201,7 @@ pub fn translate_file_params(workspace: &Path, file_path: &str) -> TranslateFile
         target_language: Some("es".to_string()),
         tone: Some("technical_neutral".to_string()),
         preserve_formatting: Some(true),
+        remote_confirmed: None,
     }
 }
 

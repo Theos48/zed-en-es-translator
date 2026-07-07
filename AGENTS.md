@@ -1,7 +1,7 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
-at specs/004-zed-ux-flow/plan.md
+at specs/005-real-provider-config/plan.md
 <!-- SPECKIT END -->
 
 ## Flujo documental del proyecto
@@ -26,6 +26,31 @@ Al retomar una sesion:
 2. Leer `docs/PLAN.md` para ubicar la jerarquia y roadmap.
 3. Leer `docs/feature-map.md` si se va a preparar una nueva feature.
 4. Leer `specs/<feature>/` si se va a implementar o ajustar la feature activa.
+
+## Regla de gates Spec Kit
+
+No cerrar una fase de Spec Kit sin reportar explicitamente el estado de los
+gates relacionados:
+
+- `speckit-specify`: crear/actualizar `spec.md` y checklist de calidad de
+  requisitos.
+- `speckit-clarify`: ejecutar el prerequisito del comando y resolver o declarar
+  que no hay ambiguedades criticas.
+- `speckit-checklist`: generar checklist de requisitos cuando el dominio tenga
+  riesgos especificos o el usuario lo pida.
+- `speckit-plan`: ejecutar `setup-plan`, generar research/data-model/contracts/
+  quickstart y actualizar el contexto de agente.
+- `speckit-tasks`: no aplicar antes de plan aprobado; cuando aplique, generar
+  `tasks.md`.
+- `speckit-analyze`: aplicar despues de `tasks.md` y antes de implementar; si
+  falta `tasks.md`, ejecutar el prerequisito y reportar el bloqueo.
+- `speckit-implement`: aplicar solo despues de tasks/analyze cuando corresponda.
+- `speckit-converge`: aplicar despues de una pasada de implementacion; si falta
+  `tasks.md` o no hubo implementacion, ejecutar el prerequisito y reportar el
+  bloqueo.
+
+Si un gate no aplica por la fase actual, no omitirlo en silencio: indicar
+`no aplicable` o `bloqueado`, con el comando/prerrequisito usado para decidirlo.
 
 ## Regla para Rust
 

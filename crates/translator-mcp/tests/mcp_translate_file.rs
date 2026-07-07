@@ -18,6 +18,7 @@ fn translate_file_returns_plain_text_success_without_mutating_source() {
         target_language: Some("es".to_string()),
         tone: Some("technical_neutral".to_string()),
         preserve_formatting: Some(true),
+        remote_confirmed: None,
     });
     let after = std::fs::read_to_string(&note).expect("read source file after translation");
 

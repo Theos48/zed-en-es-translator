@@ -91,6 +91,7 @@ pub struct TranslateRequest {
     pub input_kind: InputKind,
     pub file_path: Option<String>,
     pub workspace_root: Option<String>,
+    pub remote_confirmed: bool,
 }
 
 impl TranslateRequest {
@@ -104,6 +105,7 @@ impl TranslateRequest {
             input_kind: InputKind::Text,
             file_path: None,
             workspace_root: None,
+            remote_confirmed: false,
         }
     }
 
@@ -121,6 +123,7 @@ impl TranslateRequest {
             input_kind,
             file_path: Some(file_path.into()),
             workspace_root: Some(workspace_root.into()),
+            remote_confirmed: false,
         }
     }
 
@@ -142,6 +145,7 @@ impl TranslateRequest {
         let source_text = optional_string(&object, "source_text")?;
         let file_path = optional_string(&object, "file_path")?;
         let workspace_root = optional_string(&object, "workspace_root")?;
+        let remote_confirmed = optional_bool(&object, "remote_confirmed")?.unwrap_or(false);
 
         match (&source_text, &file_path, &workspace_root) {
             (Some(text), None, None) => {
@@ -164,6 +168,7 @@ impl TranslateRequest {
             input_kind,
             file_path,
             workspace_root,
+            remote_confirmed,
         })
     }
 
@@ -204,6 +209,9 @@ impl TranslateRequest {
         }
         if let Some(workspace_root) = &self.workspace_root {
             push_string_field(&mut json, &mut first, "workspace_root", workspace_root);
+        }
+        if self.remote_confirmed {
+            push_bool_field(&mut json, &mut first, "remote_confirmed", true);
         }
 
         json.push('}');
@@ -575,7 +583,7 @@ fn parse_json_object(input: &str) -> Result<BTreeMap<String, JsonValue>, Transla
 }
 
 fn reject_unknown_fields(object: &BTreeMap<String, JsonValue>) -> Result<(), TranslateFailure> {
-    const ALLOWED: [&str; 8] = [
+    const ALLOWED: [&str; 9] = [
         "source_text",
         "source_language",
         "target_language",
@@ -584,6 +592,7 @@ fn reject_unknown_fields(object: &BTreeMap<String, JsonValue>) -> Result<(), Tra
         "input_kind",
         "file_path",
         "workspace_root",
+        "remote_confirmed",
     ];
 
     for key in object.keys() {
@@ -634,6 +643,19 @@ fn required_bool(
         None => Err(TranslateFailure::invalid_input(
             "Missing required JSON field.",
         )),
+    }
+}
+
+fn optional_bool(
+    object: &BTreeMap<String, JsonValue>,
+    key: &str,
+) -> Result<Option<bool>, TranslateFailure> {
+    match object.get(key) {
+        Some(JsonValue::Bool(value)) => Ok(Some(*value)),
+        Some(_) => Err(TranslateFailure::invalid_input(
+            "JSON field has the wrong type.",
+        )),
+        None => Ok(None),
     }
 }
 

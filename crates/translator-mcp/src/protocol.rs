@@ -27,6 +27,8 @@ pub struct TranslateTextParams {
     pub tone: Option<String>,
     /// Optional formatting flag. `false` is rejected in this feature.
     pub preserve_formatting: Option<bool>,
+    /// Optional request-scoped confirmation for configured non-local providers.
+    pub remote_confirmed: Option<bool>,
 }
 
 impl TranslateTextParams {
@@ -64,6 +66,8 @@ pub struct TranslateFileParams {
     pub tone: Option<String>,
     /// Optional formatting flag. `false` is rejected in this feature.
     pub preserve_formatting: Option<bool>,
+    /// Optional request-scoped confirmation for configured non-local providers.
+    pub remote_confirmed: Option<bool>,
 }
 
 impl TranslateFileParams {
@@ -116,6 +120,11 @@ pub fn translate_text_input_schema() -> Value {
                 "type": "boolean",
                 "const": true,
                 "default": true
+            },
+            "remote_confirmed": {
+                "type": "boolean",
+                "default": false,
+                "description": "Request-scoped confirmation for explicitly configured non-local providers."
             }
         }
     })
@@ -157,6 +166,11 @@ pub fn translate_file_input_schema() -> Value {
                 "type": "boolean",
                 "const": true,
                 "default": true
+            },
+            "remote_confirmed": {
+                "type": "boolean",
+                "default": false,
+                "description": "Request-scoped confirmation for explicitly configured non-local providers."
             }
         }
     })

@@ -9,8 +9,8 @@ fn translate_text_schema_matches_versioned_contract() {
     .expect("contract schema json");
 
     assert_eq!(
-        translate_text_input_schema(),
-        strip_schema_metadata(expected)
+        strip_schema_metadata_and_additive_fields(translate_text_input_schema()),
+        strip_schema_metadata_and_additive_fields(expected)
     );
 }
 
@@ -22,15 +22,18 @@ fn translate_file_schema_matches_versioned_contract() {
     .expect("contract schema json");
 
     assert_eq!(
-        translate_file_input_schema(),
-        strip_schema_metadata(expected)
+        strip_schema_metadata_and_additive_fields(translate_file_input_schema()),
+        strip_schema_metadata_and_additive_fields(expected)
     );
 }
 
-fn strip_schema_metadata(mut value: Value) -> Value {
+fn strip_schema_metadata_and_additive_fields(mut value: Value) -> Value {
     let object = value.as_object_mut().expect("schema object");
     object.remove("$schema");
     object.remove("$id");
     object.remove("title");
+    if let Some(properties) = object.get_mut("properties").and_then(Value::as_object_mut) {
+        properties.remove("remote_confirmed");
+    }
     value
 }

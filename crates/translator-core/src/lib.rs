@@ -1,9 +1,11 @@
 pub mod contract;
 pub mod errors;
+pub mod libretranslate;
 pub mod limits;
 pub mod markdown;
 pub mod privacy;
 pub mod provider;
+pub mod provider_config;
 pub mod redaction;
 mod secrets;
 pub mod workspace;
@@ -13,12 +15,18 @@ pub use contract::{
     TranslateFailure, TranslateRequest, TranslateResult, TranslateSuccess,
 };
 pub use errors::ErrorCode;
+pub use libretranslate::LibreTranslateProvider;
 pub use limits::{
     MAX_INPUT_BYTES, MAX_OUTPUT_BYTES, MAX_SEGMENTS, MAX_SEGMENT_BYTES, PROVIDER_TIMEOUT_MS,
 };
 pub use privacy::{check_remote_provider_gate, contains_obvious_secret, RemoteProviderState};
 pub use provider::{
     ensure_provider_response_shape, MockProvider, Provider, ProviderRequest, ProviderResponse,
+    ProviderSelection,
+};
+pub use provider_config::{
+    ProviderConfiguration, ProviderLocality, ProviderMode, ProviderTarget,
+    ENV_ALLOW_REMOTE_PROVIDER, ENV_PROVIDER, ENV_PROVIDER_API_KEY_ENV, ENV_PROVIDER_URL,
 };
 pub use redaction::{redact_failure, redact_text};
 pub use workspace::{load_allowed_file, LoadedFile};
@@ -27,12 +35,21 @@ pub fn translate_text(
     source_text: &str,
     provider: &impl Provider,
 ) -> Result<TranslateSuccess, TranslateFailure> {
-    translate_text_inner(source_text, provider).map_err(redact_failure)
+    translate_text_with_confirmation(source_text, provider, false)
+}
+
+pub fn translate_text_with_confirmation(
+    source_text: &str,
+    provider: &impl Provider,
+    remote_confirmed: bool,
+) -> Result<TranslateSuccess, TranslateFailure> {
+    translate_text_inner(source_text, provider, remote_confirmed).map_err(redact_failure)
 }
 
 fn translate_text_inner(
     source_text: &str,
     provider: &impl Provider,
+    remote_confirmed: bool,
 ) -> Result<TranslateSuccess, TranslateFailure> {
     validate_direct_text_input(source_text)?;
 
@@ -40,11 +57,12 @@ fn translate_text_inner(
         return TranslateSuccess::new(source_text);
     }
 
-    let request = ProviderRequest::new(
+    let request = ProviderRequest::with_remote_confirmation(
         vec![source_text.to_string()],
         Language::English,
         Language::Spanish,
         Tone::TechnicalNeutral,
+        remote_confirmed,
     )?;
     let response = provider.translate(&request)?;
     ensure_provider_response_shape(&request, &response)?;
@@ -76,17 +94,32 @@ pub fn translate_file(
     workspace_root: &str,
     provider: &impl Provider,
 ) -> Result<TranslateSuccess, TranslateFailure> {
-    translate_file_inner(file_path, workspace_root, provider).map_err(redact_failure)
+    translate_file_with_confirmation(file_path, workspace_root, provider, false)
+}
+
+pub fn translate_file_with_confirmation(
+    file_path: &str,
+    workspace_root: &str,
+    provider: &impl Provider,
+    remote_confirmed: bool,
+) -> Result<TranslateSuccess, TranslateFailure> {
+    translate_file_inner(file_path, workspace_root, provider, remote_confirmed)
+        .map_err(redact_failure)
 }
 
 fn translate_file_inner(
     file_path: &str,
     workspace_root: &str,
     provider: &impl Provider,
+    remote_confirmed: bool,
 ) -> Result<TranslateSuccess, TranslateFailure> {
     let loaded = load_allowed_file(file_path, workspace_root)?;
-    let translated_text =
-        markdown::translate_document(&loaded.content, loaded.input_kind, provider)?;
+    let translated_text = markdown::translate_document_with_confirmation(
+        &loaded.content,
+        loaded.input_kind,
+        provider,
+        remote_confirmed,
+    )?;
 
     TranslateSuccess::new(translated_text)
 }
