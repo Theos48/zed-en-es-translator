@@ -178,7 +178,7 @@ No task in this feature should add a real provider, remote translation, automati
 
 ## Phase 7: Convergence
 
-- [X] T038 Record the actual Agent model route or explicit unknown/blocked route with synthetic-only rationale per FR-013 / SC-009 (partial)
-- [X] T039 Record the translation-only Agent tool-permission posture for mutation, terminal, fetch, and search tools before accepting no-mutation evidence per FR-014 / SC-010 (partial)
-- [X] T040 Add missing manual validation run metadata, including Zed version, operating system, git branch/revision, Agent profile, and `translator-en-es` tool availability per contracts/manual-validation.md (partial)
-- [X] T041 Record the setup-failure visible category, corrective action, redaction result, and no-mutation evidence per US3/AC1 (partial)
+- [X] T038 Record the actual Agent model route or explicit unknown/blocked route with synthetic-only rationale per FR-013 / SC-009
+- [X] T039 Record the translation-only Agent tool-permission posture for mutation, terminal, fetch, and search tools before accepting no-mutation evidence per FR-014 / SC-010 (blocked profile-level audit recorded; no-mutation evidence limited to observed translator operations)
+- [X] T040 Add missing manual validation run metadata, including Zed version, operating system, git branch/revision, Agent profile, and `translator-en-es` tool availability per contracts/manual-validation.md
+- [X] T041 Record the setup-failure visible category, corrective action, redaction result, and no-mutation evidence per US3/AC1

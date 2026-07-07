@@ -4,15 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DOC="$ROOT/docs/zed-ux-flow.md"
 TEMPLATE="$ROOT/specs/004-zed-ux-flow/manual-validation-template.md"
-
-require_in_file() {
-  local file="$1"
-  local needle="$2"
-  if ! grep -Fq "$needle" "$file"; then
-    printf 'missing failure contract text in %s: %s\n' "$file" "$needle" >&2
-    exit 1
-  fi
-}
+source "$ROOT/tests/integration/lib/zed_ux_flow_contract_helpers.sh"
 
 for file in "$DOC" "$TEMPLATE"; do
   [[ -f "$file" ]] || { printf 'missing required failure contract file: %s\n' "$file" >&2; exit 1; }

@@ -134,15 +134,18 @@ specs/004-zed-ux-flow/
 ├── research.md
 ├── data-model.md
 ├── quickstart.md
+├── tasks.md
+├── manual-validation-template.md
 ├── checklists/
+│   ├── pre-tasks.md
 │   └── requirements.md
 └── contracts/
     ├── manual-validation.md
     └── ux-flow.md
 ```
 
-`tasks.md` is intentionally not created in this step. It belongs to the later
-`speckit-tasks` phase after review.
+`tasks.md` is produced in the later `speckit-tasks` phase; this branch includes
+the generated task artifact for review.
 
 ### Source Code (repository root)
 

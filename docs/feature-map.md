@@ -25,10 +25,7 @@ Estado actual:
   `specs/001-translation-core-contract/`; F005 mediante
   `specs/002-mcp-server/`; F006 mediante `specs/003-zed-wrapper/` tras merge
   en `main`.
-- Activo formal: F007 mediante `specs/004-zed-ux-flow/`. Esta rama esta en
-  fase de implementacion y validacion; la guia operativa vive en
-  `docs/zed-ux-flow.md` y los contratos documentales corren con `make
-  test-zed-ux-flow`.
+- Activo formal: F007 mediante `specs/004-zed-ux-flow/`.
 - Futuro: F004, F009 y F010.
 
 ## F001: contrato de traduccion
@@ -130,8 +127,7 @@ Criterios:
 - entradas permitidas definidas por el contrato activo;
 - validacion manual del flujo real de seleccion antes de ampliar alcance.
 
-Estado actual: feature formal activa en `specs/004-zed-ux-flow/`, con guia de
-revision, plantilla de evidencia y checks documentales en implementacion.
+Estado actual: feature formal activa en `specs/004-zed-ux-flow/`.
 
 Nota de producto: esta feature valida el camino Agent Panel como puente
 intermedio sobre las tools MCP existentes. No representa la experiencia final

@@ -15,7 +15,8 @@ secrets, tokens, headers, workspace roots, sensitive paths, or environment dumps
 - Extension path: `zed-extension/`
 - Prepared artifact category: `target/release/translator-mcp` or redacted local path category
 - Agent Profile:
-- Agent model route: `local | zed-hosted | provider-key | subscription | gateway | unknown`
+- Agent model route: `local`, `zed-hosted`, `provider-key`, `subscription`,
+  `gateway`, or `unknown`
 - Tool-permission posture:
 - `translator-en-es` tools available: `yes | no | blocked`
 - Evidence format used: Synthetic canary, Hash/length metadata, Redacted summary

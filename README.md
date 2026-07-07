@@ -80,9 +80,9 @@ zed-extension-prepare`, `make test-zed-extension`, `make test`, `make fmt` y
 configuracion de la extension. Los limites de diagnostico rapido y aislamiento
 de entorno quedaron documentados en el spec y en D063/D064.
 
-Resultado parcial registrado para `specs/004-zed-ux-flow/`: `make
-test-zed-ux-flow` pasa. La validacion manual interactiva en Zed queda pendiente
-de ejecutarse y registrarse con contenido sintetico o evidencia redaccionada.
+Resultado registrado para `specs/004-zed-ux-flow/`: `make test-zed-ux-flow`
+pasa y la validacion manual interactiva en Zed quedo registrada con evidencia
+sintetica/redaccionada.
 
 ## Documentos
 

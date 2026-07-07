@@ -13,8 +13,8 @@ Fields:
 
 - `session_id`: Reviewer-chosen identifier for validation notes.
 - `zed_version`: Zed version used for manual validation.
-- `extension_state`: `prepared`, `registered`, `missing`, `stale`, or
-  `misconfigured`.
+- `extension_state`: `prepared`, `registered`, `missing`, `disabled`, `stale`,
+  or `misconfigured`.
 - `context_server_id`: Expected value: `translator-en-es`.
 - `agent_model_route`: `local`, `zed-hosted`, `provider-key`,
   `subscription`, `gateway`, or `unknown`.
