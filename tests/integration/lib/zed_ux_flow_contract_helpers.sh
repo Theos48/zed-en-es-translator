@@ -1,3 +1,5 @@
+# shellcheck shell=bash
+
 require_in_file() {
   local file="$1"
   local needle="$2"

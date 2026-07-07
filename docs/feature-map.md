@@ -165,23 +165,5 @@ que el usuario configure o use Agent Panel. Debe sentirse como una extension
 nativa de traduccion para Zed, disenada como producto propio con control fuerte
 para trabajo tecnico, privacidad y preservacion de formato.
 
-Criterios:
-
-- accion propia de la extension accesible desde menu contextual, comando de
-  Zed o boton cuando la API lo permita;
-- traduccion de texto seleccionado en un documento abierto;
-- opcion de traducir contenido permitido del documento abierto sin pedir al
-  usuario escribir prompts;
-- resultado visible dentro de Zed, preferentemente en un panel, modal, buffer
-  temporal o vista de solo lectura;
-- preview claro antes de insertar o reemplazar cualquier contenido;
-- acciones explicitas para copiar, insertar o aplicar traduccion cuando sea
-  seguro;
-- el buffer original no se modifica automaticamente;
-- no requiere configurar Agent, perfil Agent ni modelo Agent;
-- preservacion de Markdown, listas, enlaces, bloques de codigo e inline code;
-- camino futuro para comentarios/docstrings en codigo con segmentacion segura;
-- proveedor local o gratuito/no pago como objetivo de producto; cualquier
-  remoto requiere configuracion explicita y confirmacion por solicitud;
-- conserva los contratos activos de limites, redaccion, no-mutacion y acceso
-  workspace-only.
+Estado: futuro. Los criterios operativos se definiran cuando F010 se promueva a
+feature formal en `specs/<feature>/`.
