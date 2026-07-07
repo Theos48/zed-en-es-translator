@@ -6,6 +6,15 @@ Proyecto para explorar y desarrollar una integracion de traduccion ingles -> esp
 
 Permitir que una persona traduzca texto en ingles a espanol sin salir del editor Zed, con un flujo que se sienta integrado y que pueda evolucionar por features pequenas guiadas por SDD y TDD.
 
+## Objetivo de producto
+
+Construir una extension nativa de traduccion para Zed, disenada como producto
+propio para trabajo tecnico: seleccion de texto, accion desde menu
+contextual/comando/boton, preview legible, preservacion de Markdown/codigo,
+control explicito para copiar/insertar/aplicar, proveedores locales o
+gratuitos/no pago, remoto siempre confirmado, privacidad por defecto y sin
+depender de Agent Panel como experiencia principal.
+
 ## Estado
 
 Estado de las features formales:
@@ -13,7 +22,8 @@ Estado de las features formales:
 ```text
 specs/001-translation-core-contract/  completada formal
 specs/002-mcp-server/                 completada formal
-specs/003-zed-wrapper/                activa formal, pendiente de merge
+specs/003-zed-wrapper/                completada formal
+specs/004-zed-ux-flow/                activa formal
 ```
 
 La primera feature entrega un MVP tecnico offline: core Rust, `MockProvider`,
@@ -25,7 +35,7 @@ transporte stdio y dos tools: `translate_text` y `translate_file`. Mantiene el
 modo offline/mock, no agrega proveedor real, no abre red, no modifica buffers y
 delega lectura/seguridad de archivos al core existente.
 
-La tercera feature activa agrega una extension local de desarrollo para Zed en
+La tercera feature agrega una extension local de desarrollo para Zed en
 `zed-extension/`. La extension declara el context server `translator-en-es`,
 devuelve un comando controlado para arrancar el binario release
 `translator-mcp`, no agrega entorno arbitrario propio, rechaza configuracion de
@@ -35,6 +45,16 @@ quedan acotados por limitaciones confirmadas del runtime de Zed; ver
 `specs/003-zed-wrapper/` y `docs/decisions.md` D063/D064. No agrega provider
 real, red, publicacion ni edicion automatica de buffers.
 
+La cuarta feature activa documenta y valida el flujo de lectura dentro de Zed
+sobre la extension local ya fusionada. Cubre el uso del Agent Panel con
+`translate_text` y `translate_file`, los limites entre el modelo del Agent y el
+servidor MCP local, la evidencia manual redaccionada, la decision explicita de
+soporte de seleccion y la no-mutacion de archivos o buffers. La guia operativa
+vive en `docs/zed-ux-flow.md`. Este flujo Agent Panel es un puente de
+validacion, no la UX final del producto: la meta final es una accion propia de
+la extension de Zed para traducir desde menu contextual, comando o boton sin
+configurar Agent.
+
 Rust se ejecuta mediante la imagen Docker oficial fijada en `Makefile`; no se
 instala `rustc` ni `cargo` globalmente para este proyecto por defecto.
 
@@ -43,6 +63,7 @@ Validacion principal:
 ```bash
 make zed-extension-prepare
 make test-zed-extension
+make test-zed-ux-flow
 make test
 make test-mcp
 make fmt
@@ -59,12 +80,17 @@ zed-extension-prepare`, `make test-zed-extension`, `make test`, `make fmt` y
 configuracion de la extension. Los limites de diagnostico rapido y aislamiento
 de entorno quedaron documentados en el spec y en D063/D064.
 
+Resultado registrado para `specs/004-zed-ux-flow/`: `make test-zed-ux-flow`
+pasa y la validacion manual interactiva en Zed quedo registrada con evidencia
+sintetica/redaccionada.
+
 ## Documentos
 
 - [Plan de desarrollo](docs/PLAN.md)
 - [Producto y roadmap funcional](docs/product.md)
 - [Mapa detallado de features](docs/feature-map.md)
 - [Matriz de decisiones](docs/decisions.md)
+- [Guia de flujo UX en Zed](docs/zed-ux-flow.md)
 - [Diagramas](docs/diagrams.md)
 - [ADR 0001: alcance tecnico inicial](docs/adr/0001-zed-extension-scope.md)
 - [ADR 0002: arquitectura y tecnologia inicial](docs/adr/0002-architecture-and-technology.md)

@@ -53,8 +53,8 @@ Queda fuera de esta feature:
 La tercera feature formal tiene validacion automatizada completa y smoke manual
 interactivo en Zed aprobado. Sus criterios de diagnostico y entorno quedaron
 re-especificados segun las limitaciones confirmadas del runtime de extension de
-Zed; el detalle operativo vive en `specs/003-zed-wrapper/` y las decisiones
-estables en D063/D064:
+Zed; fue fusionada a `main`. El detalle operativo vive en
+`specs/003-zed-wrapper/` y las decisiones estables en D063/D064:
 
 ```text
 specs/003-zed-wrapper/
@@ -64,6 +64,23 @@ Esta iteracion empaqueta el servidor MCP existente como extension local de
 desarrollo de Zed en `zed-extension/` y cubre startup local, diagnosticos
 redaccionados, preparacion reproducible y no-mutacion. No incluye proveedor
 real, red, publicacion, UX avanzada ni edicion automatica de buffers.
+
+La cuarta feature formal esta activa en fase de implementacion y validacion:
+
+```text
+specs/004-zed-ux-flow/
+```
+
+Esta iteracion define el flujo de lectura dentro de Zed sobre la extension local
+ya fusionada. Debe documentar y validar un flujo Agent Panel de baja friccion,
+mantener los contratos `translate_text` y `translate_file`, preservar la
+no-mutacion y decidir soporte de seleccion solo con evidencia manual real. No
+incluye proveedor real, red, publicacion, API keys ni reemplazo automatico de
+contenido. La guia operativa vive en `docs/zed-ux-flow.md`; `make
+test-zed-ux-flow` valida los contratos documentales y de evidencia. Este flujo
+Agent Panel es un puente de validacion, no la experiencia final de producto; la
+experiencia final queda registrada en D065/F010 como una accion propia de la
+extension que no requiere configurar Agent.
 
 ## Flujo por feature
 
@@ -125,11 +142,21 @@ servidor como extension local de desarrollo:
 
 ### 4. UX de lectura
 
+Activo como cuarta feature formal de Spec Kit:
+
+```text
+specs/004-zed-ux-flow/
+```
+
 Reducir friccion dentro de Zed:
 
 - flujo Agent Panel;
 - seleccion si Zed la expone de forma fiable;
 - resultado legible sin modificar buffers.
+- guia de revision en `docs/zed-ux-flow.md`;
+- plantilla de evidencia manual redaccionada en
+  `specs/004-zed-ux-flow/manual-validation-template.md`;
+- checks documentales con `make test-zed-ux-flow`.
 
 ### 5. Proveedor real y publicacion
 
@@ -140,3 +167,14 @@ Solo despues de tener la base segura:
 - confirmar cada envio fuera del equipo;
 - auditar dependencias;
 - preparar licencia y publicacion.
+
+### 6. Flujo directo sin Agent
+
+Objetivo de producto final registrado en D065/F010:
+
+- accion propia de la extension desde menu contextual, comando o boton;
+- traducir texto seleccionado o contenido permitido del documento abierto;
+- mostrar la traduccion dentro de Zed sin configurar Agent Panel;
+- mantener no-mutacion automatica del buffer;
+- usar proveedor local o gratuito/no pago, con remoto siempre explicitamente
+  configurado y confirmado por solicitud.

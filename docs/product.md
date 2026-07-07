@@ -17,6 +17,31 @@ dentro del editor.
 Una herramienta integrada en Zed que reciba texto en ingles y devuelva espanol
 claro, manteniendo estructura y formato cuando sea posible.
 
+La experiencia final esperada no depende del Agent Panel. El usuario debe poder
+seleccionar texto en un documento abierto, usar una accion de la extension
+desde menu contextual, comando o boton, y ver la traduccion dentro de Zed sin
+configurar un Agent ni un modelo intermediario. El flujo Agent Panel se acepta
+solo como puente de validacion mientras se aprovechan las tools MCP existentes.
+
+## Vision de producto final
+
+El producto final debe sentirse como una extension nativa de traduccion para
+Zed, disenada como producto propio, pulido y ambicioso para trabajo tecnico.
+
+Objetivos:
+
+- traducir seleccion desde menu contextual, comando o boton;
+- mostrar preview legible antes de cualquier cambio;
+- permitir copiar, insertar o aplicar la traduccion solo por accion explicita
+  del usuario;
+- conservar Markdown, listas, enlaces, bloques de codigo e inline code;
+- soportar documentos permitidos sin mutar el archivo original por defecto;
+- evolucionar hacia comentarios/docstrings en codigo con segmentacion segura;
+- ofrecer proveedor local o gratuito/no pago como ruta principal;
+- mantener remoto default deny con confirmacion por solicitud;
+- evitar que el usuario tenga que configurar Agent, perfiles Agent o modelos
+  intermediarios para traducir.
+
 ## Primer ciclo tecnico
 
 Antes del MVP usable con proveedor real, el primer ciclo formal construye una
@@ -42,6 +67,7 @@ El backlog detallado vive en `docs/feature-map.md`. Resumen:
 7. UX de lectura dentro de Zed.
 8. Privacidad y configuracion.
 9. Empaquetado y publicacion.
+10. Flujo directo de extension Zed sin Agent.
 
 ## Fuera de alcance inicial
 
