@@ -14,6 +14,7 @@ fn translate_text_error_does_not_leak_source_or_translation() {
         target_language: Some("es".to_string()),
         tone: Some("technical_neutral".to_string()),
         preserve_formatting: Some(true),
+        remote_confirmed: None,
     });
 
     let serialized = serde_json::to_string(&result).expect("serialize tool result");
@@ -36,6 +37,7 @@ fn translate_file_error_does_not_leak_paths_or_secrets() {
         target_language: Some("es".to_string()),
         tone: Some("technical_neutral".to_string()),
         preserve_formatting: Some(true),
+        remote_confirmed: None,
     });
 
     let serialized = serde_json::to_string(&result).expect("serialize tool result");

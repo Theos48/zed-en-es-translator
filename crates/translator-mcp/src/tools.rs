@@ -13,7 +13,8 @@ use rmcp::{
 use serde::de::DeserializeOwned;
 use serde_json::Value;
 use translator_core::{
-    translate_file, translate_text, ErrorCode, MockProvider, Provider, TranslateFailure,
+    translate_file_with_confirmation, translate_text_with_confirmation, ErrorCode, MockProvider,
+    Provider, ProviderSelection, TranslateFailure,
 };
 
 use crate::protocol::{
@@ -43,16 +44,28 @@ impl<P> TranslatorMcpServer<P> {
     }
 }
 
+impl TranslatorMcpServer<ProviderSelection> {
+    /// Create a server using controlled process provider configuration.
+    pub fn from_env() -> Result<Self, TranslateFailure> {
+        Ok(Self {
+            provider: ProviderSelection::from_env()?,
+        })
+    }
+}
+
 impl<P> TranslatorMcpServer<P>
 where
     P: Provider,
 {
     /// Execute `translate_text` and map expected failures to MCP tool errors.
     pub fn translate_text(&self, params: TranslateTextParams) -> CallToolResult {
-        match params
-            .validate()
-            .and_then(|()| translate_text(&params.source_text, &self.provider))
-        {
+        match params.validate().and_then(|()| {
+            translate_text_with_confirmation(
+                &params.source_text,
+                &self.provider,
+                params.remote_confirmed.unwrap_or(false),
+            )
+        }) {
             Ok(success) => success_result(success),
             Err(failure) => error_result(failure),
         }
@@ -170,7 +183,12 @@ fn translate_file_result(
     params: TranslateFileParams,
     provider: &impl Provider,
 ) -> Result<translator_core::TranslateSuccess, TranslateFailure> {
-    params
-        .validate()
-        .and_then(|()| translate_file(&params.file_path, &params.workspace_root, provider))
+    params.validate().and_then(|()| {
+        translate_file_with_confirmation(
+            &params.file_path,
+            &params.workspace_root,
+            provider,
+            params.remote_confirmed.unwrap_or(false),
+        )
+    })
 }

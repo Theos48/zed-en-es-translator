@@ -9,7 +9,7 @@ fn translate_text_schema_matches_versioned_contract() {
     .expect("contract schema json");
 
     assert_eq!(
-        translate_text_input_schema(),
+        strip_schema_metadata(translate_text_input_schema()),
         strip_schema_metadata(expected)
     );
 }
@@ -22,7 +22,7 @@ fn translate_file_schema_matches_versioned_contract() {
     .expect("contract schema json");
 
     assert_eq!(
-        translate_file_input_schema(),
+        strip_schema_metadata(translate_file_input_schema()),
         strip_schema_metadata(expected)
     );
 }

@@ -24,6 +24,7 @@ HELP_LINES := \
 	'  make test          Run all Rust tests inside the container' \
 	'  make test-core     Run translator-core tests inside the container' \
 	'  make test-mcp      Run translator-mcp tests inside the container' \
+	'  make test-real-provider-config Run focused real-provider configuration tests' \
 	'  make zed-extension-build Build and test the local Zed extension crate' \
 	'  make zed-extension-prepare Prepare the local translator-mcp artifact path' \
 	'  make test-zed-extension Run Zed wrapper validation checks' \
@@ -33,7 +34,7 @@ HELP_LINES := \
 	'  make shell         Open a shell inside the Rust container' \
 	'  make clean         Remove local Rust build/cache output'
 
-.PHONY: all help install pull-rust-base rust-image rust-version test test-core test-mcp zed-extension-build zed-extension-server-release zed-extension-prepare test-zed-extension test-zed-ux-flow fmt clippy shell clean
+.PHONY: all help install pull-rust-base rust-image rust-version test test-core test-mcp test-real-provider-config zed-extension-build zed-extension-server-release zed-extension-prepare test-zed-extension test-zed-ux-flow fmt clippy shell clean
 
 all: test
 
@@ -60,6 +61,12 @@ test-core: rust-image
 
 test-mcp: rust-image
 	$(RUST_RUN) cargo test -p translator-mcp
+
+test-real-provider-config: rust-image
+	$(RUST_RUN) cargo test -p translator-core --test provider_configuration_contract --test provider_configuration --test provider_diagnostics_redaction --test libretranslate_provider --test local_provider_translation --test remote_provider_denial --test secret_detection_remote_gate --test provider_timeout --test libretranslate_provider_failures
+	$(RUST_RUN) cargo test -p translator-cli --test cli_provider_configuration --test cli_remote_confirmation --test cli_provider_failures
+	$(RUST_RUN) cargo test -p translator-mcp --test mcp_provider_configuration --test mcp_remote_confirmation --test mcp_provider_failures
+	$(RUST_RUN) cargo test --manifest-path zed-extension/Cargo.toml --test provider_settings --test diagnostics_redaction --locked
 
 zed-extension-build: rust-image
 	$(RUST_RUN) cargo test --manifest-path zed-extension/Cargo.toml --locked

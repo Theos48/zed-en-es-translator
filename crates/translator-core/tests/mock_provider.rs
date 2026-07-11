@@ -3,12 +3,13 @@ use translator_core::{Language, MockProvider, Provider, ProviderRequest, Tone};
 #[test]
 fn mock_provider_is_deterministic() {
     let provider = MockProvider::new();
-    let request = ProviderRequest {
-        segments: vec!["Read the docs.".to_string(), "Open the file.".to_string()],
-        source_language: Language::English,
-        target_language: Language::Spanish,
-        tone: Tone::TechnicalNeutral,
-    };
+    let request = ProviderRequest::new(
+        vec!["Read the docs.".to_string(), "Open the file.".to_string()],
+        Language::English,
+        Language::Spanish,
+        Tone::TechnicalNeutral,
+    )
+    .expect("provider request");
 
     let first = provider
         .translate(&request)

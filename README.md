@@ -23,7 +23,8 @@ Estado de las features formales:
 specs/001-translation-core-contract/  completada formal
 specs/002-mcp-server/                 completada formal
 specs/003-zed-wrapper/                completada formal
-specs/004-zed-ux-flow/                activa formal
+specs/004-zed-ux-flow/                completada formal
+specs/005-real-provider-config/        completada formal
 ```
 
 La primera feature entrega un MVP tecnico offline: core Rust, `MockProvider`,
@@ -45,7 +46,7 @@ quedan acotados por limitaciones confirmadas del runtime de Zed; ver
 `specs/003-zed-wrapper/` y `docs/decisions.md` D063/D064. No agrega provider
 real, red, publicacion ni edicion automatica de buffers.
 
-La cuarta feature activa documenta y valida el flujo de lectura dentro de Zed
+La cuarta feature documenta y valida el flujo de lectura dentro de Zed
 sobre la extension local ya fusionada. Cubre el uso del Agent Panel con
 `translate_text` y `translate_file`, los limites entre el modelo del Agent y el
 servidor MCP local, la evidencia manual redaccionada, la decision explicita de
@@ -54,6 +55,13 @@ vive en `docs/zed-ux-flow.md`. Este flujo Agent Panel es un puente de
 validacion, no la UX final del producto: la meta final es una accion propia de
 la extension de Zed para traducir desde menu contextual, comando o boton sin
 configurar Agent.
+
+La quinta feature implementa el primer proveedor real configurable en
+`specs/005-real-provider-config/`. Mantiene `MockProvider` como default,
+selecciona un proveedor local/self-hosted compatible con LibreTranslate como
+primer camino real, modela remoto como default-deny con confirmacion por
+solicitud, conserva no-mutacion, limites, redaccion y host limpio, y expone la
+configuracion controlada a CLI, MCP y la extension Zed.
 
 Rust se ejecuta mediante la imagen Docker oficial fijada en `Makefile`; no se
 instala `rustc` ni `cargo` globalmente para este proyecto por defecto.
@@ -64,8 +72,10 @@ Validacion principal:
 make zed-extension-prepare
 make test-zed-extension
 make test-zed-ux-flow
-make test
+make test-core
 make test-mcp
+make test-real-provider-config
+make test
 make fmt
 make clippy
 ```
@@ -83,6 +93,13 @@ de entorno quedaron documentados en el spec y en D063/D064.
 Resultado registrado para `specs/004-zed-ux-flow/`: `make test-zed-ux-flow`
 pasa y la validacion manual interactiva en Zed quedo registrada con evidencia
 sintetica/redaccionada.
+
+Resultado registrado para `specs/005-real-provider-config/`: `make test-core`,
+`make test-mcp`, `make test-zed-extension`, `make test-real-provider-config`,
+`make test`, `make fmt` y `make clippy` pasan dentro del contenedor Rust del
+proyecto. La evidencia automatizada usa stubs locales de loopback; la plantilla
+para smoke manual contra un proveedor local externo vive en
+`specs/005-real-provider-config/manual-validation.md`.
 
 ## Documentos
 

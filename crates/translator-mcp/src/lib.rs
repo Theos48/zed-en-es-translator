@@ -6,10 +6,13 @@ pub mod tools;
 use std::fmt;
 
 use rmcp::ServiceExt;
+use translator_core::{redact_failure, TranslateFailure};
 
 /// Error returned while running the stdio MCP server.
 #[derive(Debug)]
 pub enum StdioServerError {
+    /// Controlled provider configuration was invalid.
+    Configuration(TranslateFailure),
     /// The MCP server failed during initialization.
     Initialize(Box<rmcp::service::ServerInitializeError>),
     /// The background MCP service task failed.
@@ -19,6 +22,13 @@ pub enum StdioServerError {
 impl fmt::Display for StdioServerError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            StdioServerError::Configuration(failure) => {
+                write!(
+                    formatter,
+                    "MCP configuration failed: {}.",
+                    failure.code.as_str()
+                )
+            }
             StdioServerError::Initialize(error) => {
                 write!(
                     formatter,
@@ -37,6 +47,10 @@ impl StdioServerError {
     /// Return a redacted diagnostic string suitable for stderr.
     pub fn stderr_diagnostic(&self) -> String {
         match self {
+            StdioServerError::Configuration(failure) => {
+                let failure = redact_failure(failure.clone());
+                format!("MCP configuration failed: {}.", failure.code.as_str())
+            }
             StdioServerError::Initialize(_) => self.to_string(),
             StdioServerError::Join(_) => "MCP service task failed.".to_string(),
         }
@@ -60,6 +74,7 @@ fn initialize_error_variant(error: &rmcp::service::ServerInitializeError) -> &'s
 impl std::error::Error for StdioServerError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
+            StdioServerError::Configuration(_) => None,
             StdioServerError::Initialize(error) => Some(error.as_ref()),
             StdioServerError::Join(error) => Some(error),
         }
@@ -68,7 +83,8 @@ impl std::error::Error for StdioServerError {
 
 /// Run the translator MCP server over stdio until the client closes the session.
 pub async fn run_stdio_server() -> Result<(), StdioServerError> {
-    let service = tools::TranslatorMcpServer::new()
+    let service = tools::TranslatorMcpServer::from_env()
+        .map_err(StdioServerError::Configuration)?
         .serve(rmcp::transport::stdio())
         .await
         .map_err(|error| StdioServerError::Initialize(Box::new(error)))?;

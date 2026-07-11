@@ -65,22 +65,32 @@ desarrollo de Zed en `zed-extension/` y cubre startup local, diagnosticos
 redaccionados, preparacion reproducible y no-mutacion. No incluye proveedor
 real, red, publicacion, UX avanzada ni edicion automatica de buffers.
 
-La cuarta feature formal esta activa en fase de implementacion y validacion:
+La cuarta feature formal fue implementada y validada:
 
 ```text
 specs/004-zed-ux-flow/
 ```
 
-Esta iteracion define el flujo de lectura dentro de Zed sobre la extension local
-ya fusionada. Debe documentar y validar un flujo Agent Panel de baja friccion,
-mantener los contratos `translate_text` y `translate_file`, preservar la
-no-mutacion y decidir soporte de seleccion solo con evidencia manual real. No
-incluye proveedor real, red, publicacion, API keys ni reemplazo automatico de
-contenido. La guia operativa vive en `docs/zed-ux-flow.md`; `make
-test-zed-ux-flow` valida los contratos documentales y de evidencia. Este flujo
-Agent Panel es un puente de validacion, no la experiencia final de producto; la
-experiencia final queda registrada en D065/F010 como una accion propia de la
-extension que no requiere configurar Agent.
+Esta iteracion define y valida el flujo de lectura dentro de Zed sobre la
+extension local ya fusionada. Documenta un flujo Agent Panel de baja friccion,
+mantiene los contratos `translate_text` y `translate_file`, preserva la
+no-mutacion y registra la decision de soporte de seleccion con evidencia manual
+real. No incluye proveedor real, red, publicacion, API keys ni reemplazo
+automatico de contenido. La guia operativa vive en `docs/zed-ux-flow.md`;
+`make test-zed-ux-flow` valida los contratos documentales y de evidencia. Este
+flujo Agent Panel es un puente de validacion, no la experiencia final de
+producto; la experiencia final queda registrada en D065/F010 como una accion
+propia de la extension que no requiere configurar Agent.
+
+La quinta feature formal fue implementada y validada:
+
+```text
+specs/005-real-provider-config/
+```
+
+Esta iteracion promueve F004 como hito de proveedor real configurable sin
+debilitar la privacidad por defecto. El detalle operativo, gates y evidencia de
+validacion viven en `specs/005-real-provider-config/`.
 
 ## Flujo por feature
 
@@ -88,12 +98,22 @@ Para cada iteracion:
 
 1. Elegir el siguiente bloque desde `docs/feature-map.md`.
 2. Usar esa entrada como contexto para `speckit-specify`.
-3. Ejecutar `speckit-clarify` solo si quedan decisiones ambiguas.
-4. Usar `speckit-plan` para fijar tecnologias, estructura, contratos y limites
+3. Ejecutar `speckit-clarify` y registrar si no hay ambiguedades criticas.
+4. Ejecutar `speckit-checklist` cuando la feature tenga riesgos especificos
+   (seguridad, privacidad, UX, proveedor, publicacion, datos) o cuando el
+   usuario lo pida.
+5. Usar `speckit-plan` para fijar tecnologias, estructura, contratos y limites
    concretos de esa feature.
-5. Usar `speckit-tasks` para generar trabajo ejecutable.
-6. Usar `speckit-analyze` antes de implementar cuando haya varios artefactos.
-7. Usar `speckit-implement` para ejecutar `tasks.md` con TDD.
+6. Usar `speckit-tasks` para generar trabajo ejecutable.
+7. Usar `speckit-analyze` despues de `tasks.md` y antes de implementar; si no
+   aplica, registrar el prerequisito que lo bloquea.
+8. Usar `speckit-implement` para ejecutar `tasks.md` con TDD.
+9. Usar `speckit-converge` despues de implementar para append-only de trabajo
+   restante; si no aplica, registrar el prerequisito que lo bloquea.
+
+No cerrar una iteracion diciendo que el flujo esta completo sin reportar el
+estado de `checklist`, `analyze` y `converge` como ejecutado, no aplicable o
+bloqueado.
 
 Durante este flujo, `docs/feature-map.md` conserva el backlog. La feature
 formal vive en `specs/<feature>/`.
@@ -142,7 +162,7 @@ servidor como extension local de desarrollo:
 
 ### 4. UX de lectura
 
-Activo como cuarta feature formal de Spec Kit:
+Completado como cuarta feature formal de Spec Kit:
 
 ```text
 specs/004-zed-ux-flow/
@@ -158,17 +178,28 @@ Reducir friccion dentro de Zed:
   `specs/004-zed-ux-flow/manual-validation-template.md`;
 - checks documentales con `make test-zed-ux-flow`.
 
-### 5. Proveedor real y publicacion
+### 5. Proveedor real configurable
+
+Completado como quinta feature formal de Spec Kit:
+
+```text
+specs/005-real-provider-config/
+```
+
+Integra el primer proveedor real configurable sin cambiar el default offline ni
+el limite de privacidad. El detalle operativo vive en
+`specs/005-real-provider-config/`.
+
+### 6. Empaquetado y publicacion
 
 Solo despues de tener la base segura:
 
-- seleccionar proveedor local o remoto;
 - mantener remoto default deny;
 - confirmar cada envio fuera del equipo;
 - auditar dependencias;
 - preparar licencia y publicacion.
 
-### 6. Flujo directo sin Agent
+### 7. Flujo directo sin Agent
 
 Objetivo de producto final registrado en D065/F010:
 

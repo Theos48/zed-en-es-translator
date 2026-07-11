@@ -1,8 +1,9 @@
 use std::io::Read;
 
 use translator_core::{
-    redact_failure, translate_file, translate_text, ErrorCode, MockProvider, TranslateFailure,
-    TranslateRequest, TranslateResult, TranslateSuccess, MAX_INPUT_BYTES,
+    redact_failure, translate_file_with_confirmation, translate_text_with_confirmation, ErrorCode,
+    ProviderSelection, TranslateFailure, TranslateRequest, TranslateResult, TranslateSuccess,
+    MAX_INPUT_BYTES,
 };
 
 fn main() {
@@ -56,15 +57,26 @@ fn run() -> i32 {
         }
     };
 
-    let provider = MockProvider::new();
+    let provider = match ProviderSelection::from_env() {
+        Ok(provider) => provider,
+        Err(failure) => {
+            write_failure(failure);
+            return 1;
+        }
+    };
     let result: Result<TranslateSuccess, TranslateFailure> =
         if let Some(source_text) = request.source_text.as_deref() {
-            translate_text(source_text, &provider)
+            translate_text_with_confirmation(source_text, &provider, request.remote_confirmed)
         } else if let (Some(file_path), Some(workspace_root)) = (
             request.file_path.as_deref(),
             request.workspace_root.as_deref(),
         ) {
-            translate_file(file_path, workspace_root, &provider)
+            translate_file_with_confirmation(
+                file_path,
+                workspace_root,
+                &provider,
+                request.remote_confirmed,
+            )
         } else {
             Err(TranslateFailure::new(
                 ErrorCode::InvalidInput,
