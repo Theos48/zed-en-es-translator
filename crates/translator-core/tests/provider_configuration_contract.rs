@@ -1,4 +1,4 @@
-use translator_core::TranslateRequest;
+use translator_core::{ErrorCode, TranslateRequest};
 
 #[test]
 fn parses_missing_remote_confirmation_as_false() {
@@ -18,6 +18,16 @@ fn parses_additive_remote_confirmation() {
     .expect("request should parse");
 
     assert!(request.remote_confirmed);
+}
+
+#[test]
+fn rejects_remote_confirmation_with_wrong_type() {
+    let err = TranslateRequest::from_json(
+        r#"{"source_text":"Read the docs.","source_language":"en","target_language":"es","tone":"technical_neutral","preserve_formatting":true,"input_kind":"text","remote_confirmed":"yes"}"#,
+    )
+    .expect_err("request should reject non-boolean remote_confirmed");
+
+    assert_eq!(err.code, ErrorCode::InvalidInput);
 }
 
 #[test]

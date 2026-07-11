@@ -88,16 +88,9 @@ La quinta feature formal fue implementada y validada:
 specs/005-real-provider-config/
 ```
 
-Esta iteracion promueve F004: proveedor real configurable. Mantiene
-`MockProvider` como default, selecciona un proveedor local/self-hosted
-compatible con LibreTranslate como primer camino real, conserva los limites y
-contratos existentes de traduccion, agrega confirmacion remota por solicitud de
-forma compatible hacia atras, y mantiene no-mutacion, redaccion y host limpio.
-La validacion registrada pasa con `make test-core`, `make test-mcp`,
-`make test-zed-extension`, `make test-real-provider-config`, `make test`,
-`make fmt` y `make clippy`. No incluye publicacion, proveedor pago gestionado,
-instalacion global del proveedor, UX directa sin Agent ni reemplazo automatico
-de contenido.
+Esta iteracion promueve F004 como hito de proveedor real configurable sin
+debilitar la privacidad por defecto. El detalle operativo, gates y evidencia de
+validacion viven en `specs/005-real-provider-config/`.
 
 ## Flujo por feature
 
@@ -193,16 +186,9 @@ Completado como quinta feature formal de Spec Kit:
 specs/005-real-provider-config/
 ```
 
-Seleccionar e integrar el primer proveedor real sin debilitar el limite de
-privacidad:
-
-- proveedor local/self-hosted compatible con LibreTranslate;
-- `MockProvider` como default;
-- configuracion explicita fuera del texto traducido;
-- remoto default deny;
-- confirmacion por solicitud para cualquier envio fuera del equipo;
-- sin secretos versionados;
-- dependencias revisadas y pruebas negativas antes de habilitar el proveedor.
+Integra el primer proveedor real configurable sin cambiar el default offline ni
+el limite de privacidad. El detalle operativo vive en
+`specs/005-real-provider-config/`.
 
 ### 6. Empaquetado y publicacion
 

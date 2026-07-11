@@ -4,8 +4,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     provider_config::provider_not_configured, ErrorCode, Language, Provider, ProviderRequest,
-    ProviderResponse, ProviderTarget, TranslateFailure, PROVIDER_TIMEOUT_MS,
+    ProviderResponse, ProviderTarget, TranslateFailure, MAX_OUTPUT_BYTES, PROVIDER_TIMEOUT_MS,
 };
+
+const PROVIDER_RESPONSE_BODY_LIMIT_BYTES: u64 = MAX_OUTPUT_BYTES as u64 + 1024;
 
 #[derive(Debug, Clone)]
 pub struct LibreTranslateProvider {
@@ -56,11 +58,7 @@ impl Provider for LibreTranslateProvider {
             ));
         }
 
-        let translated_segments = request
-            .segments
-            .iter()
-            .map(|segment| self.translate_segment(segment))
-            .collect::<Result<Vec<_>, _>>()?;
+        let translated_segments = self.translate_segments(&request.segments)?;
 
         Ok(ProviderResponse {
             translated_segments,
@@ -69,9 +67,9 @@ impl Provider for LibreTranslateProvider {
 }
 
 impl LibreTranslateProvider {
-    fn translate_segment(&self, segment: &str) -> Result<String, TranslateFailure> {
+    fn translate_segments(&self, segments: &[String]) -> Result<Vec<String>, TranslateFailure> {
         let payload = LibreTranslateRequest {
-            q: segment,
+            q: segments,
             source: "en",
             target: "es",
             format: "text",
@@ -88,14 +86,25 @@ impl LibreTranslateProvider {
             .map_err(map_ureq_error)?;
         let body = response
             .body_mut()
+            .with_config()
+            .limit(PROVIDER_RESPONSE_BODY_LIMIT_BYTES)
             .read_json::<LibreTranslateResponse>()
             .map_err(map_ureq_error)?;
+        let translated_segments = body.translated_text.into_segments(segments.len())?;
 
-        if body.translated_text.trim().is_empty() {
+        if translated_segments.len() != segments.len() {
+            return Err(provider_failed(
+                "Provider returned an invalid segment count.",
+            ));
+        }
+        if translated_segments
+            .iter()
+            .any(|segment| segment.trim().is_empty())
+        {
             return Err(provider_failed("Provider returned empty translated text."));
         }
 
-        Ok(body.translated_text)
+        Ok(translated_segments)
     }
 
     fn api_key_value(&self) -> Result<Option<String>, TranslateFailure> {
@@ -116,7 +125,7 @@ impl LibreTranslateProvider {
 
 #[derive(Debug, Serialize)]
 struct LibreTranslateRequest<'a> {
-    q: &'a str,
+    q: &'a [String],
     source: &'static str,
     target: &'static str,
     format: &'static str,
@@ -128,7 +137,26 @@ struct LibreTranslateRequest<'a> {
 #[derive(Debug, Deserialize)]
 struct LibreTranslateResponse {
     #[serde(rename = "translatedText")]
-    translated_text: String,
+    translated_text: TranslatedText,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum TranslatedText {
+    Single(String),
+    Multiple(Vec<String>),
+}
+
+impl TranslatedText {
+    fn into_segments(self, expected_segments: usize) -> Result<Vec<String>, TranslateFailure> {
+        match self {
+            Self::Single(text) if expected_segments == 1 => Ok(vec![text]),
+            Self::Single(_) => Err(provider_failed(
+                "Provider returned an invalid segment count.",
+            )),
+            Self::Multiple(segments) => Ok(segments),
+        }
+    }
 }
 
 fn map_ureq_error(error: ureq::Error) -> TranslateFailure {
