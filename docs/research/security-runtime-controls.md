@@ -1,5 +1,10 @@
 # Investigacion: controles de seguridad y runtime
 
+> Nota de vigencia: esta investigacion nacio antes de F006/F007/F010. Sus
+> controles de seguridad siguen aplicando, pero Agent Panel debe tratarse como
+> puente de validacion historico. La UX objetivo es una accion directa de
+> extension Zed sin Agent.
+
 ## Objetivo
 
 Definir controles verificables antes de ejecutar el flujo formal de Spec Kit:
@@ -126,7 +131,9 @@ En el MVP tecnico:
   hereda el entorno del proceso Zed por limitacion de plataforma;
 - errores y logs redaccionan valores sensibles.
 
-La ubicacion final de configuracion de proveedor se decidira cuando se implemente proveedor real.
+La configuracion de proveedor real quedo definida en
+`specs/005-real-provider-config/`: vive fuera del texto traducible, como
+configuracion controlada del proceso/servidor y de la extension Zed.
 
 ## Decision E: proveedores CLI y HTTP futuros
 
@@ -185,7 +192,7 @@ Antes de publicar o habilitar proveedores reales:
 
 Revisar este documento cuando:
 
-- se valide el flujo real de seleccion en Zed;
-- se agregue un proveedor local o remoto real;
+- se promueva F010 y se valide el flujo directo de extension sin Agent;
+- se cambie el proveedor local real o se agregue otro proveedor remoto/local;
 - se habilite soporte de archivo completo para codigo fuente;
 - se prepare publicacion en Zed o registro MCP.

@@ -23,6 +23,23 @@ desde menu contextual, comando o boton, y ver la traduccion dentro de Zed sin
 configurar un Agent ni un modelo intermediario. El flujo Agent Panel se acepta
 solo como puente de validacion mientras se aprovechan las tools MCP existentes.
 
+## Objetivo actual
+
+El siguiente objetivo de producto es convertir la base ya validada en una
+extension directa de Zed. El usuario no debe tener que abrir Agent Panel,
+configurar perfiles Agent ni depender de un modelo intermediario para ejecutar
+una traduccion explicita.
+
+El servidor MCP, el flujo Agent Panel y las validaciones de F007 quedan como
+infraestructura y evidencia historica. No son la superficie principal que debe
+guiar nuevas features de producto.
+
+Regla de direccion: desde F006, cualquier feature que toque Zed debe empujar la
+extension hacia una experiencia propia. Agent Panel solo puede aparecer como
+puente tecnico, prueba de compatibilidad o workaround documentado cuando la API
+vigente de Zed impida una accion directa. No se debe acumular producto sobre
+Agent Panel para migrarlo al final.
+
 ## Vision de producto final
 
 El producto final debe sentirse como una extension nativa de traduccion para
@@ -63,11 +80,11 @@ El backlog detallado vive en `docs/feature-map.md`. Resumen:
 3. Proveedor mock.
 4. Proveedor real configurable.
 5. Servidor MCP.
-6. Wrapper Zed.
+6. Fundacion de extension Zed.
 7. UX de lectura dentro de Zed.
 8. Privacidad y configuracion.
-9. Empaquetado y publicacion.
-10. Flujo directo de extension Zed sin Agent.
+9. Flujo directo de extension Zed sin Agent.
+10. Empaquetado y publicacion.
 
 ## Fuera de alcance inicial
 

@@ -3,7 +3,9 @@
 > Nota de vigencia: esta investigacion conserva alternativas de estructura
 > previas a F005. La estructura vigente para el servidor MCP es
 > `crates/translator-mcp/`, definida en ADR 0003 y `specs/002-mcp-server/`. El
-> wrapper Zed sigue reservado para una iteracion posterior.
+> wrapper Zed ya fue implementado en `zed-extension/` durante F006. La siguiente
+> direccion de producto es F010: accion directa de extension Zed sin Agent; MCP
+> y Agent Panel quedan como puente/infraestructura, no como superficie final.
 
 ## Objetivo
 
@@ -11,7 +13,7 @@ Definir una estructura de repositorio que:
 
 1. Sea compatible con desarrollo y publicacion de extension Zed.
 2. No interfiera con la estructura que Spec Kit genera para features formales.
-3. Permita separar core Rust, servidor MCP TypeScript y wrapper Zed.
+3. Permita separar core Rust, servidor MCP Rust, CLI y extension Zed.
 4. Mantenga documentacion de planeacion separada de specs formales.
 
 ## Evidencia revisada
@@ -36,12 +38,14 @@ Definir una estructura de repositorio que:
 
 ## Implicaciones
 
-1. No conviene poner la extension Zed en la raiz si el repo tambien contendra core Rust, MCP TypeScript, docs de planeacion y `specs/` de Spec Kit.
+1. No conviene poner la extension Zed en la raiz si el repo tambien contendra
+   core Rust, CLI, MCP Rust, docs de planeacion y `specs/` de Spec Kit.
 2. El directorio que Zed instale como dev extension debe poder apuntarse directamente a un subdirectorio con `extension.toml`.
 3. La raiz reserva `specs/` para features formales de Spec Kit.
 4. La documentacion estrategica vive en `docs/`; la implementacion activa vive
    en `specs/<feature>/`.
-5. Como usaremos CLI Rust primero, conviene separar el core reusable del binario CLI.
+5. Conviene separar el core reusable de sus adaptadores: CLI, MCP y extension
+   Zed.
 
 ## Estructura candidata
 
@@ -55,8 +59,8 @@ zed-en-es-translator/
 │   └── PLAN.md
 ├── crates/
 │   ├── translator-core/
-│   └── translator-cli/
-├── mcp-server/
+│   ├── translator-cli/
+│   └── translator-mcp/
 ├── zed-extension/
 │   ├── extension.toml
 │   ├── Cargo.toml
@@ -68,8 +72,7 @@ zed-en-es-translator/
 ├── specs/
 │   └── [features formales de Spec Kit]
 ├── Makefile
-├── Cargo.toml
-└── package.json
+└── Cargo.toml
 ```
 
 ## Decision
@@ -80,7 +83,7 @@ Razon:
 
 - Es compatible con `zed: install dev extension` apuntando a `zed-extension/`.
 - Es compatible con publicacion Zed usando `path = "zed-extension"`.
-- Deja la raiz libre para workspace Rust, MCP TypeScript, docs y `specs/`.
+- Deja la raiz libre para workspace Rust, CLI, MCP Rust, docs y `specs/`.
 - Evita que la estructura generada por Spec Kit compita con los archivos obligatorios de Zed.
 
 Estado: aceptada en `D029`.

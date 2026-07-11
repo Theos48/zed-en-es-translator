@@ -1,14 +1,20 @@
 # Zed UX Flow
 
-This guide defines the supported reviewer flow for the local English to Spanish
-translator inside Zed. It is intentionally a reading workflow: the translator
-returns visible Spanish output, and the user decides whether to copy it. The
-flow does not replace editor text, edit files, configure real providers, enable
-remote translation, or publish the extension.
+This guide records the F007 Agent Panel validation bridge for the local English
+to Spanish translator inside Zed. It is intentionally a reading workflow: the
+translator returns visible Spanish output, and the user decides whether to copy
+it. The flow does not replace editor text, edit files, configure real providers,
+enable remote translation, or publish the extension.
+
+This is not the final product UX. New product work should target F010: a direct
+Zed extension action that does not require Agent Panel, Agent profiles, manual
+prompts, or an intermediary model. Per D072, this applies from the F006
+extension foundation onward; do not add new product UX on top of Agent Panel
+unless a specific Zed API limitation is documented.
 
 ## Scope
 
-Supported for this feature:
+Supported for historical F007 validation:
 
 - local development extension `zed-extension/`;
 - context server `translator-en-es`;
@@ -51,6 +57,9 @@ extension.
 5. Open the Agent Panel.
 6. Use an Agent profile where `translator-en-es` exposes `translate_text` and
    `translate_file`.
+
+Do not treat these setup steps as product requirements for F010. They exist to
+replay or audit the bridge flow only.
 
 ## Agent Privacy And Permission Setup
 
@@ -259,7 +268,7 @@ Persistent evidence may contain:
 
 ## Completion Boundary
 
-The feature can close only when repository checks pass and manual Zed validation
-has a recorded pass or explicit blocked reason for each scenario. A blocked host
-prerequisite must be recorded without installing host tooling outside the
-workstation policy.
+F007 is closed. This boundary is kept as historical validation criteria for the
+Agent Panel bridge. A future direct-extension feature must define its own
+manual validation path under `specs/<feature>/` and must not inherit Agent Panel
+as a required user step.

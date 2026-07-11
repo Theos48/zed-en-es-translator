@@ -4,13 +4,14 @@
 > inicial. Las decisiones sobre el servidor MCP TypeScript y el puente
 > TypeScript -> CLI Rust fueron reemplazadas para F005 por ADR 0003 y
 > `specs/002-mcp-server/`: servidor MCP Rust con `rmcp`, stdio y llamada directa
-> a `translator-core`.
+> a `translator-core`. Para nuevas features de producto, especialmente F010, no
+> usar Agent Panel ni el puente TypeScript historico como superficie objetivo.
 
 ## Objetivo
 
 Definir el contrato minimo entre:
 
-1. Servidor MCP TypeScript.
+1. Servidor MCP inicialmente planeado y adaptadores actuales.
 2. CLI/core Rust.
 3. Proveedores de traduccion mock, CLI local, HTTP local y HTTP remoto configurado.
 
@@ -54,7 +55,8 @@ Decisiones relevantes:
 - Provider futuro compatible con CLI local, HTTP local y HTTP remoto configurado.
 - Confirmacion explicita antes de enviar texto fuera del equipo.
 - Archivo completo limitado a 20 KiB por defecto.
-- Core Rust llamado por CLI desde TypeScript.
+- Core Rust llamado directamente por MCP Rust desde F005; el puente TypeScript
+  -> CLI Rust queda como contexto historico.
 - Primer ciclo Spec Kit limitado a core, mock, contrato CLI, limites y pruebas negativas.
 - Remoto default deny y confirmado por servidor/core.
 
@@ -160,9 +162,14 @@ Razon:
 - El mock puede ser determinista segmento por segmento.
 - Proveedores futuros CLI/HTTP no necesitan entender Markdown ni codigo fuente.
 
-## Decision E: wire contract TS -> CLI Rust
+## Decision E: wire contract historico TS -> CLI Rust
 
-El servidor MCP TypeScript invocara el CLI Rust con:
+Este contrato fue parte de la planeacion inicial y queda como referencia
+historica. Desde F005, el servidor MCP Rust llama a `translator-core`
+directamente. Nuevas features, incluida F010, no deben reintroducir este puente
+como superficie principal sin una decision nueva.
+
+El servidor MCP TypeScript planeado invocaria el CLI Rust con:
 
 ```text
 stdin: JSON UTF-8 con un TranslateRequest serializado
@@ -179,14 +186,15 @@ Reglas:
 - una request por proceso CLI;
 - no pasar texto traducible por argv;
 - no imprimir `source_text`, segmentos, traduccion completa, tokens ni headers en stderr;
-- si el proceso excede timeout, el adaptador MCP devuelve `PROVIDER_TIMEOUT`;
-- si stdout no es JSON valido, el adaptador MCP devuelve `INTERNAL_ERROR` con mensaje redaccionado;
-- el servidor MCP mapea errores a tool result con `isError: true`;
-- el servidor MCP mapea exito a `content: [{ type: "text", text: translated_text }]`.
+- si el proceso excede timeout, el adaptador MCP devolveria `PROVIDER_TIMEOUT`;
+- si stdout no es JSON valido, el adaptador MCP devolveria `INTERNAL_ERROR` con mensaje redaccionado;
+- el servidor MCP mapearia errores a tool result con `isError: true`;
+- el servidor MCP mapearia exito a `content: [{ type: "text", text: translated_text }]`.
 
 Razon:
 
-- MCP define schema y resultados de tools, pero el puente TS -> Rust es responsabilidad del proyecto.
+- MCP define schema y resultados de tools, pero el puente TS -> Rust habria
+  sido responsabilidad del proyecto si esa alternativa hubiera seguido vigente.
 - JSON por stdin/stdout evita quoting inseguro de shell y permite fixtures simples.
 - Una request por proceso reduce estado compartido y simplifica timeouts para el MVP.
 

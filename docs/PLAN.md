@@ -92,6 +92,22 @@ Esta iteracion promueve F004 como hito de proveedor real configurable sin
 debilitar la privacidad por defecto. El detalle operativo, gates y evidencia de
 validacion viven en `specs/005-real-provider-config/`.
 
+Direccion actual:
+
+- la base tecnica existe: core, CLI, MCP, fundacion de extension Zed local,
+  flujo Agent Panel validado y proveedor real configurable;
+- el Agent Panel queda como puente de validacion e infraestructura historica,
+  no como experiencia final de producto;
+- F006 debe entenderse como la fundacion de la extension Zed, no como permiso
+  para construir el producto alrededor de Agent Panel;
+- desde F006, toda feature que toque Zed debe avanzar la extension directa o
+  documentar una limitacion concreta de la API de Zed que obligue a un puente;
+- la siguiente feature que debe promoverse es F010: una accion propia de la
+  extension de Zed para traducir sin configurar Agent, como continuacion de
+  F006 y no como migracion final;
+- F009/publicacion queda despues de F010, para no publicar una experiencia cuyo
+  camino principal dependa de Agent Panel.
+
 ## Flujo por feature
 
 Para cada iteracion:
@@ -148,10 +164,12 @@ como herramientas MCP:
 - tests de contrato MCP.
 - transporte stdio y crate Rust `crates/translator-mcp/`.
 
-### 3. Wrapper Zed
+### 3. Fundacion de extension Zed
 
-Completado en la tercera feature formal de Spec Kit con TDD. Empaqueta el
-servidor como extension local de desarrollo:
+Completado en la tercera feature formal de Spec Kit con TDD. Aunque la
+implementacion concreta empaqueta el servidor MCP como context server local,
+esta etapa se interpreta como la fundacion de la extension Zed, no como el
+destino de producto:
 
 - `zed-extension/extension.toml`;
 - crate Rust/WASM aislada con `zed_extension_api = "0.7.0"`;
@@ -159,6 +177,8 @@ servidor como extension local de desarrollo:
 - preparacion reproducible mediante `make zed-extension-prepare`;
 - validacion con `make test-zed-extension`;
 - diagnosticos redaccionados y revision de no-mutacion.
+- frontera documentada para que las siguientes features muevan la UX hacia una
+  accion propia de la extension cuando la API de Zed lo permita.
 
 ### 4. UX de lectura
 
@@ -170,13 +190,17 @@ specs/004-zed-ux-flow/
 
 Reducir friccion dentro de Zed:
 
-- flujo Agent Panel;
+- flujo Agent Panel solo como puente de validacion F007;
 - seleccion si Zed la expone de forma fiable;
 - resultado legible sin modificar buffers.
 - guia de revision en `docs/zed-ux-flow.md`;
 - plantilla de evidencia manual redaccionada en
   `specs/004-zed-ux-flow/manual-validation-template.md`;
 - checks documentales con `make test-zed-ux-flow`.
+
+Este bloque no debe repetirse como direccion de producto en nuevas features. Si
+una feature futura toca UX de Zed, debe partir de la extension directa; Agent
+Panel solo puede quedar como fallback justificado.
 
 ### 5. Proveedor real configurable
 
@@ -190,16 +214,7 @@ Integra el primer proveedor real configurable sin cambiar el default offline ni
 el limite de privacidad. El detalle operativo vive en
 `specs/005-real-provider-config/`.
 
-### 6. Empaquetado y publicacion
-
-Solo despues de tener la base segura:
-
-- mantener remoto default deny;
-- confirmar cada envio fuera del equipo;
-- auditar dependencias;
-- preparar licencia y publicacion.
-
-### 7. Flujo directo sin Agent
+### 6. Flujo directo sin Agent
 
 Objetivo de producto final registrado en D065/F010:
 
@@ -209,3 +224,14 @@ Objetivo de producto final registrado en D065/F010:
 - mantener no-mutacion automatica del buffer;
 - usar proveedor local o gratuito/no pago, con remoto siempre explicitamente
   configurado y confirmado por solicitud.
+- tratar el servidor MCP y el flujo Agent Panel como infraestructura o puente
+  de compatibilidad, no como superficie primaria de usuario.
+
+### 7. Empaquetado y publicacion
+
+Solo despues de tener la base segura y el flujo directo de extension:
+
+- mantener remoto default deny;
+- confirmar cada envio fuera del equipo;
+- auditar dependencias;
+- preparar licencia y publicacion.

@@ -4,7 +4,14 @@
 
 Aceptado, reemplazado parcialmente por
 [ADR 0003](./0003-mcp-server-rust-rmcp.md) para la tecnologia del servidor MCP
-de F005.
+de F005, y matizado por D065, D066 y D071 para la experiencia de producto.
+Tambien queda matizado por D072 para la direccion extension-first desde F006.
+
+Nota de vigencia: este ADR describe la arquitectura inicial. El Agent Panel fue
+suficiente para el MVP tecnico y la validacion F007, pero no gobierna el
+objetivo vigente. La siguiente direccion es una accion directa de extension Zed
+sin Agent. F006 se interpreta como fundacion de esa extension, no como inicio
+de un producto construido alrededor de Agent Panel.
 
 ## Contexto
 
@@ -12,7 +19,7 @@ El proyecto busca una extension para Zed que permita leer traducciones de ingles
 
 No se usaran APIs de pago. El desarrollo debe poder iniciar con un proveedor mock para TDD, pero la arquitectura debe admitir un motor local futuro y, si se decide despues, proveedores gratuitos/remotos con confirmacion explicita antes de enviar texto fuera del equipo.
 
-Zed documenta extensiones con `extension.toml`, logic custom en Rust/WASM cuando aplique, y servidores MCP como via de integracion con el Agent Panel. Por ahora el Agent Panel es suficiente para el MVP.
+Zed documenta extensiones con `extension.toml`, logic custom en Rust/WASM cuando aplique, y servidores MCP como via de integracion con el Agent Panel. Para el MVP tecnico el Agent Panel fue suficiente; para el producto final ya no debe ser requisito de uso.
 
 ## Decision
 
@@ -32,10 +39,10 @@ La particion tecnologica inicial sera:
 3. Contratos explicitos entre fronteras para evitar acoplamiento accidental.
 4. El CLI Rust se conserva como frontera publica y de pruebas del core.
 
-El MVP:
+El MVP tecnico inicial:
 
 1. Implementara ingles -> espanol.
-2. Mostrara la traduccion en el Agent Panel.
+2. Mostrara la traduccion en el Agent Panel como puente de validacion.
 3. No modificara buffers ni reemplazara selecciones.
 4. Devolvera una traduccion limpia por defecto.
 5. Permitira traducir seleccion o archivo completo con limites claros.
@@ -86,7 +93,8 @@ plan tecnico, contratos, tareas y quickstart.
 ## Consecuencias
 
 - El core puede probarse sin Zed, sin red y sin proveedor real.
-- La integracion inicial se mantiene alineada con capacidades documentadas de Zed.
+- La integracion inicial se mantiene alineada con capacidades documentadas de
+  Zed, pero la UX final se mueve a una accion propia de extension.
 - La falta de reemplazo automatico reduce riesgo de ediciones destructivas.
 - La arquitectura evita acoplar el proyecto a un unico proveedor de traduccion.
 - El servidor MCP puede evolucionar separado del wrapper Zed.
@@ -109,3 +117,7 @@ Este ADR debe revisarse cuando:
 - El costo de mantener Rust + TypeScript supere los beneficios de separacion.
 - Se valide que Zed entregue seleccion directamente al Agent Panel con baja friccion.
 - Se agregue soporte de archivo completo para codigo fuente.
+
+Revision aplicada: D065/D066/D071 establecen que la siguiente evolucion debe
+quitar Agent Panel de la superficie principal de usuario antes de publicar.
+D072 agrega que esa orientacion aplica desde F006 en adelante.

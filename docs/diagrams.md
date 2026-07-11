@@ -1,32 +1,73 @@
 # Diagramas
 
-Diagramas Mermaid fuente para arquitectura y flujos estables. La feature activa
-se detalla en `specs/001-translation-core-contract/`.
+Diagramas Mermaid fuente para arquitectura y flujos estables. No hay feature
+formal activa; la siguiente candidata es F010, flujo directo de extension Zed
+sin Agent. Los detalles operativos de una feature activa viven en
+`specs/<feature>/`.
 
 ## Arquitectura objetivo
 
 ```mermaid
 flowchart LR
     user[Usuario en Zed]
-    agent[Agent Panel]
-    wrapper[Wrapper Zed]
+    action[Accion propia de extension]
+    preview[Preview o resultado en Zed]
+    extension[zed-extension]
+    boundary[Frontera de traduccion]
     mcp[Servidor MCP]
     cli[CLI Rust]
     core[Core Rust]
     provider[Provider]
     mock[MockProvider]
-    local[Proveedor local futuro]
-    remote[Proveedor remoto futuro]
+    local[Proveedor local LibreTranslate compatible]
+    remote[Proveedor remoto confirmado]
+    agent[Agent Panel puente F007]
 
-    user --> agent
-    agent --> mcp
-    wrapper -. arranca .-> mcp
-    mcp --> cli
-    cli --> core
+    user --> action
+    action --> preview
+    extension --> action
+    action --> boundary
+    boundary --> core
+    boundary -. compatibilidad .-> mcp
+    cli -. frontera publica .-> core
+    mcp --> core
     core --> provider
     provider --> mock
-    provider -. futuro .-> local
+    provider --> local
     provider -. confirmacion por request .-> remote
+    agent -. validacion historica .-> mcp
+```
+
+## Flujo de producto objetivo
+
+```mermaid
+flowchart TD
+    input[Seleccion o documento permitido]
+    command[Accion de la extension]
+    validate[Validar limites, workspace, UTF-8 y secretos]
+    provider{Proveedor requiere salir del equipo?}
+    confirm[Confirmacion explicita por solicitud]
+    translate[Traducir segmentos permitidos]
+    preview[Mostrar preview en Zed]
+    apply{Usuario decide salida}
+    copy[Copiar traduccion]
+    insert[Insertar o aplicar si Zed lo permite]
+    keep[No mutar buffer]
+    reject[Error normalizado redaccionado]
+
+    input --> command
+    command --> validate
+    validate --> provider
+    validate -. fallo .-> reject
+    provider -- no --> translate
+    provider -- si --> confirm
+    confirm -- aceptado --> translate
+    confirm -- omitido --> reject
+    translate --> preview
+    preview --> apply
+    apply -- copiar --> copy
+    apply -- accion explicita --> insert
+    apply -- cerrar --> keep
 ```
 
 ## Frontera de documentacion

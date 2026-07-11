@@ -2,7 +2,14 @@
 
 ## Estado
 
-Aceptado.
+Aceptado, matizado por D065, D066, D071 y D072.
+
+Nota de vigencia: este ADR describe el alcance tecnico inicial. El Agent Panel
+fue aceptado como puente de validacion para las tools MCP, no como experiencia
+final de producto. La direccion vigente es F010: una accion propia de la
+extension de Zed sin configurar Agent. Desde F006, las features de Zed deben
+orientarse a esa extension directa y no acumular UX sobre Agent Panel para una
+migracion final.
 
 ## Contexto
 
@@ -28,9 +35,11 @@ El primer ciclo formal de implementacion no intentara resolver traduccion real n
 ## Consecuencias
 
 - Podemos avanzar con TDD sin depender de Zed desde el primer dia.
-- El MVP queda integrado en Zed por Agent Panel.
+- El MVP tecnico quedo integrado en Zed por Agent Panel como puente de
+  validacion.
 - Evitamos riesgo de cambios destructivos en el buffer.
-- La accion directa de editor queda fuera del alcance inicial mientras el producto busca lectura asistida, no edicion automatica.
+- La accion directa de editor quedo fuera del alcance inicial, pero pasa a ser
+  el objetivo de producto de F010.
 - La extension Zed queda desacoplada del servidor MCP para reducir riesgo si cambia la via recomendada por Zed.
 - La traduccion usable con proveedor real queda fuera del primer ciclo tecnico.
 
@@ -41,3 +50,6 @@ Este ADR debe revisarse cuando exista evidencia practica de:
 - Limitaciones reales de MCP en Zed.
 - Camino recomendado por Zed para herramientas no relacionadas con lenguajes.
 - Cambio de alcance hacia edicion automatica o reemplazo de seleccion.
+
+Revision aplicada: F007 valido el puente Agent Panel y D065/D066 fijaron que la
+experiencia final debe ser una extension directa sin Agent.

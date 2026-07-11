@@ -4,6 +4,12 @@
 
 Aceptado.
 
+Nota de vigencia: F006 ya implemento el wrapper local en `zed-extension/`. Para
+F010, el servidor MCP debe considerarse infraestructura reutilizable o puente
+de compatibilidad; la superficie principal de usuario debe ser una accion
+directa de extension sin Agent. D072 impide tratar MCP/Agent como camino de
+producto para nuevas features de Zed salvo fallback justificado.
+
 ## Contexto
 
 La primera feature formal entrego `translator-core` y `translator-cli` en Rust,
@@ -39,8 +45,8 @@ F005 no agregara:
 - `extension.toml`;
 - publicacion en registry MCP o Zed.
 
-El wrapper Zed queda como F006 y debera arrancar el binario MCP por comando
-cuando llegue esa iteracion.
+El wrapper Zed quedo como F006 y arranca el binario MCP por comando para el
+flujo local validado.
 
 ## Razon
 
