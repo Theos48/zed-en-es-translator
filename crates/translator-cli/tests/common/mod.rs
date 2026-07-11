@@ -31,6 +31,8 @@ pub fn response_server_with_status(status: u16, response_body: &'static str) -> 
 }
 
 fn read_http_request(stream: &mut impl Read) {
+    const MAX_REQUEST_BYTES: usize = 1024 * 1024;
+
     let mut bytes = Vec::new();
     let mut buffer = [0_u8; 1024];
     loop {
@@ -42,6 +44,9 @@ fn read_http_request(stream: &mut impl Read) {
         };
         if read == 0 {
             break;
+        }
+        if read > MAX_REQUEST_BYTES.saturating_sub(bytes.len()) {
+            panic!("stub request exceeds the maximum size");
         }
         bytes.extend_from_slice(&buffer[..read]);
         if request_is_complete(&bytes) {

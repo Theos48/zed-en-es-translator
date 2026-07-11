@@ -5,9 +5,12 @@ use std::io::ErrorKind;
 use std::io::{Read, Write};
 use std::net::TcpListener;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
+
+static UNIQUE_SUFFIX_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 pub fn temp_case(name: &str) -> PathBuf {
     let root = std::env::temp_dir().join(format!(
@@ -27,11 +30,13 @@ pub fn write_file(path: &Path, content: impl AsRef<[u8]>) {
     fs::write(path, content).expect("write file");
 }
 
-fn unique_suffix() -> u128 {
-    std::time::SystemTime::now()
+fn unique_suffix() -> String {
+    let nanos = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .expect("time")
-        .as_nanos()
+        .as_nanos();
+    let counter = UNIQUE_SUFFIX_COUNTER.fetch_add(1, Ordering::Relaxed);
+    format!("{nanos}_{counter}")
 }
 
 pub struct StubHttpServer {
@@ -100,6 +105,8 @@ impl StubHttpServer {
 }
 
 fn read_http_request(stream: &mut impl Read) -> String {
+    const MAX_REQUEST_BYTES: usize = 1024 * 1024;
+
     let mut bytes = Vec::new();
     let mut buffer = [0_u8; 1024];
     loop {
@@ -111,6 +118,9 @@ fn read_http_request(stream: &mut impl Read) -> String {
         };
         if read == 0 {
             break;
+        }
+        if read > MAX_REQUEST_BYTES.saturating_sub(bytes.len()) {
+            panic!("stub request exceeds the maximum size");
         }
         bytes.extend_from_slice(&buffer[..read]);
         if request_is_complete(&bytes) {
