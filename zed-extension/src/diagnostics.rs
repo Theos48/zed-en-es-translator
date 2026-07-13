@@ -148,6 +148,27 @@ pub const fn corrective_action(code: DiagnosticCode) -> &'static str {
     }
 }
 
+/// Corrective action for the direct `translator-lsp` launch surface.
+pub const fn direct_corrective_action(code: DiagnosticCode) -> &'static str {
+    match code {
+        DiagnosticCode::BinaryPathNotConfigured | DiagnosticCode::BinaryNotFound => {
+            "Run `make zed-direct-prepare` and configure `lsp.en-es-translator.binary.path` to the printed translator-lsp artifact."
+        }
+        DiagnosticCode::BinaryNotExecutable | DiagnosticCode::BinaryStaleOrIncompatible => {
+            "Rebuild the direct artifact with `make zed-direct-prepare` and configure the printed translator-lsp path."
+        }
+        DiagnosticCode::UnsupportedContextServer => {
+            "Use the `en-es-translator` language server declared by this extension."
+        }
+        DiagnosticCode::UnsafeLaunchConfiguration => {
+            "Use an absolute translator-lsp path, empty arguments, and only the documented controlled `binary.env` entries."
+        }
+        DiagnosticCode::InternalExtensionError => {
+            "Retry after rebuilding with `make zed-direct-prepare`; inspect direct workflow tests if the error persists."
+        }
+    }
+}
+
 /// Build a redacted diagnostic with the standard corrective action appended.
 pub fn diagnostic_with_action(
     phase: DiagnosticPhase,
@@ -158,6 +179,19 @@ pub fn diagnostic_with_action(
         phase,
         code,
         format!("{} {}", detail.as_ref(), corrective_action(code)),
+    )
+}
+
+/// Build a redacted direct-LSP diagnostic with its own corrective action.
+pub fn direct_diagnostic_with_action(
+    phase: DiagnosticPhase,
+    code: DiagnosticCode,
+    detail: impl AsRef<str>,
+) -> DiagnosticEvent {
+    DiagnosticEvent::new(
+        phase,
+        code,
+        format!("{} {}", detail.as_ref(), direct_corrective_action(code)),
     )
 }
 

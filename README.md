@@ -25,6 +25,7 @@ specs/002-mcp-server/                 completada formal
 specs/003-zed-wrapper/                completada formal
 specs/004-zed-ux-flow/                completada formal
 specs/005-real-provider-config/        completada formal
+specs/006-direct-zed-translation/      completada formal
 ```
 
 La primera feature entrega un MVP tecnico offline: core Rust, `MockProvider`,
@@ -63,6 +64,16 @@ primer camino real, modela remoto como default-deny con confirmacion por
 solicitud, conserva no-mutacion, limites, redaccion y host limpio, y expone la
 configuracion controlada a CLI, MCP y la extension Zed.
 
+La sexta feature implementa F010 como flujo directo sin Agent. La extension
+registra el language server `en-es-translator` para Markdown y Plain Text; su
+code action usa la seleccion o el documento permitido, ejecuta
+`translator-lsp`, muestra un preview de solo lectura por hover y conserva la
+confirmacion remota por solicitud. No devuelve edits ni modifica archivos o
+buffers. La API de Zed 0.7.0 no permite clipboard o panel propio, por lo que
+copy/insert/apply quedan fuera. La configuracion de proveedor directa usa solo
+la allowlist `lsp.en-es-translator.binary.env` validada en Zed real; estas
+decisiones viven en D073-D075 y ADR 0004.
+
 Rust se ejecuta mediante la imagen Docker oficial fijada en `Makefile`; no se
 instala `rustc` ni `cargo` globalmente para este proyecto por defecto.
 
@@ -70,6 +81,8 @@ Validacion principal:
 
 ```bash
 make zed-extension-prepare
+make zed-direct-prepare
+make test-direct-zed-translation
 make test-zed-extension
 make test-zed-ux-flow
 make test-core
@@ -101,6 +114,14 @@ proyecto. La evidencia automatizada usa stubs locales de loopback; la plantilla
 para smoke manual contra un proveedor local externo vive en
 `specs/005-real-provider-config/manual-validation.md`.
 
+Resultado automatizado registrado para
+`specs/006-direct-zed-translation/`: `make test-direct-zed-translation`, `make
+test-zed-extension`, `make test-real-provider-config`, `make fmt` y `make
+clippy` pasan. Los tres escenarios interactivos en Zed tambien pasan con
+fuentes sin cambios, Agent Panel ausente y denegacion remota por secreto antes
+del proveedor; la evidencia redactada vive en
+`specs/006-direct-zed-translation/manual-validation.md`.
+
 ## Documentos
 
 - [Plan de desarrollo](docs/PLAN.md)
@@ -112,6 +133,7 @@ para smoke manual contra un proveedor local externo vive en
 - [ADR 0001: alcance tecnico inicial](docs/adr/0001-zed-extension-scope.md)
 - [ADR 0002: arquitectura y tecnologia inicial](docs/adr/0002-architecture-and-technology.md)
 - [ADR 0003: servidor MCP Rust con rmcp](docs/adr/0003-mcp-server-rust-rmcp.md)
+- [ADR 0004: flujo directo Zed mediante LSP](docs/adr/0004-direct-zed-lsp-workflow.md)
 - [Investigacion: estructura Zed y Spec Kit](docs/research/zed-spec-kit-repo-structure.md)
 - [Investigacion: contrato de traduccion y Provider](docs/research/provider-contract.md)
 - [Investigacion: archivos y comentarios](docs/research/supported-files-and-comments.md)

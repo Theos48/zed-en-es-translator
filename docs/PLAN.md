@@ -92,6 +92,21 @@ Esta iteracion promueve F004 como hito de proveedor real configurable sin
 debilitar la privacidad por defecto. El detalle operativo, gates y evidencia de
 validacion viven en `specs/005-real-provider-config/`.
 
+La sexta feature formal tiene implementacion y validacion automatizada
+completas; la validacion manual interactiva sigue abierta:
+
+```text
+specs/006-direct-zed-translation/
+```
+
+Esta iteracion promueve F010 mediante un language server Rust. Zed ofrece una
+code action con localidad segura, entrega rango/version sin Agent, ejecuta la
+traduccion por comando y muestra el resultado en hover. No hay ediciones,
+clipboard ni panel propio. El proveedor directo se configura por una allowlist
+en `binary.env` tras la brecha detectada en el smoke real. La arquitectura
+estable vive en D073-D075 y ADR 0004; el estado manual real vive en
+`manual-validation.md`.
+
 Direccion actual:
 
 - la base tecnica existe: core, CLI, MCP, fundacion de extension Zed local,
@@ -102,11 +117,8 @@ Direccion actual:
   para construir el producto alrededor de Agent Panel;
 - desde F006, toda feature que toque Zed debe avanzar la extension directa o
   documentar una limitacion concreta de la API de Zed que obligue a un puente;
-- la siguiente feature que debe promoverse es F010: una accion propia de la
-  extension de Zed para traducir sin configurar Agent, como continuacion de
-  F006 y no como migracion final;
-- F009/publicacion queda despues de F010, para no publicar una experiencia cuyo
-  camino principal dependa de Agent Panel.
+- F010 esta completada como flujo directo LSP con smoke manual aprobado;
+- F009/publicacion queda desbloqueada como siguiente candidata formal.
 
 ## Flujo por feature
 
@@ -216,7 +228,7 @@ el limite de privacidad. El detalle operativo vive en
 
 ### 6. Flujo directo sin Agent
 
-Objetivo de producto final registrado en D065/F010:
+Completado como sexta feature formal, incluida validacion manual en Zed:
 
 - accion propia de la extension desde menu contextual, comando o boton;
 - traducir texto seleccionado o contenido permitido del documento abierto;
@@ -226,6 +238,8 @@ Objetivo de producto final registrado en D065/F010:
   configurado y confirmado por solicitud.
 - tratar el servidor MCP y el flujo Agent Panel como infraestructura o puente
   de compatibilidad, no como superficie primaria de usuario.
+- usar code action, execute command y hover de LSP porque la API estable 0.7.0
+  no ofrece accion generica, clipboard o panel propio.
 
 ### 7. Empaquetado y publicacion
 

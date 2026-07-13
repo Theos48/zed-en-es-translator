@@ -25,16 +25,21 @@ HELP_LINES := \
 	'  make test-core     Run translator-core tests inside the container' \
 	'  make test-mcp      Run translator-mcp tests inside the container' \
 	'  make test-real-provider-config Run focused real-provider configuration tests' \
+	'  make zed-direct-lock Resolve direct workflow dependencies in Cargo.lock' \
+	'  make zed-direct-server-release Build the direct translator-lsp artifact' \
+	'  make zed-direct-prepare Prepare the local translator-lsp artifact path' \
+	'  make test-direct-zed-translation Run the direct Zed workflow tests' \
 	'  make zed-extension-build Build and test the local Zed extension crate' \
 	'  make zed-extension-prepare Prepare the local translator-mcp artifact path' \
 	'  make test-zed-extension Run Zed wrapper validation checks' \
 	'  make test-zed-ux-flow Run Zed UX flow documentation contract checks' \
+	'  make format         Format Rust sources inside the container' \
 	'  make fmt           Check Rust formatting inside the container' \
 	'  make clippy        Run clippy inside the container' \
 	'  make shell         Open a shell inside the Rust container' \
 	'  make clean         Remove local Rust build/cache output'
 
-.PHONY: all help install pull-rust-base rust-image rust-version test test-core test-mcp test-real-provider-config zed-extension-build zed-extension-server-release zed-extension-prepare test-zed-extension test-zed-ux-flow fmt clippy shell clean
+.PHONY: all help install pull-rust-base rust-image rust-version test test-core test-mcp test-real-provider-config zed-direct-lock zed-direct-server-release zed-direct-prepare test-direct-zed-translation zed-extension-build zed-extension-server-release zed-extension-prepare test-zed-extension test-zed-ux-flow format fmt clippy shell clean
 
 all: test
 
@@ -68,6 +73,22 @@ test-real-provider-config: rust-image
 	$(RUST_RUN) cargo test -p translator-mcp --test mcp_provider_configuration --test mcp_remote_confirmation --test mcp_provider_failures
 	$(RUST_RUN) cargo test --manifest-path zed-extension/Cargo.toml --test provider_settings --test diagnostics_redaction --locked
 
+zed-direct-lock: rust-image
+	$(RUST_RUN) cargo check -p translator-lsp
+
+zed-direct-server-release: rust-image
+	$(RUST_RUN) cargo build -p translator-lsp --release --locked
+
+zed-direct-prepare: zed-direct-server-release
+	ZED_DIRECT_PREPARE_BUILT=1 ./scripts/zed-extension/prepare-direct.sh
+
+DIRECT_ZED_TESTS := prepare_artifact prepare_idempotent no_agent_no_mutation
+
+test-direct-zed-translation: rust-image zed-direct-prepare
+	$(RUST_RUN) cargo test -p translator-core --test document_snapshot --test selection_translation --locked
+	$(RUST_RUN) cargo test -p translator-lsp --locked
+	$(foreach t,$(DIRECT_ZED_TESTS),./tests/integration/zed_direct_$(t).sh &&) true
+
 zed-extension-build: rust-image
 	$(RUST_RUN) cargo test --manifest-path zed-extension/Cargo.toml --locked
 	$(RUST_RUN) cargo build --manifest-path zed-extension/Cargo.toml --target wasm32-wasip1 --release --locked
@@ -90,6 +111,10 @@ ZED_UX_FLOW_TESTS := make_targets docs_contract evidence_contract privacy_contra
 
 test-zed-ux-flow:
 	$(foreach t,$(ZED_UX_FLOW_TESTS),./tests/integration/zed_ux_flow_$(t).sh &&) true
+
+format: rust-image
+	$(RUST_RUN) cargo fmt --all
+	$(RUST_RUN) cargo fmt --manifest-path zed-extension/Cargo.toml --all
 
 fmt: rust-image
 	$(RUST_RUN) cargo fmt --all -- --check

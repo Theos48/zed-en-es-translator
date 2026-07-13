@@ -3,6 +3,8 @@ use crate::{
     ProviderRequest, Tone, TranslateFailure, MAX_SEGMENTS, MAX_SEGMENT_BYTES,
 };
 
+use std::ops::Range;
+
 pub fn translate_document(
     content: &str,
     input_kind: InputKind,
@@ -268,6 +270,113 @@ fn no_translatable_segments() -> TranslateFailure {
         ErrorCode::NoTranslatableSegments,
         "No translatable segments were found.",
     )
+}
+
+pub(crate) fn selection_intersects_protected(content: &str, selection: Range<usize>) -> bool {
+    protected_ranges(content)
+        .into_iter()
+        .any(|protected| ranges_overlap(&selection, &protected))
+}
+
+fn protected_ranges(content: &str) -> Vec<Range<usize>> {
+    let mut ranges = block_protected_ranges(content);
+    ranges.extend(inline_code_ranges(content));
+    ranges.extend(link_destination_ranges(content));
+    ranges
+}
+
+fn block_protected_ranges(content: &str) -> Vec<Range<usize>> {
+    let mut ranges = Vec::new();
+    let mut offset = 0_usize;
+    let mut frontmatter = false;
+    let mut frontmatter_checked = false;
+    let mut fence: Option<String> = None;
+    let mut html: Option<HtmlBlock> = None;
+
+    for line in content.split_inclusive('\n') {
+        let line_range = offset..offset + line.len();
+        offset = line_range.end;
+        let trimmed = line.trim_end_matches(['\r', '\n']);
+        let start = trimmed.trim_start();
+
+        if !frontmatter_checked {
+            frontmatter_checked = true;
+            if trimmed == "---" {
+                frontmatter = true;
+                ranges.push(line_range);
+                continue;
+            }
+        }
+        if frontmatter {
+            ranges.push(line_range);
+            if trimmed == "---" {
+                frontmatter = false;
+            }
+            continue;
+        }
+        if let Some(marker) = &fence {
+            ranges.push(line_range);
+            if starts_with_fence_marker(start, marker) {
+                fence = None;
+            }
+            continue;
+        }
+        if let Some(marker) = opening_fence_marker(start) {
+            fence = Some(marker);
+            ranges.push(line_range);
+            continue;
+        }
+        if let Some(block) = html {
+            ranges.push(line_range);
+            if block.closes_with_tag(start)
+                || (block.closes_on_blank_line() && trimmed.trim().is_empty())
+            {
+                html = None;
+            }
+            continue;
+        }
+        if let Some(block) = html_block(start) {
+            ranges.push(line_range);
+            if !block.closes_with_tag(start) && !is_self_closing_html_block(start) {
+                html = Some(block);
+            }
+        }
+    }
+    ranges
+}
+
+fn inline_code_ranges(content: &str) -> Vec<Range<usize>> {
+    let mut ranges = Vec::new();
+    let mut cursor = 0_usize;
+    while let Some(relative_start) = content[cursor..].find('`') {
+        let start = cursor + relative_start;
+        let count = count_backticks(&content[start..]);
+        let after_open = start + count;
+        let end = find_closing_backticks(content, after_open, count)
+            .map_or(content.len(), |closing| closing + count);
+        ranges.push(start..end);
+        cursor = end;
+    }
+    ranges
+}
+
+fn link_destination_ranges(content: &str) -> Vec<Range<usize>> {
+    let mut ranges = Vec::new();
+    let mut cursor = 0_usize;
+    while let Some(relative_start) = content[cursor..].find("](") {
+        let destination_start = cursor + relative_start + 2;
+        let Some(destination_end) = find_link_destination_end(content, destination_start) else {
+            ranges.push(destination_start..content.len());
+            break;
+        };
+        ranges.push(destination_start..destination_end);
+        cursor = destination_end;
+    }
+    ranges
+}
+
+fn ranges_overlap(left: &Range<usize>, right: &Range<usize>) -> bool {
+    left.start < right.end && right.start < left.end
 }
 
 fn opening_fence_marker(line: &str) -> Option<String> {

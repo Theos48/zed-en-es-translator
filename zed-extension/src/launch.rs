@@ -4,15 +4,22 @@ use std::path::Path;
 use std::os::unix::fs::PermissionsExt;
 
 use crate::diagnostics::{
-    diagnostic_with_action, DiagnosticCode, DiagnosticEvent, DiagnosticPhase,
+    diagnostic_with_action, direct_diagnostic_with_action, DiagnosticCode, DiagnosticEvent,
+    DiagnosticPhase,
 };
 use crate::settings::LaunchSettings;
 
 /// Single context server id declared by `extension.toml`.
 pub const CONTEXT_SERVER_ID: &str = "translator-en-es";
 
+/// Direct language server id declared by `extension.toml`.
+pub const DIRECT_LSP_ID: &str = "en-es-translator";
+
 /// Existing MCP server binary this wrapper is allowed to launch.
 pub const TRANSLATOR_MCP_BINARY: &str = "translator-mcp";
+
+/// Native direct-workflow binary this wrapper is allowed to launch.
+pub const TRANSLATOR_LSP_BINARY: &str = "translator-lsp";
 
 /// Controlled launch profile returned to Zed.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -87,6 +94,78 @@ pub fn build_launch_profile(
         args: Vec::new(),
         env,
     })
+}
+
+/// Build the controlled Zed language-server command for the direct workflow.
+pub fn build_lsp_launch_profile(
+    language_server_id: &str,
+    settings: &LaunchSettings,
+) -> Result<LaunchProfile, DiagnosticEvent> {
+    if language_server_id != DIRECT_LSP_ID {
+        return Err(direct_diagnostic_with_action(
+            DiagnosticPhase::Configuration,
+            DiagnosticCode::UnsupportedContextServer,
+            "Unsupported language server.",
+        ));
+    }
+
+    let Some(binary_path) = settings.binary_path() else {
+        return Err(direct_diagnostic_with_action(
+            DiagnosticPhase::Configuration,
+            DiagnosticCode::BinaryPathNotConfigured,
+            "The direct translator binary is not configured.",
+        ));
+    };
+    let path = Path::new(binary_path);
+    if path.file_name().and_then(|name| name.to_str()) != Some(TRANSLATOR_LSP_BINARY) {
+        return Err(direct_diagnostic_with_action(
+            DiagnosticPhase::ArtifactValidation,
+            DiagnosticCode::BinaryStaleOrIncompatible,
+            "The configured direct translator artifact is incompatible.",
+        ));
+    }
+    let status = artifact_status(path);
+    if status != PreparedArtifactStatus::Usable {
+        return Err(diagnostic_for_direct_artifact_status(status));
+    }
+
+    let mut env = settings.provider_env();
+    if let Some(value) = settings.rust_log() {
+        env.push(("RUST_LOG".to_string(), value.to_string()));
+    }
+    Ok(LaunchProfile {
+        command: binary_path.to_string(),
+        args: Vec::new(),
+        env,
+    })
+}
+
+fn diagnostic_for_direct_artifact_status(status: PreparedArtifactStatus) -> DiagnosticEvent {
+    match status {
+        PreparedArtifactStatus::Missing => direct_diagnostic_with_action(
+            DiagnosticPhase::ArtifactValidation,
+            DiagnosticCode::BinaryNotFound,
+            "The configured direct translator artifact was not found.",
+        ),
+        PreparedArtifactStatus::NotExecutable => direct_diagnostic_with_action(
+            DiagnosticPhase::ArtifactValidation,
+            DiagnosticCode::BinaryNotExecutable,
+            "The configured direct translator artifact is not executable.",
+        ),
+        PreparedArtifactStatus::NotFile
+        | PreparedArtifactStatus::Stale
+        | PreparedArtifactStatus::IncompatibleCheckout
+        | PreparedArtifactStatus::FailedOnStart => direct_diagnostic_with_action(
+            DiagnosticPhase::ArtifactValidation,
+            DiagnosticCode::BinaryStaleOrIncompatible,
+            "The configured direct translator artifact is stale or incompatible.",
+        ),
+        PreparedArtifactStatus::Usable => direct_diagnostic_with_action(
+            DiagnosticPhase::ArtifactValidation,
+            DiagnosticCode::InternalExtensionError,
+            "No direct artifact failure was present.",
+        ),
+    }
 }
 
 /// Validate local artifact state from the filesystem.
