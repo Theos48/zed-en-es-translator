@@ -31,6 +31,8 @@ pub use provider_config::{
 pub use redaction::{redact_failure, redact_text};
 pub use workspace::{load_allowed_file, LoadedFile};
 
+use std::ops::Range;
+
 pub fn translate_text(
     source_text: &str,
     provider: &impl Provider,
@@ -89,6 +91,46 @@ fn is_ambiguous_direct_text(source_text: &str) -> bool {
         || (trimmed.contains('(') && trimmed.contains(')') && trimmed.contains('"'))
 }
 
+pub fn translate_selection_with_confirmation(
+    document: &str,
+    input_kind: InputKind,
+    selection: Range<usize>,
+    provider: &impl Provider,
+    remote_confirmed: bool,
+) -> Result<TranslateSuccess, TranslateFailure> {
+    translate_selection_inner(document, input_kind, selection, provider, remote_confirmed)
+        .map_err(redact_failure)
+}
+
+fn translate_selection_inner(
+    document: &str,
+    input_kind: InputKind,
+    selection: Range<usize>,
+    provider: &impl Provider,
+    remote_confirmed: bool,
+) -> Result<TranslateSuccess, TranslateFailure> {
+    let selected = document
+        .get(selection.clone())
+        .ok_or_else(|| TranslateFailure::invalid_input("Invalid selection range."))?;
+    validate_direct_text_input(selected)?;
+    if is_ambiguous_direct_text(selected)
+        || (input_kind == InputKind::Markdown
+            && markdown::selection_intersects_protected(document, selection))
+    {
+        return Err(TranslateFailure::invalid_input(
+            "The selection contains protected or ambiguous content.",
+        ));
+    }
+
+    let translated_text = markdown::translate_document_with_confirmation(
+        selected,
+        input_kind,
+        provider,
+        remote_confirmed,
+    )?;
+    TranslateSuccess::new(translated_text)
+}
+
 pub fn translate_file(
     file_path: &str,
     workspace_root: &str,
@@ -105,6 +147,41 @@ pub fn translate_file_with_confirmation(
 ) -> Result<TranslateSuccess, TranslateFailure> {
     translate_file_inner(file_path, workspace_root, provider, remote_confirmed)
         .map_err(redact_failure)
+}
+
+pub fn translate_document_snapshot_with_confirmation(
+    file_path: &str,
+    workspace_root: &str,
+    snapshot: &str,
+    provider: &impl Provider,
+    remote_confirmed: bool,
+) -> Result<TranslateSuccess, TranslateFailure> {
+    translate_document_snapshot_inner(
+        file_path,
+        workspace_root,
+        snapshot,
+        provider,
+        remote_confirmed,
+    )
+    .map_err(redact_failure)
+}
+
+fn translate_document_snapshot_inner(
+    file_path: &str,
+    workspace_root: &str,
+    snapshot: &str,
+    provider: &impl Provider,
+    remote_confirmed: bool,
+) -> Result<TranslateSuccess, TranslateFailure> {
+    let loaded = load_allowed_file(file_path, workspace_root)?;
+    validate_direct_text_input(snapshot)?;
+    let translated_text = markdown::translate_document_with_confirmation(
+        snapshot,
+        loaded.input_kind,
+        provider,
+        remote_confirmed,
+    )?;
+    TranslateSuccess::new(translated_text)
 }
 
 fn translate_file_inner(

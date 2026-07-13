@@ -26,13 +26,14 @@ Estado actual:
   `specs/002-mcp-server/`; F006 mediante `specs/003-zed-wrapper/` tras merge
   en `main`; F007 mediante `specs/004-zed-ux-flow/`; F004 mediante
   `specs/005-real-provider-config/`.
-- Activo formal: ninguno.
-- Siguiente candidata: F010.
-- Futuro posterior: F009.
+- Completado formal: F010 mediante
+  `specs/006-direct-zed-translation/`, incluidas tres validaciones manuales en
+  Zed.
+- Activo formal: ninguno; F010 esta cerrada.
+- Siguiente candidata: F009.
 
-Prioridad actual: promover F010 antes de F009. No conviene publicar una
-extension cuya experiencia principal todavia requiera configurar o usar Agent
-Panel.
+Prioridad actual: cerrar la evidencia manual de F010 antes de promover F009. No
+conviene publicar una extension sin validar en Zed su nuevo camino directo.
 
 Regla de direccion desde F006: las features que toquen Zed deben ser
 extension-first. El Agent Panel puede usarse para validar integracion o cubrir
@@ -197,10 +198,12 @@ que el usuario configure o use Agent Panel. Debe sentirse como una extension
 nativa de traduccion para Zed, disenada como producto propio con control fuerte
 para trabajo tecnico, privacidad y preservacion de formato.
 
-Estado: siguiente candidata a feature formal. Debe tratarse como la continuacion
-natural de F006, no como una migracion final despues de construir mas UX sobre
-Agent Panel. Los criterios operativos definitivos se fijaran cuando F010 se
-promueva a `specs/<feature>/`.
+Estado: promovida a `specs/006-direct-zed-translation/`. La implementacion y los
+gates automatizados estan completos; faltan tres validaciones manuales reales
+en Zed antes de cerrar la feature formal. La integracion usa code action,
+execute command y hover LSP; las limitaciones de clipboard/panel propio en API
+0.7.0 y el canal real de configuracion `binary.env` quedan registradas en
+D073-D075 y ADR 0004.
 
 Criterios iniciales para `speckit-specify`:
 

@@ -1,19 +1,18 @@
 # Diagramas
 
-Diagramas Mermaid fuente para arquitectura y flujos estables. No hay feature
-formal activa; la siguiente candidata es F010, flujo directo de extension Zed
-sin Agent. Los detalles operativos de una feature activa viven en
-`specs/<feature>/`.
+Diagramas Mermaid fuente para arquitectura y flujos estables. F010 esta
+completada en `specs/006-direct-zed-translation/`, incluida su validacion manual
+interactiva.
 
-## Arquitectura objetivo
+## Arquitectura directa actual
 
 ```mermaid
 flowchart LR
     user[Usuario en Zed]
-    action[Accion propia de extension]
-    preview[Preview o resultado en Zed]
+    action[Code action LSP]
+    preview[Hover Markdown en Zed]
     extension[zed-extension]
-    boundary[Frontera de traduccion]
+    lsp[translator-lsp]
     mcp[Servidor MCP]
     cli[CLI Rust]
     core[Core Rust]
@@ -24,11 +23,12 @@ flowchart LR
     agent[Agent Panel puente F007]
 
     user --> action
-    action --> preview
     extension --> action
-    action --> boundary
-    boundary --> core
-    boundary -. compatibilidad .-> mcp
+    action --> lsp
+    lsp --> preview
+    lsp --> core
+    extension --> lsp
+    extension -. compatibilidad .-> mcp
     cli -. frontera publica .-> core
     mcp --> core
     core --> provider
@@ -48,11 +48,8 @@ flowchart TD
     provider{Proveedor requiere salir del equipo?}
     confirm[Confirmacion explicita por solicitud]
     translate[Traducir segmentos permitidos]
-    preview[Mostrar preview en Zed]
-    apply{Usuario decide salida}
-    copy[Copiar traduccion]
-    insert[Insertar o aplicar si Zed lo permite]
-    keep[No mutar buffer]
+    preview[Mostrar hover versionado en Zed]
+    keep[Conservar buffer y archivo sin cambios]
     reject[Error normalizado redaccionado]
 
     input --> command
@@ -64,10 +61,53 @@ flowchart TD
     confirm -- aceptado --> translate
     confirm -- omitido --> reject
     translate --> preview
-    preview --> apply
-    apply -- copiar --> copy
-    apply -- accion explicita --> insert
-    apply -- cerrar --> keep
+    preview --> keep
+```
+
+## Secuencia del flujo directo
+
+```mermaid
+sequenceDiagram
+    actor User as Usuario
+    participant Zed
+    participant LSP as translator-lsp
+    participant Core as translator-core
+    participant Provider
+
+    User->>Zed: Abrir code action
+    Zed->>LSP: codeAction con URI rango y snapshot actual
+    LSP-->>Zed: Accion con localidad sin texto ni edit
+    User->>Zed: Ejecutar traduccion
+    Zed->>LSP: executeCommand con URI version rango y tipo
+    opt Provider remoto allowlisted
+        LSP->>Zed: showMessageRequest por esta solicitud
+        Zed-->>LSP: Confirmar o cancelar
+    end
+    LSP->>Core: Snapshot o seleccion permitida
+    Core->>Provider: Solo segmentos idioma y tono
+    Provider-->>Core: Segmentos traducidos
+    Core-->>LSP: Resultado validado
+    LSP-->>Zed: Preview listo sin contenido en notificacion
+    User->>Zed: Hover sobre rango vigente
+    Zed->>LSP: hover
+    LSP-->>Zed: Preview Markdown de solo lectura
+```
+
+## Estado del preview directo
+
+```mermaid
+stateDiagram-v2
+    [*] --> SinPreview
+    SinPreview --> ObjetivoValidado: executeCommand vigente
+    ObjetivoValidado --> ConfirmacionRemota: provider remoto
+    ObjetivoValidado --> Traduciendo: offline o local
+    ConfirmacionRemota --> Traduciendo: confirmacion positiva
+    ConfirmacionRemota --> Rechazado: cancelar timeout o cambio
+    Traduciendo --> PreviewVigente: resultado validado
+    Traduciendo --> Rechazado: fallo redaccionado
+    PreviewVigente --> SinPreview: didChange o didClose
+    PreviewVigente --> PreviewVigente: nueva traduccion reemplaza anterior
+    Rechazado --> SinPreview
 ```
 
 ## Frontera de documentacion

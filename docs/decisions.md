@@ -79,10 +79,12 @@ La implementacion detallada de la feature activa vive en `specs/<feature>/`.
 | D070 | Spec Kit | Cada iteracion debe reportar explicitamente el estado de `speckit-checklist`, `speckit-analyze` y `speckit-converge` como ejecutado, no aplicable o bloqueado por prerequisito; no se deben omitir silenciosamente gates posteriores aunque la sesion se detenga antes de implementacion. | Aceptada | Evita cerrar flujos parciales como si fueran completos y deja evidencia concreta del comando/prerrequisito que justifica saltar una fase. |
 | D071 | Roadmap | F010, flujo directo de extension Zed sin Agent, debe promoverse antes de F009/publicacion. | Aceptada | La meta de producto es una extension nativa usable sin configurar Agent; publicar antes consolidaria una experiencia puente como si fuera final. |
 | D072 | Roadmap | Desde F006, cualquier feature que toque Zed debe orientarse a una extension propia y directa; Agent Panel solo puede usarse como puente tecnico, compatibilidad o fallback justificado por limitaciones concretas de la API de Zed. | Aceptada | Evita construir varias features alrededor de Agent Panel para migrarlas al final. F006 es la fundacion de la extension, no una decision de convertir Agent en la UX principal. |
+| D073 | Arquitectura Zed directa | F010 implementa la accion propia de traduccion como code action de un servidor LSP Rust `translator-lsp`, con ejecucion por `workspace/executeCommand`, preview de solo lectura por hover y confirmacion remota por `window/showMessageRequest`; `translator-mcp` queda solo como compatibilidad. | Aceptada | `zed_extension_api` 0.7.0 no expone acciones genericas, seleccion del editor ni UI propia, mientras LSP entrega rango/version y superficies nativas suficientes sin Agent ni mutacion. Ver ADR 0004. |
+| D074 | Limites UI Zed | F010 no implementa clipboard, panel propio, insert, replace ni apply. El resultado es un hover Markdown versionado y cualquier cambio futuro que mutara el buffer requiere una enmienda constitucional. | Aceptada | La API 0.7.0 no expone clipboard o panel/webview de extension y la constitucion vigente prohibe mutacion automatica o explicita del buffer. La limitacion queda visible y no se sustituye por Agent Panel. |
+| D075 | Configuracion LSP Zed | La seleccion de proveedor para `translator-lsp` usa exclusivamente las cuatro variables controladas bajo `lsp.en-es-translator.binary.env`; configuracion arbitraria, incompleta o simultanea por `settings.provider` se rechaza. | Aceptada | La validacion real en Zed 1.10.3 mostro que `settings.provider` no modificaba el entorno de lanzamiento y mantenia la accion offline. `binary.env` es la superficie estandar que llega a `language_server_command`; el wrapper valida y reconstruye solo `TRANSLATOR_PROVIDER`, URL, nombre de variable de API key y permiso remoto. Ver ADR 0004. |
 
 ## Preguntas pendientes siguientes
 
-1. Promover F010 desde `docs/feature-map.md` a una nueva feature formal de Spec
-   Kit, partiendo de F006 como fundacion de extension y verificando que API
-   vigente de Zed permite una accion directa sin Agent, o documentando la
-   limitacion concreta si obliga a un puente.
+1. Preparar F009/publicacion como siguiente feature formal; la evidencia manual
+   de F010 ya esta cerrada en
+   `specs/006-direct-zed-translation/manual-validation.md`.

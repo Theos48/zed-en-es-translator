@@ -21,6 +21,17 @@ pub const FORBIDDEN_SETTING_NAMES: &[&str] = &[
     "extra_args",
 ];
 
+const ENV_PROVIDER: &str = "TRANSLATOR_PROVIDER";
+const ENV_PROVIDER_URL: &str = "TRANSLATOR_PROVIDER_URL";
+const ENV_PROVIDER_API_KEY_ENV: &str = "TRANSLATOR_PROVIDER_API_KEY_ENV";
+const ENV_ALLOW_REMOTE_PROVIDER: &str = "TRANSLATOR_ALLOW_REMOTE_PROVIDER";
+const CONTROLLED_PROVIDER_ENV_NAMES: &[&str] = &[
+    ENV_PROVIDER,
+    ENV_PROVIDER_URL,
+    ENV_PROVIDER_API_KEY_ENV,
+    ENV_ALLOW_REMOTE_PROVIDER,
+];
+
 /// Command settings normalized from Zed before validation.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct CommandSettingsInput {
@@ -49,6 +60,7 @@ pub struct LaunchSettings {
     binary_path: Option<String>,
     rust_log: Option<String>,
     provider: ProviderSettings,
+    provider_configured: bool,
 }
 
 impl LaunchSettings {
@@ -72,12 +84,19 @@ impl LaunchSettings {
             return Err(unsafe_setting("command.arguments"));
         }
 
+        let mut provider_environment = Vec::new();
         for (key, value) in command.env {
             if key == "RUST_LOG" && is_safe_rust_log(&value) {
                 launch_settings.rust_log = Some(value);
+            } else if CONTROLLED_PROVIDER_ENV_NAMES.contains(&key.as_str()) {
+                provider_environment.push((key, value));
             } else {
                 return Err(unsafe_setting("command.env"));
             }
+        }
+        if !provider_environment.is_empty() {
+            launch_settings.provider = parse_provider_environment(provider_environment)?;
+            launch_settings.provider_configured = true;
         }
 
         if let Some(settings_value) = settings {
@@ -97,7 +116,7 @@ impl LaunchSettings {
         self.rust_log.as_deref()
     }
 
-    /// Controlled provider environment entries passed to `translator-mcp`.
+    /// Controlled provider environment entries passed to the selected server.
     pub fn provider_env(&self) -> Vec<(String, String)> {
         self.provider.env()
     }
@@ -170,7 +189,11 @@ fn parse_nested_settings(
             };
             set_binary_path(launch_settings, path.to_string(), "binary_path")?;
         } else if key == "provider" {
+            if launch_settings.provider_configured {
+                return Err(conflicting_provider_configuration());
+            }
             launch_settings.provider = parse_provider_settings(value)?;
+            launch_settings.provider_configured = true;
         }
     }
 
@@ -213,6 +236,39 @@ fn parse_provider_settings(value: &Value) -> Result<ProviderSettings, Diagnostic
         }
     }
 
+    validate_provider_settings(&provider)?;
+    Ok(provider)
+}
+
+fn parse_provider_environment(
+    entries: Vec<(String, String)>,
+) -> Result<ProviderSettings, DiagnosticEvent> {
+    let mut provider = ProviderSettings::default();
+    let mut seen = HashSet::new();
+
+    for (key, value) in entries {
+        if !seen.insert(key.clone()) {
+            return Err(unsafe_setting("command.env"));
+        }
+        match key.as_str() {
+            ENV_PROVIDER => provider.mode = parse_provider_mode(&value)?,
+            ENV_PROVIDER_URL => provider.url = parse_provider_url(&value)?,
+            ENV_PROVIDER_API_KEY_ENV => provider.api_key_env = parse_api_key_env(&value)?,
+            ENV_ALLOW_REMOTE_PROVIDER => {
+                provider.allow_remote = parse_allow_remote_environment(&value)?;
+            }
+            _ => return Err(unsafe_setting("command.env")),
+        }
+    }
+
+    if !seen.contains(ENV_PROVIDER) {
+        return Err(unsafe_setting("command.env.TRANSLATOR_PROVIDER"));
+    }
+    validate_provider_settings(&provider)?;
+    Ok(provider)
+}
+
+fn validate_provider_settings(provider: &ProviderSettings) -> Result<(), DiagnosticEvent> {
     if provider.mode == "libretranslate" && provider.url.is_none() {
         return Err(unsafe_setting("provider.url"));
     }
@@ -222,7 +278,7 @@ fn parse_provider_settings(value: &Value) -> Result<ProviderSettings, Diagnostic
         }
     }
 
-    Ok(provider)
+    Ok(())
 }
 
 fn parse_provider_mode(mode: &str) -> Result<String, DiagnosticEvent> {
@@ -269,6 +325,24 @@ fn parse_api_key_env(value: &str) -> Result<Option<String>, DiagnosticEvent> {
         return Err(unsafe_setting("provider.api_key_env"));
     }
     Ok(Some(trimmed.to_string()))
+}
+
+fn parse_allow_remote_environment(value: &str) -> Result<bool, DiagnosticEvent> {
+    match value.trim() {
+        "true" | "1" => Ok(true),
+        "false" | "0" => Ok(false),
+        _ => Err(unsafe_setting(
+            "command.env.TRANSLATOR_ALLOW_REMOTE_PROVIDER",
+        )),
+    }
+}
+
+fn conflicting_provider_configuration() -> DiagnosticEvent {
+    diagnostic_with_action(
+        DiagnosticPhase::Configuration,
+        DiagnosticCode::UnsafeLaunchConfiguration,
+        "Rejected conflicting provider configuration from nested settings and binary environment.",
+    )
 }
 
 fn is_non_local_url(url: &str) -> bool {

@@ -6,4 +6,8 @@ authors = ["theos"]
 description = "Local English to Spanish translator MCP wrapper."
 repository = "https://github.com/theos/zed-en-es-translator"
 
+[language_servers.en-es-translator]
+name = "English to Spanish Translator"
+languages = ["Markdown", "Plain Text"]
+
 [context_servers.translator-en-es]
