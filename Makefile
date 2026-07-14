@@ -1,6 +1,7 @@
 RUST_VERSION ?= 1.96.1
 RUST_IMAGE ?= rust:$(RUST_VERSION)-bookworm
 RUST_DEV_IMAGE ?= zed-en-es-translator-rust:$(RUST_VERSION)
+CARGO_DENY_VERSION ?= 0.20.2
 DOCKER ?= docker
 
 USER_ID := $(shell id -u)
@@ -36,10 +37,11 @@ HELP_LINES := \
 	'  make format         Format Rust sources inside the container' \
 	'  make fmt           Check Rust formatting inside the container' \
 	'  make clippy        Run clippy inside the container' \
+	'  make deny          Audit Rust advisories, licenses, bans and sources' \
 	'  make shell         Open a shell inside the Rust container' \
 	'  make clean         Remove local Rust build/cache output'
 
-.PHONY: all help install pull-rust-base rust-image rust-version test test-core test-mcp test-real-provider-config zed-direct-lock zed-direct-server-release zed-direct-prepare test-direct-zed-translation zed-extension-build zed-extension-server-release zed-extension-prepare test-zed-extension test-zed-ux-flow format fmt clippy shell clean
+.PHONY: all help install pull-rust-base rust-image rust-version test test-core test-mcp test-real-provider-config zed-direct-lock zed-direct-server-release zed-direct-prepare test-direct-zed-translation zed-extension-build zed-extension-server-release zed-extension-prepare test-zed-extension test-zed-ux-flow format fmt clippy deny shell clean
 
 all: test
 
@@ -52,7 +54,7 @@ pull-rust-base:
 	$(DOCKER) pull $(RUST_IMAGE)
 
 rust-image:
-	$(DOCKER) build --build-arg RUST_IMAGE=$(RUST_IMAGE) -t $(RUST_DEV_IMAGE) -f docker/rust-toolchain.Dockerfile .
+	$(DOCKER) build --build-arg RUST_IMAGE=$(RUST_IMAGE) --build-arg CARGO_DENY_VERSION=$(CARGO_DENY_VERSION) -t $(RUST_DEV_IMAGE) -f docker/rust-toolchain.Dockerfile .
 
 rust-version: rust-image
 	$(RUST_RUN) rustc --version
@@ -60,6 +62,7 @@ rust-version: rust-image
 
 test: rust-image
 	$(RUST_RUN) cargo test
+	$(RUST_RUN) cargo test --manifest-path zed-extension/Cargo.toml --locked
 
 test-core: rust-image
 	$(RUST_RUN) cargo test -p translator-core
@@ -123,6 +126,10 @@ fmt: rust-image
 clippy: rust-image
 	$(RUST_RUN) cargo clippy --all-targets --all-features -- -D warnings
 	$(RUST_RUN) cargo clippy --manifest-path zed-extension/Cargo.toml --all-targets --all-features --locked -- -D warnings
+
+deny: rust-image
+	$(RUST_RUN) cargo deny --all-features --locked check
+	$(RUST_RUN) cargo deny --manifest-path zed-extension/Cargo.toml --all-features --locked check
 
 shell: rust-image
 	$(RUST_RUN) bash

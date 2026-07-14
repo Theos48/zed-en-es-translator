@@ -77,6 +77,12 @@ decisiones viven en D073-D075 y ADR 0004.
 Rust se ejecuta mediante la imagen Docker oficial fijada en `Makefile`; no se
 instala `rustc` ni `cargo` globalmente para este proyecto por defecto.
 
+La calidad obligatoria se valida localmente y en cada pull request con los
+mismos targets del `Makefile`: formato, Clippy, pruebas y `cargo-deny`. La
+auditoria cubre vulnerabilidades publicadas, licencias, dependencias prohibidas
+y fuentes no autorizadas. Dependabot revisa semanalmente las dependencias Cargo
+de ambos workspaces y las acciones de GitHub.
+
 Validacion principal:
 
 ```bash
@@ -91,6 +97,7 @@ make test-real-provider-config
 make test
 make fmt
 make clippy
+make deny
 ```
 
 Resultado registrado para `specs/001-translation-core-contract/` y

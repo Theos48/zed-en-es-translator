@@ -1,6 +1,6 @@
 ## Resumen
 
-@coderabbitai summary
+<!-- Resume el cambio y el resultado esperado. -->
 
 ## Alcance
 
@@ -13,6 +13,7 @@
 - [ ] `make fmt`
 - [ ] `make clippy`
 - [ ] `make test`
+- [ ] `make deny`
 
 ## Notas para revision
 
