@@ -104,6 +104,11 @@ Expected:
 - confirmed secret content returns `SECRET_DETECTED` before provider contact;
 - messages and logs contain only redacted status/error metadata.
 
+On the reviewed Zed 1.10.3 host, the dismissed execute-command error may be
+rendered only as `Error: execute command`; the redacted LSP result still carries
+`REMOTE_CONFIRMATION_REQUIRED`. Record the normalized result and generic host
+rendering rather than raw log output.
+
 ## Manual Evidence
 
 Record Zed version, extension API version, exact scenario result, source hash

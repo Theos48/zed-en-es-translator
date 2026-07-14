@@ -15,7 +15,7 @@ containing content.
 | Local image | `sha256:1de2d7056bb8...` |
 | Local model versions | `en-es 1.0; es-en 1.9; user-provisioned, not redistributed` |
 | Remote service | `Azure AI Translator Text v3, global single-service, F0` |
-| Validation window UTC | `2026-07-14T11:07:10Z / 2026-07-14T11:55:05Z` |
+| Validation window UTC | `2026-07-14T11:07:10Z / 2026-07-14T12:08:49Z` |
 | Reviewer | `Codex terminal validation + user Zed observation` |
 
 ## Real success matrix
@@ -92,7 +92,7 @@ this evidence file.
 | Case | Timestamp UTC | Condition | Provider contacted | Actual normalized outcome | Result |
 |---|---|---|---|---|---|
 | `REMOTE-DENY-01` | `2026-07-14T11:13:11Z` | denied | `no` | `REMOTE_CONFIRMATION_REQUIRED` | `pass` |
-| `REMOTE-DISMISS-01` | `[UTC]` | dismissed | `[no/unknown]` | `[error code]` | `[pass/fail]` |
+| `REMOTE-DISMISS-01` | `2026-07-14T12:08:49Z` | dismissed | `no (loopback-only process namespace)` | `REMOTE_CONFIRMATION_REQUIRED; host UI showed generic error` | `pass` |
 | `REMOTE-STALE-01` | `[UTC]` | stale/mismatched consent | `[no/unknown]` | `[error code]` | `[pass/fail]` |
 | `REMOTE-REUSE-01` | `[UTC]` | prior consent reused | `[no/unknown]` | `[error code]` | `[pass/fail]` |
 | `REMOTE-SECRET-01` | `2026-07-14T11:13:29Z` | synthetic secret after confirmation | `no` | `SECRET_DETECTED` | `pass` |
@@ -108,8 +108,8 @@ this evidence file.
   rows still require the same clean-checkout discipline.
 - The local direct Zed row passed; `REMOTE-ZED-01` still requires a reviewer to
   observe the preview and buffer state in the editor.
-- No Azure F0 credential/reference was present, so no real Azure request was
-  attempted.
+- No real Azure F0 credential was present, so remote success and real contact
+  cases were not attempted.
 - A reviewed negative simulation used a temporary mismatched expected image
   identity; the versioned lock was restored byte-for-byte after the failure.
 - Destructive cleanup remains deferred so the prepared offline provider is

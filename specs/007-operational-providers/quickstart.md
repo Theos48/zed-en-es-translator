@@ -172,6 +172,11 @@ run denial/dismissal/stale/mismatch and synthetic-secret cases and prove the
 provider was not contacted. Validate timeout, missing/rejected key, quota, and
 safe generic failure handling without recording raw service output.
 
+On the reviewed Zed 1.10.3 host, dismissing `window/showMessageRequest` may be
+rendered only as the generic `Error: execute command`; the redacted LSP result
+must still be `REMOTE_CONFIRMATION_REQUIRED`. Record the normalized result and
+the generic host rendering, never a raw log.
+
 For Zed local settings, add only the three safe provider-selection values
 above. The actual `AZURE_TRANSLATOR_KEY` value must already exist in the Zed
 parent process environment. The extension passes only the reference name and
