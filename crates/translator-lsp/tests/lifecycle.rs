@@ -1,3 +1,5 @@
+mod common;
+
 use std::path::PathBuf;
 use std::thread;
 
@@ -5,6 +7,8 @@ use lsp_server::{Connection, ErrorCode, Message, Notification, Request, Response
 use serde_json::json;
 use translator_core::MockProvider;
 use translator_lsp::{serve, state::ProviderDescriptor};
+
+use common::ResponseExt as _;
 
 #[test]
 fn advertises_minimal_capabilities_and_handles_shutdown() {
@@ -28,7 +32,7 @@ fn advertises_minimal_capabilities_and_handles_shutdown() {
         .expect("initialize send");
     let response = receive_response(&client);
     let capabilities = response
-        .result
+        .result()
         .expect("initialize result")
         .get("capabilities")
         .cloned()
@@ -58,7 +62,7 @@ fn advertises_minimal_capabilities_and_handles_shutdown() {
         }))
         .expect("unknown send");
     let unknown = receive_response(&client);
-    let error = unknown.error.expect("unknown method error");
+    let error = unknown.error().expect("unknown method error");
     assert_eq!(error.code, ErrorCode::MethodNotFound as i32);
     assert!(!error.message.contains("SOURCE_SECRET_123"));
 
@@ -71,7 +75,7 @@ fn advertises_minimal_capabilities_and_handles_shutdown() {
         }))
         .expect("shutdown send");
     let shutdown = receive_response(&client);
-    assert!(shutdown.error.is_none());
+    assert!(shutdown.error().is_none());
     client
         .sender
         .send(Message::Notification(Notification {

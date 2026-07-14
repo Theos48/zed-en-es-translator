@@ -3,11 +3,34 @@
 use std::path::PathBuf;
 use std::thread::{self, JoinHandle};
 
-use lsp_server::{Connection, Message, Notification, Request, RequestId, Response};
+use lsp_server::{
+    Connection, Message, Notification, Request, RequestId, Response, ResponseError, ResponseKind,
+};
 use lsp_types::{Position, Range};
 use serde_json::{json, Value};
 use translator_core::{MockProvider, Provider};
 use translator_lsp::{serve, state::ProviderDescriptor};
+
+pub trait ResponseExt {
+    fn result(&self) -> Option<&Value>;
+    fn error(&self) -> Option<&ResponseError>;
+}
+
+impl ResponseExt for Response {
+    fn result(&self) -> Option<&Value> {
+        match &self.response_kind {
+            ResponseKind::Ok { result } => Some(result),
+            ResponseKind::Err { .. } => None,
+        }
+    }
+
+    fn error(&self) -> Option<&ResponseError> {
+        match &self.response_kind {
+            ResponseKind::Ok { .. } => None,
+            ResponseKind::Err { error } => Some(error),
+        }
+    }
+}
 
 pub struct TestClient {
     connection: Connection,
@@ -38,7 +61,7 @@ impl TestClient {
             next_id: 1,
         };
         let response = client.request("initialize", json!({"capabilities": {}}));
-        assert!(response.error.is_none());
+        assert!(response.error().is_none());
         client.notify("initialized", json!({}));
         client
     }
@@ -127,7 +150,7 @@ impl TestClient {
 
     pub fn shutdown(mut self) {
         let response = self.request("shutdown", Value::Null);
-        assert!(response.error.is_none());
+        assert!(response.error().is_none());
         self.notify("exit", Value::Null);
         assert!(self
             .server

@@ -9,7 +9,7 @@ use serde_json::json;
 use translator_core::{Provider, ProviderRequest, ProviderResponse, TranslateFailure};
 use translator_lsp::state::ProviderDescriptor;
 
-use common::{file_uri, range, TestClient};
+use common::{file_uri, range, ResponseExt as _, TestClient};
 
 #[test]
 fn unsafe_document_targets_fail_before_provider_contact() {
@@ -56,7 +56,7 @@ fn unsafe_document_targets_fail_before_provider_contact() {
                 "arguments":[{"uri":uri,"version":index as i32 + 1,"range":range(0,0),"input_kind":"markdown"}]
             }),
         );
-        assert!(response.error.is_some(), "unsafe target should fail");
+        assert!(response.error().is_some(), "unsafe target should fail");
     }
 
     assert_eq!(calls.load(Ordering::SeqCst), 0);

@@ -5,7 +5,7 @@ use std::fs;
 use serde_json::{json, Value};
 use translator_lsp::state::ProviderDescriptor;
 
-use common::{file_uri, range, TestClient};
+use common::{file_uri, range, ResponseExt as _, TestClient};
 
 #[test]
 fn document_preview_preserves_all_protected_markdown_regions() {
@@ -29,12 +29,12 @@ fn document_preview_preserves_all_protected_markdown_regions() {
             "arguments":[{"uri":uri,"version":1,"range":range(0,0),"input_kind":"markdown"}]
         }),
     );
-    assert_eq!(execute.result, Some(Value::Null));
+    assert_eq!(execute.result(), Some(&Value::Null));
     let hover = client.request(
         "textDocument/hover",
         json!({"textDocument":{"uri":uri},"position":{"line":3,"character":2}}),
     );
-    let preview = hover.result.expect("hover")["contents"]["value"]
+    let preview = hover.result().expect("hover")["contents"]["value"]
         .as_str()
         .expect("preview")
         .to_string();
@@ -62,7 +62,7 @@ fn protected_only_document_produces_no_preview() {
             "arguments":[{"uri":uri,"version":1,"range":range(0,0),"input_kind":"markdown"}]
         }),
     );
-    assert!(execute.error.is_some());
+    assert!(execute.error().is_some());
     client.shutdown();
 }
 

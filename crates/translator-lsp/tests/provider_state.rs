@@ -3,7 +3,7 @@ mod common;
 use translator_core::ProviderConfiguration;
 use translator_lsp::state::ProviderDescriptor;
 
-use common::{code_action_params, range, TestClient};
+use common::{code_action_params, range, ResponseExt as _, TestClient};
 
 #[test]
 fn derives_safe_locality_labels_from_provider_configuration() {
@@ -57,7 +57,7 @@ fn code_action_exposes_only_the_safe_locality_label() {
             "textDocument/codeAction",
             code_action_params(uri, range(0, 14)),
         );
-        let wire = response.result.expect("actions").to_string();
+        let wire = response.result().expect("actions").to_string();
         assert!(wire.contains(expected));
         assert!(!wire.contains("http"));
         client.shutdown();

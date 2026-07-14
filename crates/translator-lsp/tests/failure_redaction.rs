@@ -9,7 +9,7 @@ use translator_core::{
 };
 use translator_lsp::state::ProviderDescriptor;
 
-use common::{range, TestClient};
+use common::{range, ResponseExt as _, TestClient};
 
 #[test]
 fn invalid_command_uri_range_and_provider_failures_are_redacted() {
@@ -23,7 +23,7 @@ fn invalid_command_uri_range_and_provider_failures_are_redacted() {
         json!({"command":"en-es-translator.translate","arguments":[{"uri":uri,"version":1,"range":range(0,99),"input_kind":"markdown"}]}),
     ] {
         let response = invalid.request("workspace/executeCommand", params);
-        let message = response.error.expect("invalid error").message;
+        let message = &response.error().expect("invalid error").message;
         assert!(!message.contains(secret));
         assert!(!message.contains(uri));
     }
@@ -48,7 +48,7 @@ fn invalid_command_uri_range_and_provider_failures_are_redacted() {
             "workspace/executeCommand",
             json!({"command":"en-es-translator.translate","arguments":[{"uri":uri,"version":1,"range":range(0,14),"input_kind":"markdown"}]}),
         );
-        let message = response.error.expect("provider error").message;
+        let message = &response.error().expect("provider error").message;
         assert!(message.contains(code.as_str()));
         assert!(!message.contains("PRIVATE_PROVIDER_DETAIL"));
         assert!(!message.contains(uri));
@@ -66,7 +66,7 @@ fn invalid_command_uri_range_and_provider_failures_are_redacted() {
             "workspace/executeCommand",
             json!({"command":"en-es-translator.translate","arguments":[{"uri":uri,"version":1,"range":range(0,14),"input_kind":"markdown"}]}),
         );
-        let message = response.error.expect("invalid output error").message;
+        let message = &response.error().expect("invalid output error").message;
         assert!(message.contains("PROVIDER_FAILED"));
         assert!(!message.contains("xxxxx"));
         client.shutdown();

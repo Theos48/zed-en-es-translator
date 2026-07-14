@@ -3,7 +3,7 @@ mod common;
 use serde_json::Value;
 use translator_lsp::state::ProviderDescriptor;
 
-use common::{code_action_params, range, TestClient};
+use common::{code_action_params, range, ResponseExt as _, TestClient};
 
 #[test]
 fn returns_source_free_non_editing_refactor_action_for_current_selection() {
@@ -16,7 +16,7 @@ fn returns_source_free_non_editing_refactor_action_for_current_selection() {
         "textDocument/codeAction",
         code_action_params(uri, range(0, 14)),
     );
-    let actions = response.result.expect("result");
+    let actions = response.result().expect("result");
     let action = &actions.as_array().expect("action list")[0];
 
     assert_eq!(action["title"], "Translate English to Spanish [offline]");
@@ -43,7 +43,7 @@ fn returns_no_action_for_unsupported_language_snapshot() {
         "textDocument/codeAction",
         code_action_params(uri, range(0, 2)),
     );
-    assert_eq!(response.result, Some(Value::Array(Vec::new())));
+    assert_eq!(response.result(), Some(&Value::Array(Vec::new())));
 
     client.shutdown();
 }

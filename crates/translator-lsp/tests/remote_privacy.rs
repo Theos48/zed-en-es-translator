@@ -13,7 +13,7 @@ use translator_core::{
 };
 use translator_lsp::state::ProviderDescriptor;
 
-use common::{range, TestClient};
+use common::{range, ResponseExt as _, TestClient};
 
 #[test]
 fn remote_not_allowlisted_fails_without_prompt_or_provider_contact() {
@@ -32,7 +32,7 @@ fn remote_not_allowlisted_fails_without_prompt_or_provider_contact() {
         execute_params(uri, 1, range(0, 14)),
     );
     assert!(response
-        .error
+        .error()
         .expect("denial")
         .message
         .contains("PROVIDER_NOT_CONFIGURED"));
@@ -67,7 +67,7 @@ fn confirmed_secret_is_blocked_before_provider_contact() {
     ));
     let response = client.receive_response(&execute_id).0;
     assert!(response
-        .error
+        .error()
         .expect("secret denial")
         .message
         .contains("SECRET_DETECTED"));
