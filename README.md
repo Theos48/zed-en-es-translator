@@ -84,11 +84,11 @@ global F0 como camino remoto/online. `MockProvider` sigue siendo default; el
 camino remoto usa host HTTPS fijo, key por referencia y confirmacion nueva por
 solicitud. Estan implementados la configuracion exacta, los adaptadores, las
 pruebas controladas y el ciclo local candidate/current/previous. La validacion
-real local por CLI, sin egress y con rollback paso; las filas directas de Zed,
-Azure real y los casos manuales restantes mantienen T056 abierta. MCP/Agent
-Panel conserva solo cobertura de compatibilidad y no es una superficie de
-aceptacion F011. El modelo Argos `en-es` no se redistribuira mientras upstream
-no declare su licencia.
+real local por CLI y Zed directo, sin egress, con fallo de update aislado y con
+rollback paso; Azure real y los casos manuales restantes mantienen T056
+abierta. MCP/Agent Panel conserva solo cobertura de compatibilidad y no es
+una superficie de aceptacion F011. El modelo Argos `en-es` no se redistribuira
+mientras upstream no declare su licencia.
 F009/empaquetado y publicacion queda despues de cerrar ambos gates.
 
 El proveedor local se administra solo mediante la interfaz versionada del

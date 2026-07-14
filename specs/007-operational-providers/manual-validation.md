@@ -15,7 +15,7 @@ containing content.
 | Local image | `sha256:1de2d7056bb8...` |
 | Local model versions | `en-es 1.0; es-en 1.9; user-provisioned, not redistributed` |
 | Remote service | `Azure AI Translator Text v3, global single-service, F0` |
-| Validation window UTC | `2026-07-14T11:07:10Z / 2026-07-14T11:47:52Z` |
+| Validation window UTC | `2026-07-14T11:07:10Z / 2026-07-14T11:55:05Z` |
 | Reviewer | `Codex terminal validation + user Zed observation` |
 
 ## Real success matrix
@@ -58,7 +58,7 @@ non-mock English-to-Spanish output and was not copied into this record:
 | `LOCAL-PREPARE-01` | `2026-07-14T11:07:10Z` | pinned artifacts verified | `READY; integrity and promotion passed` | enabled only for prepare | `yes (114 s total; readiness gates enforced at 120 s)` | `pass` |
 | `LOCAL-OFFLINE-01` | `2026-07-14T11:13:49Z` | health+translation after no-egress restart | `READY; provider egress blocked` | disabled | `yes (11 s readiness; invocation under 1 s)` | `pass` |
 | `LOCAL-IDEMPOTENT-01` | `2026-07-14T11:09:07Z` | repeated start/stop safe | `READY after repeated stop/start/verify` | disabled | `yes (31 s sequence)` | `pass` |
-| `LOCAL-UPDATE-FAIL-01` | `[UTC]` | failed candidate leaves current | `[safe status]` | `[enabled/disabled]` | `[yes/no]` | `[pass/fail]` |
+| `LOCAL-UPDATE-FAIL-01` | `2026-07-14T11:55:05Z` | failed candidate leaves current | `IMAGE_IDENTITY_MISMATCH; active/current/previous unchanged` | enabled only for update | `yes (2.530 s)` | `pass` |
 | `LOCAL-ROLLBACK-01` | `2026-07-14T11:11:58Z` | prior slot restored and verified | `READY; active_slot=previous` | disabled | `yes (30 s rollback+verify)` | `pass` |
 | `LOCAL-CLEAN-01` | `[UTC]` | only project provider resources removed | `[safe status]` | disabled | `[yes/no]` | `[pass/fail]` |
 
@@ -110,9 +110,10 @@ this evidence file.
   observe the preview and buffer state in the editor.
 - No Azure F0 credential/reference was present, so no real Azure request was
   attempted.
-- No reviewed provider-lock change exists for a real failed-update exercise.
+- A reviewed negative simulation used a temporary mismatched expected image
+  identity; the versioned lock was restored byte-for-byte after the failure.
 - Destructive cleanup remains deferred so the prepared offline provider is
-  available for the pending failed-update and cleanup cases.
+  available for the pending cleanup case.
 
 ## Final gates
 
@@ -120,7 +121,7 @@ this evidence file.
 - [X] Prepared local readiness completed within 120 seconds and every executed provider invocation completed within 15 seconds.
 - [ ] Four real success rows passed.
 - [X] Local provider worked with external egress disabled after preparation.
-- [ ] Failed update preserved current and offline rollback passed.
+- [X] Failed update preserved current and offline rollback passed.
 - [ ] Every remote invocation required fresh confirmation.
 - [ ] Denial/dismissal/stale/mismatch/reuse/secret cases stopped before contact.
 - [ ] Files and Zed buffers remained byte-for-byte unchanged.

@@ -355,7 +355,7 @@ tests.
 | `speckit-plan` | complete | `setup-plan`, research, data model, contracts, quickstart, evidence template, constitution re-check |
 | `speckit-tasks` | complete | `setup-tasks --json` resolved the active feature; `tasks.md` contains 57 dependency-ordered TDD/security tasks with 22 explicit parallel opportunities |
 | `speckit-analyze` | complete after remediation | non-destructive rerun resolves 39/39 requirements with no CRITICAL/HIGH finding; TDD interface checks, final-only real validation, tone/format, key-reference, clean-checkout, budget, evidence and MCP scope corrections are encoded |
-| `speckit-implement` | automatic scope complete through convergence T062; T056 partial | TDD implementation and all automatic Rust/shell/security/supply-chain gates pass; approved real local CLI/direct Zed/offline/idempotency/rollback and pre-contact negatives pass, while Azure real, failed-update, clean and remaining clean-checkout evidence remain pending |
+| `speckit-implement` | automatic scope complete through convergence T062; T056 partial | TDD implementation and all automatic Rust/shell/security/supply-chain gates pass; approved real local CLI/direct Zed/offline/idempotency/failed-update/rollback and pre-contact negatives pass, while Azure real, clean and remaining clean-checkout evidence remain pending |
 | `speckit-converge` | clean after remediation | Phase 8 added and completed T058-T062 for probe validation, atomic physical-slot rotation, prior-image rollback, fail-safe cleanup and safe state/override handling; follow-up assessment found no uncovered buildable work, while existing T056 remains the explicit external acceptance gate |
 
 T054 passed `workspace-storage-check`, `test-operational-providers`,

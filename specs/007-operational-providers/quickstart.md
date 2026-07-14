@@ -2,8 +2,8 @@
 
 This is the implemented operational path and the final acceptance procedure.
 The automatic controlled checks and the approved real local CLI/direct-Zed/
-offline/rollback runs pass. Task T056 remains open for Azure and the remaining
-manual rows.
+offline/failed-update/rollback runs pass. Task T056 remains open for Azure and
+the remaining manual rows.
 
 ## Prerequisites
 

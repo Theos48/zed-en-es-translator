@@ -125,7 +125,7 @@ Direccion actual:
   validacion real parcial en `specs/007-operational-providers/`;
 - F011 selecciona LibreTranslate 1.9.6 fijado por digest para el camino local y
   Azure AI Translator Text v3 global F0 para el camino remoto; el camino local
-  CLI/offline/rollback ya paso; Zed directo, Azure real y casos
+  CLI/Zed directo/offline/fallo de update/rollback ya paso; Azure real y casos
   manuales restantes siguen pendientes;
 - el modelo Argos `en-es` se aprovisionara localmente, pero no se redistribuira
   mientras upstream no declare su licencia;
