@@ -1,7 +1,10 @@
 mod common;
 
 use serde_json::Value;
-use translator_core::{ProviderConfiguration, ProviderSelection};
+use translator_core::{
+    contains_obvious_secret, ErrorCode, Provider, ProviderRequest, ProviderResponse,
+    TranslateFailure,
+};
 use translator_mcp::protocol::{translate_text_input_schema, TranslateTextParams};
 use translator_mcp::tools::TranslatorMcpServer;
 
@@ -33,14 +36,36 @@ fn mcp_blocks_confirmed_non_local_secret_before_contact() {
 }
 
 fn translate_text_with_remote_provider(params: TranslateTextParams) -> Value {
-    let config = ProviderConfiguration::from_values(
-        Some("libretranslate"),
-        Some("https://translations.example.invalid"),
-        None,
-        Some("true"),
+    serde_json::to_value(
+        TranslatorMcpServer::with_provider(RemoteGateProvider).translate_text(params),
     )
-    .expect("provider config");
-    let provider = ProviderSelection::from_configuration(config).expect("provider selection");
-    serde_json::to_value(TranslatorMcpServer::with_provider(provider).translate_text(params))
-        .expect("tool result json")
+    .expect("tool result json")
+}
+
+#[derive(Clone)]
+struct RemoteGateProvider;
+
+impl Provider for RemoteGateProvider {
+    fn translate(&self, request: &ProviderRequest) -> Result<ProviderResponse, TranslateFailure> {
+        if !request.remote_confirmed {
+            return Err(TranslateFailure::new(
+                ErrorCode::RemoteConfirmationRequired,
+                "Remote provider confirmation is required for this request.",
+            ));
+        }
+        if request
+            .segments
+            .iter()
+            .any(|segment| contains_obvious_secret(segment))
+        {
+            return Err(TranslateFailure::new(
+                ErrorCode::SecretDetected,
+                "Potential secret content was detected.",
+            ));
+        }
+        Err(TranslateFailure::new(
+            ErrorCode::ProviderFailed,
+            "Provider request failed.",
+        ))
+    }
 }

@@ -1,15 +1,18 @@
+use std::fmt;
+
 use crate::{
-    contains_obvious_secret, validate_segments, ErrorCode, Language, LibreTranslateProvider,
-    ProviderConfiguration, ProviderLocality, ProviderMode, ProviderTarget, Tone,
-    TranslatableSegment, TranslateFailure, MAX_OUTPUT_BYTES,
+    contains_obvious_secret, validate_segments, AzureTranslatorProvider, ErrorCode, Language,
+    LibreTranslateProvider, ProviderConfiguration, ProviderLocality, ProviderMode, ProviderTarget,
+    Tone, TranslatableSegment, TranslateFailure, MAX_OUTPUT_BYTES,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct ProviderRequest {
     pub segments: Vec<String>,
     pub source_language: Language,
     pub target_language: Language,
     pub tone: Tone,
+    pub preserve_formatting: bool,
     pub remote_confirmed: bool,
 }
 
@@ -42,14 +45,46 @@ impl ProviderRequest {
             source_language,
             target_language,
             tone,
+            preserve_formatting: true,
             remote_confirmed,
         })
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+impl fmt::Debug for ProviderRequest {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("ProviderRequest")
+            .field("segment_count", &self.segments.len())
+            .field("source_language", &self.source_language)
+            .field("target_language", &self.target_language)
+            .field("tone", &self.tone)
+            .field("preserve_formatting", &self.preserve_formatting)
+            .field("remote_confirmed", &self.remote_confirmed)
+            .finish()
+    }
+}
+
+#[derive(Clone, PartialEq, Eq)]
 pub struct ProviderResponse {
     pub translated_segments: Vec<String>,
+}
+
+impl fmt::Debug for ProviderResponse {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("ProviderResponse")
+            .field("segment_count", &self.translated_segments.len())
+            .field(
+                "translated_bytes",
+                &self
+                    .translated_segments
+                    .iter()
+                    .map(String::len)
+                    .sum::<usize>(),
+            )
+            .finish()
+    }
 }
 
 pub trait Provider {
@@ -83,6 +118,7 @@ impl Provider for MockProvider {
 pub enum ProviderSelection {
     Mock(MockProvider),
     LibreTranslate(LibreTranslateProvider),
+    AzureTranslator(AzureTranslatorProvider),
 }
 
 impl ProviderSelection {
@@ -107,6 +143,17 @@ impl ProviderSelection {
                     configuration.api_key_env,
                 )))
             }
+            ProviderMode::AzureTranslator => {
+                let reference = configuration.api_key_env.as_deref().ok_or_else(|| {
+                    TranslateFailure::new(
+                        ErrorCode::ProviderNotConfigured,
+                        "Provider API key environment reference is required.",
+                    )
+                })?;
+                Ok(Self::AzureTranslator(
+                    AzureTranslatorProvider::from_env_reference(reference)?,
+                ))
+            }
         }
     }
 }
@@ -123,6 +170,10 @@ impl Provider for ProviderSelection {
             Self::Mock(provider) => provider.translate(request),
             Self::LibreTranslate(provider) => {
                 validate_real_provider_invocation(provider_target(provider), request)?;
+                provider.translate(request)
+            }
+            Self::AzureTranslator(provider) => {
+                validate_remote_request(request)?;
                 provider.translate(request)
             }
         }
@@ -213,17 +264,6 @@ fn validate_real_provider_invocation(
         return Ok(());
     }
 
-    if request
-        .segments
-        .iter()
-        .any(|segment| contains_obvious_secret(segment))
-    {
-        return Err(TranslateFailure::new(
-            ErrorCode::SecretDetected,
-            "Potential secret content was detected.",
-        ));
-    }
-
     if !target.allow_remote() {
         return Err(TranslateFailure::new(
             ErrorCode::ProviderNotConfigured,
@@ -235,6 +275,28 @@ fn validate_real_provider_invocation(
         return Err(TranslateFailure::new(
             ErrorCode::RemoteConfirmationRequired,
             "Remote provider confirmation is required for this request.",
+        ));
+    }
+
+    validate_remote_request(request)
+}
+
+fn validate_remote_request(request: &ProviderRequest) -> Result<(), TranslateFailure> {
+    if !request.remote_confirmed {
+        return Err(TranslateFailure::new(
+            ErrorCode::RemoteConfirmationRequired,
+            "Remote provider confirmation is required for this request.",
+        ));
+    }
+
+    if request
+        .segments
+        .iter()
+        .any(|segment| contains_obvious_secret(segment))
+    {
+        return Err(TranslateFailure::new(
+            ErrorCode::SecretDetected,
+            "Potential secret content was detected.",
         ));
     }
 

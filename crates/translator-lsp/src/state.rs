@@ -5,7 +5,7 @@ use std::fmt;
 
 use lsp_types::{Range, Uri};
 use translator_core::{
-    ErrorCode, InputKind, ProviderConfiguration, ProviderLocality, ProviderMode, TranslateFailure,
+    ErrorCode, InputKind, ProviderConfiguration, ProviderMode, ProviderSelection, TranslateFailure,
 };
 
 #[derive(Clone)]
@@ -189,6 +189,45 @@ pub struct ProviderDescriptor {
     allow_remote: bool,
 }
 
+/// Provider selection and safe descriptor produced from one configuration.
+pub struct ProviderRuntime {
+    selection: ProviderSelection,
+    descriptor: ProviderDescriptor,
+}
+
+impl ProviderRuntime {
+    /// Consume one validated configuration to build execution and locality state.
+    ///
+    /// # Errors
+    ///
+    /// Returns the shared provider configuration error when selection cannot
+    /// be constructed, including a missing referenced remote credential.
+    pub fn from_configuration(
+        configuration: ProviderConfiguration,
+    ) -> Result<Self, TranslateFailure> {
+        let descriptor = ProviderDescriptor::from_configuration(&configuration);
+        let selection = ProviderSelection::from_configuration(configuration)?;
+        Ok(Self {
+            selection,
+            descriptor,
+        })
+    }
+
+    /// Split the already-matched execution provider and safe UI descriptor.
+    pub fn into_parts(self) -> (ProviderSelection, ProviderDescriptor) {
+        (self.selection, self.descriptor)
+    }
+}
+
+impl fmt::Debug for ProviderRuntime {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("ProviderRuntime")
+            .field("descriptor", &self.descriptor)
+            .finish_non_exhaustive()
+    }
+}
+
 impl ProviderDescriptor {
     pub const fn offline() -> Self {
         Self {
@@ -214,11 +253,8 @@ impl ProviderDescriptor {
     pub fn from_configuration(configuration: &ProviderConfiguration) -> Self {
         match configuration.mode {
             ProviderMode::Mock => Self::offline(),
-            ProviderMode::LibreTranslate => match configuration.target.as_ref() {
-                Some(target) if target.locality() == ProviderLocality::Local => Self::local(),
-                Some(target) => Self::remote(target.allow_remote()),
-                None => Self::remote(false),
-            },
+            ProviderMode::LibreTranslate => Self::local(),
+            ProviderMode::AzureTranslator => Self::remote(true),
         }
     }
 

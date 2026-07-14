@@ -29,3 +29,14 @@ fn denies_confirmed_but_not_allowlisted_remote_provider() {
 
     assert_eq!(err.code, ErrorCode::ProviderNotConfigured);
 }
+
+#[test]
+fn confirmation_is_required_before_secret_detection() {
+    let err = check_remote_provider_gate(
+        "API_KEY=fake_test_key_123456",
+        RemoteProviderState::ConfiguredButUnconfirmed,
+    )
+    .expect_err("confirmation must precede content disclosure checks");
+
+    assert_eq!(err.code, ErrorCode::RemoteConfirmationRequired);
+}

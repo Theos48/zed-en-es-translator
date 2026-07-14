@@ -29,8 +29,9 @@ Estado actual:
 - Completado formal: F010 mediante
   `specs/006-direct-zed-translation/`, incluidas tres validaciones manuales en
   Zed.
-- Activo formal: ninguno; F010 esta cerrada.
-- Siguiente candidata: F011.
+- Activo formal: F011 mediante `specs/007-operational-providers/`; especificar,
+  aclarar y planificar estan completos, implementacion/evidencia pendientes.
+- Siguiente gate: aprobar el plan y generar tareas de F011.
 
 Prioridad actual: configurar y validar proveedores reales mediante F011 antes de
 promover F009. No conviene publicar una extension cuyo adaptador de proveedor
@@ -236,10 +237,13 @@ Objetivo: pasar de un adaptador configurable probado con dobles de prueba a dos
 caminos de traduccion reales y verificables desde la extension directa de Zed:
 uno local/offline y otro remoto/online.
 
-Estado: backlog; siguiente candidata formal antes de F009/publicacion. Los
-proveedores concretos se seleccionaran durante `speckit-clarify` y
-`speckit-plan` despues de evaluar privacidad, licencia, mantenimiento, calidad
-ingles-espanol y costo. El camino base no debe exigir una cuenta de pago.
+Estado: activo formal en `specs/007-operational-providers/` antes de
+F009/publicacion. `speckit-clarify` permitio cuenta gratuita y API key sin
+suscripcion de pago obligatoria. `speckit-plan` selecciono LibreTranslate 1.9.6
+fijado por digest como camino local y Azure AI Translator Text v3 global F0
+como camino remoto. El modelo Argos `en-es` se aprovisionara localmente pero no
+se redistribuira mientras upstream no declare su licencia. Implementacion y
+evidencia real siguen pendientes.
 
 Criterios iniciales para `speckit-specify`:
 

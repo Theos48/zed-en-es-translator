@@ -1,3 +1,4 @@
+use std::fmt;
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
@@ -9,11 +10,21 @@ use crate::{
 
 const PROVIDER_RESPONSE_BODY_LIMIT_BYTES: u64 = MAX_OUTPUT_BYTES as u64 + 1024;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct LibreTranslateProvider {
     target: ProviderTarget,
     api_key_env: Option<String>,
     agent: ureq::Agent,
+}
+
+impl fmt::Debug for LibreTranslateProvider {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("LibreTranslateProvider")
+            .field("locality", &self.target.locality())
+            .field("has_api_key_reference", &self.api_key_env.is_some())
+            .finish_non_exhaustive()
+    }
 }
 
 impl LibreTranslateProvider {

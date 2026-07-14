@@ -258,6 +258,7 @@ fn execute_command_response<P: Provider>(
             Response::new_ok(id, ())
         }
         Err(failure) => {
+            documents.invalidate_preview(&target.uri);
             send_safe_message(
                 connection,
                 MessageType::ERROR,

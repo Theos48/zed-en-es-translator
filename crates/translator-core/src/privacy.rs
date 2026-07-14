@@ -5,19 +5,13 @@ pub enum RemoteProviderState {
     Unconfigured,
     ConfiguredButUnconfirmed,
     ConfirmedButNotAllowlisted,
+    ConfirmedAndAllowlisted,
 }
 
 pub fn check_remote_provider_gate(
     source_text: &str,
     state: RemoteProviderState,
 ) -> Result<(), TranslateFailure> {
-    if contains_obvious_secret(source_text) {
-        return Err(TranslateFailure::new(
-            ErrorCode::SecretDetected,
-            "Potential secret content was detected.",
-        ));
-    }
-
     match state {
         RemoteProviderState::Unconfigured => Err(TranslateFailure::new(
             ErrorCode::ProviderNotConfigured,
@@ -31,6 +25,15 @@ pub fn check_remote_provider_gate(
             ErrorCode::ProviderNotConfigured,
             "The provider is not allowlisted for this feature.",
         )),
+        RemoteProviderState::ConfirmedAndAllowlisted => {
+            if contains_obvious_secret(source_text) {
+                return Err(TranslateFailure::new(
+                    ErrorCode::SecretDetected,
+                    "Potential secret content was detected.",
+                ));
+            }
+            Ok(())
+        }
     }
 }
 

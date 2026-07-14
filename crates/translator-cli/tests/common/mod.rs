@@ -10,8 +10,31 @@ pub fn response_server(response_body: &'static str) -> String {
     response_server_with_status(200, response_body)
 }
 
+pub fn operational_local_response_server(response_body: &'static str) -> String {
+    operational_local_response_server_with_status(200, response_body)
+}
+
+pub fn operational_local_response_server_with_status(
+    status: u16,
+    response_body: &'static str,
+) -> String {
+    response_server_on_listener(
+        TcpListener::bind("127.0.0.1:5000").expect("bind operational stub server"),
+        status,
+        response_body,
+    )
+}
+
 pub fn response_server_with_status(status: u16, response_body: &'static str) -> String {
     let listener = TcpListener::bind("127.0.0.1:0").expect("bind stub server");
+    response_server_on_listener(listener, status, response_body)
+}
+
+fn response_server_on_listener(
+    listener: TcpListener,
+    status: u16,
+    response_body: &'static str,
+) -> String {
     let url = format!("http://{}", listener.local_addr().expect("local addr"));
     thread::spawn(move || {
         let (mut stream, _) = listener.accept().expect("accept request");

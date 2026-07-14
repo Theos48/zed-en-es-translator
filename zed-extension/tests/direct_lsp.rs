@@ -43,7 +43,7 @@ fn builds_empty_argument_lsp_command_with_only_allowlisted_environment() {
     let profile = build_lsp_launch_profile(DIRECT_LSP_ID, &settings).expect("profile");
     assert_eq!(profile.command, artifact.display().to_string());
     assert!(profile.args.is_empty());
-    assert_eq!(profile.env.len(), 3);
+    assert_eq!(profile.env.len(), 2);
     assert!(profile
         .env
         .iter()
@@ -61,11 +61,11 @@ fn accepts_provider_configuration_from_zed_binary_environment() {
             vec![
                 (
                     "TRANSLATOR_PROVIDER".to_string(),
-                    "libretranslate".to_string(),
+                    "azure_translator".to_string(),
                 ),
                 (
-                    "TRANSLATOR_PROVIDER_URL".to_string(),
-                    "https://translations.example.invalid".to_string(),
+                    "TRANSLATOR_PROVIDER_API_KEY_ENV".to_string(),
+                    "AZURE_TRANSLATOR_KEY".to_string(),
                 ),
                 (
                     "TRANSLATOR_ALLOW_REMOTE_PROVIDER".to_string(),
@@ -82,11 +82,11 @@ fn accepts_provider_configuration_from_zed_binary_environment() {
         vec![
             (
                 "TRANSLATOR_PROVIDER".to_string(),
-                "libretranslate".to_string(),
+                "azure_translator".to_string(),
             ),
             (
-                "TRANSLATOR_PROVIDER_URL".to_string(),
-                "https://translations.example.invalid".to_string(),
+                "TRANSLATOR_PROVIDER_API_KEY_ENV".to_string(),
+                "AZURE_TRANSLATOR_KEY".to_string(),
             ),
             (
                 "TRANSLATOR_ALLOW_REMOTE_PROVIDER".to_string(),
@@ -106,11 +106,11 @@ fn rejects_conflicting_nested_and_binary_environment_provider_configuration() {
             vec![
                 (
                     "TRANSLATOR_PROVIDER".to_string(),
-                    "libretranslate".to_string(),
+                    "azure_translator".to_string(),
                 ),
                 (
-                    "TRANSLATOR_PROVIDER_URL".to_string(),
-                    "https://translations.example.invalid".to_string(),
+                    "TRANSLATOR_PROVIDER_API_KEY_ENV".to_string(),
+                    "AZURE_TRANSLATOR_KEY".to_string(),
                 ),
                 (
                     "TRANSLATOR_ALLOW_REMOTE_PROVIDER".to_string(),
@@ -221,6 +221,35 @@ fn provider_url_key_values_and_arbitrary_environment_never_enter_errors() {
     )
     .expect_err("arbitrary environment");
     assert!(!arbitrary.to_user_message().contains("PRIVATE_VALUE"));
+}
+
+#[test]
+fn azure_launch_profile_contains_only_selection_and_reference_name() {
+    let artifact = executable_artifact("azure-direct-lsp");
+    let settings = LaunchSettings::from_json_value(Some(&json!({
+        "binary_path": artifact.display().to_string(),
+        "provider": {
+            "mode": "azure_translator",
+            "api_key_env": "AZURE_TRANSLATOR_KEY",
+            "allow_remote": true
+        }
+    })))
+    .expect("Azure launch settings");
+
+    let profile = build_lsp_launch_profile(DIRECT_LSP_ID, &settings).expect("profile");
+    let wire = format!("{:?}", profile.env);
+
+    assert!(wire.contains("AZURE_TRANSLATOR_KEY"));
+    assert!(!wire.contains("api.cognitive"));
+    assert!(!wire.contains("Ocp-Apim"));
+}
+
+#[test]
+fn settings_module_never_reads_the_referenced_parent_secret() {
+    let source = include_str!("../src/settings.rs");
+
+    assert!(!source.contains("std::env::var"));
+    assert!(!source.contains("std::env::vars"));
 }
 
 fn executable_artifact(case: &str) -> PathBuf {

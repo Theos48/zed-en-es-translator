@@ -1,7 +1,7 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
-at specs/006-direct-zed-translation/plan.md
+at specs/007-operational-providers/plan.md
 <!-- SPECKIT END -->
 
 ## Flujo documental del proyecto
@@ -84,3 +84,18 @@ Regla de sincronizacion:
 - No duplicar en `docs/` el detalle operativo que ya vive en `specs/<feature>/`.
 - No borrar detalle del mapa de features: sirve como entrada para futuros
   ciclos `specify -> clarify -> plan -> tasks -> implement`.
+
+## Higiene de worktrees y almacenamiento temporal
+
+- No crear worktrees, clones ni salidas de compilacion del proyecto bajo
+  `/tmp`, `/dev/shm`, `/run/user/*` u otro filesystem `tmpfs`/`ramfs`.
+- Crear worktrees temporales bajo
+  `~/dev/.worktrees/zed-en-es-translator/<nombre>` para que sus artefactos
+  permanezcan en disco y no ocupen RAM/swap.
+- Antes de compilar, ejecutar `make workspace-storage-check`. Los targets Rust
+  lo aplican automaticamente mediante `rust-image`.
+- Auditar todos los checkouts registrados con `make worktree-audit`.
+- Retirar un worktree con `git worktree remove <ruta>` y luego
+  `git worktree prune`; no borrar su directorio directamente.
+- No forzar la retirada de un worktree sucio: revisar y preservar primero sus
+  cambios y comprobar que ningun proceso o montaje lo este usando.
