@@ -62,7 +62,9 @@ La quinta feature implementa el primer proveedor real configurable en
 selecciona un proveedor local/self-hosted compatible con LibreTranslate como
 primer camino real, modela remoto como default-deny con confirmacion por
 solicitud, conserva no-mutacion, limites, redaccion y host limpio, y expone la
-configuracion controlada a CLI, MCP y la extension Zed.
+configuracion controlada a CLI, MCP y la extension Zed. Esta entrega implementa
+el adaptador y sus controles; no instala, despliega ni deja configurado un
+servicio real, y su evidencia automatizada usa servicios loopback simulados.
 
 La sexta feature implementa F010 como flujo directo sin Agent. La extension
 registra el language server `en-es-translator` para Markdown y Plain Text; su
@@ -73,6 +75,13 @@ buffers. La API de Zed 0.7.0 no permite clipboard o panel propio, por lo que
 copy/insert/apply quedan fuera. La configuracion de proveedor directa usa solo
 la allowlist `lsp.en-es-translator.binary.env` validada en Zed real; estas
 decisiones viven en D073-D075 y ADR 0004.
+
+El siguiente hito del roadmap es F011: configurar y validar desde el flujo
+directo de Zed un proveedor local/offline real y otro remoto/online real. F009,
+empaquetado y publicacion, queda despues de ese hito. La seleccion concreta de
+proveedores se cerrara durante `speckit-clarify` y `speckit-plan`, manteniendo
+`MockProvider` como default, secretos fuera del repositorio y confirmacion por
+solicitud para cualquier envio remoto.
 
 Rust se ejecuta mediante la imagen Docker oficial fijada en `Makefile`; no se
 instala `rustc` ni `cargo` globalmente para este proyecto por defecto.

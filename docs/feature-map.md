@@ -30,10 +30,12 @@ Estado actual:
   `specs/006-direct-zed-translation/`, incluidas tres validaciones manuales en
   Zed.
 - Activo formal: ninguno; F010 esta cerrada.
-- Siguiente candidata: F009.
+- Siguiente candidata: F011.
 
-Prioridad actual: cerrar la evidencia manual de F010 antes de promover F009. No
-conviene publicar una extension sin validar en Zed su nuevo camino directo.
+Prioridad actual: configurar y validar proveedores reales mediante F011 antes de
+promover F009. No conviene publicar una extension cuyo adaptador de proveedor
+existe, pero que aun no tiene evidencia de traduccion extremo a extremo con un
+proveedor local/offline real y otro remoto/online real.
 
 Regla de direccion desde F006: las features que toquen Zed deben ser
 extension-first. El Agent Panel puede usarse para validar integracion o cubrir
@@ -95,7 +97,10 @@ Estado actual: feature formal completada en
 `specs/005-real-provider-config/`. Implementa un proveedor local/self-hosted
 compatible con LibreTranslate como primer camino real, mantiene mock/offline
 como default, modela remoto como default-deny con confirmacion por solicitud y
-mantiene la configuracion fuera del texto traducido.
+mantiene la configuracion fuera del texto traducido. Esta feature implemento el
+adaptador y sus fronteras de configuracion; sus pruebas usaron servicios
+loopback simulados y no desplego ni dejo configurada una instancia real para el
+uso cotidiano.
 
 Criterios:
 
@@ -180,8 +185,9 @@ Criterios:
 
 Objetivo: preparar el proyecto para distribucion.
 
-Estado: futuro posterior a F010. La publicacion debe esperar a que exista una
-experiencia directa de extension sin Agent como camino principal.
+Estado: futuro posterior a F011. La publicacion debe esperar a que exista una
+experiencia directa de extension sin Agent y que los caminos local/offline y
+remoto/online hayan sido configurados y validados con proveedores reales.
 
 Criterios:
 
@@ -198,12 +204,10 @@ que el usuario configure o use Agent Panel. Debe sentirse como una extension
 nativa de traduccion para Zed, disenada como producto propio con control fuerte
 para trabajo tecnico, privacidad y preservacion de formato.
 
-Estado: promovida a `specs/006-direct-zed-translation/`. La implementacion y los
-gates automatizados estan completos; faltan tres validaciones manuales reales
-en Zed antes de cerrar la feature formal. La integracion usa code action,
-execute command y hover LSP; las limitaciones de clipboard/panel propio en API
-0.7.0 y el canal real de configuracion `binary.env` quedan registradas en
-D073-D075 y ADR 0004.
+Estado: completada en `specs/006-direct-zed-translation/`, incluidas tres
+validaciones manuales en Zed. La integracion usa code action, execute command y
+hover LSP; las limitaciones de clipboard/panel propio en API 0.7.0 y el canal
+real de configuracion `binary.env` quedan registradas en D073-D075 y ADR 0004.
 
 Criterios iniciales para `speckit-specify`:
 
@@ -225,3 +229,44 @@ Criterios iniciales para `speckit-specify`:
   texto fuera del equipo;
 - documentar cualquier limitacion real de la API de Zed antes de recortar
   alcance.
+
+## F011: configuracion operativa de proveedores reales
+
+Objetivo: pasar de un adaptador configurable probado con dobles de prueba a dos
+caminos de traduccion reales y verificables desde la extension directa de Zed:
+uno local/offline y otro remoto/online.
+
+Estado: backlog; siguiente candidata formal antes de F009/publicacion. Los
+proveedores concretos se seleccionaran durante `speckit-clarify` y
+`speckit-plan` despues de evaluar privacidad, licencia, mantenimiento, calidad
+ingles-espanol y costo. El camino base no debe exigir una cuenta de pago.
+
+Criterios iniciales para `speckit-specify`:
+
+- configurar un proveedor local real, ejecutado con aislamiento y alcance de
+  proyecto, que pueda traducir sin Internet despues de preparar sus artefactos;
+- documentar inicio, parada, actualizacion, datos persistentes, verificacion y
+  rollback del proveedor local sin instalar runtimes o servicios globales en
+  Fedora;
+- configurar un proveedor remoto real mediante HTTPS y host allowlisted, sin
+  convertirlo en default ni enviar texto sin confirmacion por solicitud;
+- mantener `MockProvider` como default determinista cuando no haya
+  configuracion explicita, conforme a la constitucion;
+- mantener secretos reales fuera del repositorio y documentar solo nombres de
+  variables o referencias seguras;
+- mostrar en Zed si la traduccion usara modo offline/local o remoto/online antes
+  de ejecutar la solicitud;
+- validar traduccion inglesa a espanola con contenido sintetico tanto por CLI
+  como por el flujo directo de Zed para ambos proveedores reales;
+- demostrar que no se modifican buffers o archivos y que logs, errores y
+  evidencias no contienen texto fuente, traducciones, URLs sensibles, tokens o
+  secretos;
+- comprobar indisponibilidad, timeout, respuesta invalida, rechazo remoto sin
+  confirmacion y bloqueo de secretos antes del contacto remoto;
+- conservar limites, segmentacion, preservacion Markdown y errores
+  normalizados existentes;
+- registrar evidencia manual redaccionada contra los servicios reales; los
+  stubs siguen siendo validos para automatizacion, pero no cierran por si solos
+  esta feature;
+- no incluir publicacion, proveedor de pago obligatorio, instalacion global en
+  el host ni mutacion automatica del buffer.

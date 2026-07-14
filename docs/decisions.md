@@ -84,9 +84,13 @@ La implementacion detallada de la feature activa vive en `specs/<feature>/`.
 | D075 | Configuracion LSP Zed | La seleccion de proveedor para `translator-lsp` usa exclusivamente las cuatro variables controladas bajo `lsp.en-es-translator.binary.env`; configuracion arbitraria, incompleta o simultanea por `settings.provider` se rechaza. | Aceptada | La validacion real en Zed 1.10.3 mostro que `settings.provider` no modificaba el entorno de lanzamiento y mantenia la accion offline. `binary.env` es la superficie estandar que llega a `language_server_command`; el wrapper valida y reconstruye solo `TRANSLATOR_PROVIDER`, URL, nombre de variable de API key y permiso remoto. Ver ADR 0004. |
 | D076 | Proceso de revision | El repositorio no depende de CodeRabbit ni conserva su configuracion o invocaciones automaticas; los gates obligatorios siguen siendo las pruebas y comprobaciones reproducibles del proyecto, y cualquier revisor de IA futuro sera complementario. | Aceptada | El plan gratuito del repositorio privado no realiza la revision detallada esperada y no se justifica mantener una integracion activa ligada a una suscripcion de pago. |
 | D077 | Calidad y supply chain | GitHub Actions ejecuta `make fmt`, `make clippy`, `make test` y `make deny` en pull requests y `main`; `cargo-deny` vive fijado en la imagen Docker del proyecto y Dependabot revisa semanalmente ambos workspaces Cargo y las acciones. | Aceptada | Conserva una unica interfaz reproducible entre local y CI, cubre calidad determinista y riesgos de dependencias sin instalar herramientas en el host ni depender de un revisor de pago. |
+| D078 | Roadmap de proveedores | Crear F011 como siguiente feature formal para configurar y validar un proveedor local/offline real y otro remoto/online real antes de F009/publicacion; F004/feature 005 se reconoce como implementacion del adaptador y sus controles, no como despliegue operativo de proveedores reales. | Aceptada | Evita confundir pruebas con stubs con traduccion real disponible, obliga a cerrar operacion, privacidad y evidencia extremo a extremo, y garantiza que la extension se publique con ambos caminos comprobados desde la UX directa de Zed. |
 
 ## Preguntas pendientes siguientes
 
-1. Preparar F009/publicacion como siguiente feature formal; la evidencia manual
-   de F010 ya esta cerrada en
-   `specs/006-direct-zed-translation/manual-validation.md`.
+1. Promover F011/configuracion operativa de proveedores reales mediante el flujo
+   completo de Spec Kit.
+2. Seleccionar durante `speckit-clarify` y `speckit-plan` el proveedor
+   local/offline y el remoto/online concretos, con evidencia de privacidad,
+   costo, mantenimiento y calidad ingles-espanol.
+3. Preparar F009/publicacion solo despues de cerrar F011.

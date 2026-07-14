@@ -90,10 +90,13 @@ specs/005-real-provider-config/
 
 Esta iteracion promueve F004 como hito de proveedor real configurable sin
 debilitar la privacidad por defecto. El detalle operativo, gates y evidencia de
-validacion viven en `specs/005-real-provider-config/`.
+validacion viven en `specs/005-real-provider-config/`. El hito implemento el
+adaptador LibreTranslate-compatible y sus controles, pero no desplego ni dejo
+configurado un proveedor real de uso cotidiano; la evidencia automatizada uso
+servicios loopback simulados.
 
-La sexta feature formal tiene implementacion y validacion automatizada
-completas; la validacion manual interactiva sigue abierta:
+La sexta feature formal fue implementada y validada, incluida la validacion
+manual interactiva:
 
 ```text
 specs/006-direct-zed-translation/
@@ -118,7 +121,9 @@ Direccion actual:
 - desde F006, toda feature que toque Zed debe avanzar la extension directa o
   documentar una limitacion concreta de la API de Zed que obligue a un puente;
 - F010 esta completada como flujo directo LSP con smoke manual aprobado;
-- F009/publicacion queda desbloqueada como siguiente candidata formal.
+- F011/configuracion operativa de proveedores reales es la siguiente candidata
+  formal: debe validar un camino local/offline y otro remoto/online reales;
+- F009/publicacion queda pospuesta hasta completar F011.
 
 ## Flujo por feature
 
@@ -224,7 +229,8 @@ specs/005-real-provider-config/
 
 Integra el primer proveedor real configurable sin cambiar el default offline ni
 el limite de privacidad. El detalle operativo vive en
-`specs/005-real-provider-config/`.
+`specs/005-real-provider-config/`. Su alcance fue el adaptador y la frontera de
+configuracion, no desplegar o mantener una instancia real.
 
 ### 6. Flujo directo sin Agent
 
@@ -241,9 +247,29 @@ Completado como sexta feature formal, incluida validacion manual en Zed:
 - usar code action, execute command y hover de LSP porque la API estable 0.7.0
   no ofrece accion generica, clipboard o panel propio.
 
-### 7. Empaquetado y publicacion
+### 7. Configuracion operativa de proveedores reales
 
-Solo despues de tener la base segura y el flujo directo de extension:
+Siguiente candidata formal mediante F011:
+
+- seleccionar durante `clarify`/`plan` un proveedor local/offline real y uno
+  remoto/online real, sin exigir una cuenta de pago como camino base;
+- preparar el proveedor local como servicio reproducible y aislado del
+  proyecto, sin instalar runtimes o servicios globales en Fedora;
+- documentar inicio, parada, actualizacion, persistencia, verificacion y
+  rollback del camino local;
+- configurar el proveedor remoto por HTTPS, host allowlisted, secretos fuera
+  del repositorio y confirmacion por cada solicitud;
+- validar ambos proveedores con traducciones sinteticas reales desde CLI y el
+  flujo directo de Zed;
+- conservar `MockProvider` como default, no-mutacion, redaccion, limites y
+  bloqueo de secretos;
+- exigir evidencia manual contra servicios reales ademas de los stubs
+  automatizados.
+
+### 8. Empaquetado y publicacion
+
+Solo despues de tener la base segura, el flujo directo de extension y F011
+validada:
 
 - mantener remoto default deny;
 - confirmar cada envio fuera del equipo;

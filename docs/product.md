@@ -25,10 +25,11 @@ solo como puente de validacion mientras se aprovechan las tools MCP existentes.
 
 ## Objetivo actual
 
-El siguiente objetivo de producto es convertir la base ya validada en una
-extension directa de Zed. El usuario no debe tener que abrir Agent Panel,
-configurar perfiles Agent ni depender de un modelo intermediario para ejecutar
-una traduccion explicita.
+El flujo directo de extension ya fue implementado y validado. El siguiente
+objetivo de producto es configurar y comprobar dos caminos de traduccion
+reales desde esa extension: un proveedor local/offline y un proveedor
+remoto/online, sin confundir el adaptador ya implementado con un servicio real
+en funcionamiento.
 
 El servidor MCP, el flujo Agent Panel y las validaciones de F007 quedan como
 infraestructura y evidencia historica. No son la superficie principal que debe
@@ -84,7 +85,9 @@ El backlog detallado vive en `docs/feature-map.md`. Resumen:
 7. UX de lectura dentro de Zed.
 8. Privacidad y configuracion.
 9. Flujo directo de extension Zed sin Agent.
-10. Empaquetado y publicacion.
+10. Configuracion operativa de un proveedor real local/offline y otro
+    remoto/online.
+11. Empaquetado y publicacion.
 
 ## Fuera de alcance inicial
 
