@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-14
 
-**Status**: Partial Real-Service Validation — Azure and Direct Zed Pending
+**Status**: Partial Real-Service Validation — Azure and Remaining Manual Cases Pending
 
 **Input**: User description: "Promote F011 from docs/feature-map.md: configure and validate one real local/offline English-to-Spanish provider and one real remote/online provider from both the CLI and the direct Zed workflow. Keep MockProvider as the deterministic default; isolate the local provider inside the project with documented lifecycle, persistence, verification, updates, and rollback; require HTTPS allowlisting, secrets outside the repository, and per-request confirmation for remote use; preserve existing limits, segmentation, Markdown protection, normalized errors, non-mutation, secret blocking, and redaction; require redacted manual evidence against both real services; exclude publication, paid-only providers, global host installation, and buffer mutation."
 
@@ -182,13 +182,13 @@ Out of scope:
 | FR-001-FR-004, FR-007-FR-014 | Exact provider matrix, pinned local profile, fixed Azure adapter, mock default, payload/limit/consent tests | automatic gates pass |
 | FR-005-FR-006, FR-021-FR-022 | Project Make lifecycle, isolated provider plus loopback relay, candidate/current/previous state, offline verification, update, rollback and token-gated removal tests | automatic gates pass; real prepare/offline/idempotency/rollback pass; failed-update and clean rows pending |
 | FR-015-FR-018, FR-SEC-A-D, FR-TEST-A | Core/CLI/LSP/Zed failure, timeout, redaction, secret, non-mutation and evidence-contract matrices | automatic gates pass |
-| FR-019-FR-020; SC-001-SC-009, SC-011 | Four real service/surface rows and real negative/offline/rollback evidence | T056 partial: local CLI/offline/rollback and three pre-contact negatives pass; direct Zed, Azure and remaining rows pending |
+| FR-019-FR-020; SC-001-SC-009, SC-011 | Four real service/surface rows and real negative/offline/rollback evidence | T056 partial: local CLI/direct Zed, offline/rollback and three pre-contact negatives pass; Azure and remaining rows pending |
 | FR-023 | Provider image/license metadata recorded; model license unresolved and redistribution forbidden | implemented publication gate; upstream resolution pending |
 | SC-010 | Full workspace, direct Zed, extension, format, Clippy and cargo-deny gates | pass |
 
 Automatic evidence uses only controlled loopback/process doubles and public
-synthetic fixtures. The separate partial manual record proves the local CLI
-path but does not substitute for the missing real Zed/Azure rows; F011
+synthetic fixtures. The separate partial manual record proves both local CLI
+and direct Zed paths but does not substitute for the missing real Azure rows; F011
 therefore remains incomplete.
 
 ## Assumptions

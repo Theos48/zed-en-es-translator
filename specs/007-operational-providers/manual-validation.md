@@ -1,6 +1,6 @@
 # Manual Validation: Operational Real Providers
 
-**Status**: Partial real execution — local CLI/lifecycle pass; T056 incomplete
+**Status**: Partial real execution — local CLI/direct Zed/lifecycle pass; T056 incomplete
 
 **Rule**: Replace only bracketed safe fields after implementation. Never add
 source text, translated text, segments, response bodies, credentials, headers,
@@ -15,8 +15,8 @@ containing content.
 | Local image | `sha256:1de2d7056bb8...` |
 | Local model versions | `en-es 1.0; es-en 1.9; user-provisioned, not redistributed` |
 | Remote service | `Azure AI Translator Text v3, global single-service, F0` |
-| Validation window UTC | `2026-07-14T11:07:10Z / 2026-07-14T11:36:42Z` |
-| Reviewer | `Codex terminal validation` |
+| Validation window UTC | `2026-07-14T11:07:10Z / 2026-07-14T11:47:52Z` |
+| Reviewer | `Codex terminal validation + user Zed observation` |
 
 ## Real success matrix
 
@@ -43,13 +43,13 @@ contact/no-contact outcomes.
 | Case | Timestamp UTC | Surface | Locality | Actual normalized outcome | Within budget | Source unchanged | Buffer unchanged | Redaction | Result |
 |---|---|---|---|---|---|---|---|---|---|
 | `LOCAL-CLI-01` | `2026-07-14T11:36:42Z` | CLI | local | `success at clean commit 1d1b204151d2` | `yes (1.139 s)` | `yes` | n/a | `pass` | `pass` |
-| `LOCAL-ZED-01` | `[UTC]` | direct Zed | local | `[success/error code]` | `[yes/no]` | `[yes/no]` | `[yes/no]` | `[pass/fail]` | `[pass/fail]` |
+| `LOCAL-ZED-01` | `2026-07-14T11:47:52Z` | direct Zed | local | `success at clean commit 02590922bd82` | `yes (<15 s, reviewer-observed)` | `yes` | `yes` | `pass` | `pass` |
 | `REMOTE-CLI-01` | `[UTC]` | CLI | remote | `[success/error code]` | `[yes/no]` | `[yes/no]` | n/a | `[pass/fail]` | `[pass/fail]` |
 | `REMOTE-ZED-01` | `[UTC]` | direct Zed | remote | `[success/error code]` | `[yes/no]` | `[yes/no]` | `[yes/no]` | `[pass/fail]` | `[pass/fail]` |
 
 Reviewer attestation: translated output was observed ephemerally as valid,
 non-mock English-to-Spanish output and was not copied into this record:
-`pass for LOCAL-CLI-01; remaining success rows pending`.
+`pass for LOCAL-CLI-01 and LOCAL-ZED-01; remote success rows pending`.
 
 ## Local operation and recovery
 
@@ -103,15 +103,16 @@ this evidence file.
 
 ## Known incomplete prerequisites
 
-- `LOCAL-CLI-01` was rerun from clean commit `1d1b204151d2`; the remaining real
-  success rows still require the same clean-checkout discipline.
-- The direct Zed binary is prepared, but both interactive Zed rows require a
-  reviewer to observe the preview and buffer hash in the editor.
+- `LOCAL-CLI-01` was rerun from clean commit `1d1b204151d2`, and
+  `LOCAL-ZED-01` passed from clean commit `02590922bd82`; the two remote success
+  rows still require the same clean-checkout discipline.
+- The local direct Zed row passed; `REMOTE-ZED-01` still requires a reviewer to
+  observe the preview and buffer state in the editor.
 - No Azure F0 credential/reference was present, so no real Azure request was
   attempted.
 - No reviewed provider-lock change exists for a real failed-update exercise.
 - Destructive cleanup remains deferred so the prepared offline provider is
-  available for the pending local Zed row.
+  available for the pending failed-update and cleanup cases.
 
 ## Final gates
 

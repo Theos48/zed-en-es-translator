@@ -1,9 +1,9 @@
 # Quickstart: Operational Real Providers
 
 This is the implemented operational path and the final acceptance procedure.
-The automatic controlled checks and the approved real local CLI/offline/
-rollback run pass. Task T056 remains open for direct Zed, Azure real and the
-remaining manual rows.
+The automatic controlled checks and the approved real local CLI/direct-Zed/
+offline/rollback runs pass. Task T056 remains open for Azure and the remaining
+manual rows.
 
 ## Prerequisites
 
