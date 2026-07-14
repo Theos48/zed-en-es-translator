@@ -6,7 +6,7 @@ use serde_json::{json, Value};
 use translator_core::MAX_INPUT_BYTES;
 use translator_lsp::state::ProviderDescriptor;
 
-use common::{file_uri, range, TestClient};
+use common::{file_uri, range, ResponseExt as _, TestClient};
 
 #[test]
 fn empty_range_translates_current_saved_document_snapshot() {
@@ -21,14 +21,14 @@ fn empty_range_translates_current_saved_document_snapshot() {
         "workspace/executeCommand",
         execute_params(&uri, 3, "markdown"),
     );
-    assert_eq!(execute.0.result, Some(Value::Null));
+    assert_eq!(execute.0.result(), Some(&Value::Null));
 
     let hover = client.request(
         "textDocument/hover",
         json!({"textDocument":{"uri":uri},"position":{"line":0,"character":5}}),
     );
     assert_eq!(
-        hover.result.expect("hover")["contents"]["value"],
+        hover.result().expect("hover")["contents"]["value"],
         "Lee la documentacion."
     );
     client.shutdown();
@@ -48,7 +48,7 @@ fn empty_range_rejects_stale_untitled_unsupported_and_oversized_targets() {
         execute_params("untitled:Untitled-1", 1, "text"),
     ] {
         let response = client.request("workspace/executeCommand", params);
-        assert!(response.error.is_some());
+        assert!(response.error().is_some());
     }
 
     client.open("file:///workspace/main.rs", 1, "rust", "fn main() {}");
@@ -56,11 +56,11 @@ fn empty_range_rejects_stale_untitled_unsupported_and_oversized_targets() {
         "workspace/executeCommand",
         execute_params("file:///workspace/main.rs", 1, "text"),
     );
-    assert!(unsupported.error.is_some());
+    assert!(unsupported.error().is_some());
 
     client.change(&uri, 3, &"x".repeat(MAX_INPUT_BYTES + 1));
     let oversized = client.request("workspace/executeCommand", execute_params(&uri, 3, "text"));
-    assert!(oversized.error.is_some());
+    assert!(oversized.error().is_some());
     client.shutdown();
 }
 

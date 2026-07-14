@@ -4,7 +4,9 @@ use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 
-use lsp_server::{Connection, ErrorCode as RpcErrorCode, Message, Notification, Request, Response};
+use lsp_server::{
+    Connection, ErrorCode as RpcErrorCode, Message, Notification, Request, Response, ResponseKind,
+};
 use lsp_types::{
     CodeAction, CodeActionKind, CodeActionOptions, CodeActionOrCommand, CodeActionParams,
     CodeActionProviderCapability, Command, DidChangeTextDocumentParams, DidCloseTextDocumentParams,
@@ -301,11 +303,13 @@ fn confirm_remote_request(
             .map_err(|_| confirmation_required())?;
         match message {
             Message::Response(response) if response.id == confirmation_id => {
-                let confirmed = response.error.is_none()
-                    && response
-                        .result
-                        .and_then(|value| serde_json::from_value::<MessageActionItem>(value).ok())
-                        .is_some_and(|action| action.title == CONFIRM_ACTION);
+                let confirmed = match response.response_kind {
+                    ResponseKind::Ok { result } => {
+                        serde_json::from_value::<MessageActionItem>(result)
+                            .is_ok_and(|action| action.title == CONFIRM_ACTION)
+                    }
+                    ResponseKind::Err { .. } => false,
+                };
                 if !confirmed {
                     return Err(confirmation_required());
                 }

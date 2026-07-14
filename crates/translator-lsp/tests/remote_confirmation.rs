@@ -13,7 +13,7 @@ use translator_core::{
 };
 use translator_lsp::state::ProviderDescriptor;
 
-use common::{range, TestClient};
+use common::{range, ResponseExt as _, TestClient};
 
 #[test]
 fn remote_confirmation_is_correlated_default_deny_and_per_request() {
@@ -48,7 +48,7 @@ fn remote_confirmation_is_correlated_default_deny_and_per_request() {
     client.respond(Response::new_ok(confirmation.id, Value::Null));
     let denied = client.receive_response(&execute_id).0;
     assert!(denied
-        .error
+        .error()
         .expect("denial")
         .message
         .contains("REMOTE_CONFIRMATION_REQUIRED"));
@@ -61,13 +61,13 @@ fn remote_confirmation_is_correlated_default_deny_and_per_request() {
         json!({"title":"Send this request"}),
     ));
     let accepted = client.receive_response(&second_id).0;
-    assert_eq!(accepted.result, Some(Value::Null));
+    assert_eq!(accepted.result(), Some(&Value::Null));
     assert_eq!(calls.load(Ordering::SeqCst), 1);
 
     let third_id = client.begin_request("workspace/executeCommand", execute_params(uri, 1));
     let third_confirmation = receive_confirmation(&client);
     client.respond(Response::new_ok(third_confirmation.id, Value::Null));
-    assert!(client.receive_response(&third_id).0.error.is_some());
+    assert!(client.receive_response(&third_id).0.error().is_some());
     assert_eq!(calls.load(Ordering::SeqCst), 1);
     client.shutdown();
 }
@@ -92,7 +92,7 @@ fn document_change_while_confirming_invalidates_the_request() {
         json!({"title":"Send this request"}),
     ));
     let response = client.receive_response(&execute_id).0;
-    assert!(response.error.is_some());
+    assert!(response.error().is_some());
     assert_eq!(calls.load(Ordering::SeqCst), 0);
     client.shutdown();
 }
@@ -115,7 +115,7 @@ fn cancellation_while_confirming_denies_without_provider_contact() {
 
     let response = client.receive_response(&execute_id).0;
     assert!(response
-        .error
+        .error()
         .expect("cancellation denial")
         .message
         .contains("REMOTE_CONFIRMATION_REQUIRED"));
