@@ -15,7 +15,7 @@ containing content.
 | Local image | `sha256:1de2d7056bb8...` |
 | Local model versions | `en-es 1.0; es-en 1.9; user-provisioned, not redistributed` |
 | Remote service | `Azure AI Translator Text v3, global single-service, F0` |
-| Validation window UTC | `2026-07-14T11:07:10Z / 2026-07-14T12:26:56Z` |
+| Validation window UTC | `2026-07-14T11:07:10Z / 2026-07-14T12:28:35Z` |
 | Reviewer | `Codex terminal validation + user Zed observation` |
 
 ## Real success matrix
@@ -97,7 +97,7 @@ this evidence file.
 | `REMOTE-REUSE-01` | `2026-07-14T12:26:00Z` | prior consent reused | `no (second request; loopback-only process namespace)` | `REMOTE_CONFIRMATION_REQUIRED; fresh second prompt; host UI showed generic error` | `pass` |
 | `REMOTE-SECRET-01` | `2026-07-14T11:13:29Z` | synthetic secret after confirmation | `no` | `SECRET_DETECTED` | `pass` |
 | `REMOTE-MISSING-KEY-01` | `2026-07-14T11:13:29Z` | missing referenced key | `no` | `PROVIDER_NOT_CONFIGURED` | `pass` |
-| `REMOTE-AUTH-QUOTA-01` | `[UTC]` | rejected credential or quota | `[yes/unknown]` | `[error code]` | `[pass/fail]` |
+| `REMOTE-AUTH-QUOTA-01` | `2026-07-14T12:28:35Z` | rejected credential | `yes (single confirmed request)` | `PROVIDER_FAILED; 879 ms; redaction passed` | `pass` |
 | `REMOTE-TIMEOUT-01` | `[UTC]` | timeout | `[yes/unknown]` | `[error code]` | `[pass/fail]` |
 | `REMOTE-RESPONSE-01` | `[UTC]` | invalid/oversized response | `[yes/unknown]` | `[error code]` | `[pass/fail]` |
 
