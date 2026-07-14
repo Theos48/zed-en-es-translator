@@ -103,17 +103,17 @@ translated content.
 
 ---
 
-## Phase 4: User Story 2 - Use a Real Remote Provider With Explicit Consent (Priority: P2)
+## Phase 4: User Story 2 - Keep Optional Remote Use Explicitly Gated (Priority: P2)
 
-**Goal**: Add the fixed Azure Translator v3 F0 path while proving exact target,
-minimal payload, safe credential reference, fresh consent, secret blocking,
-bounded response validation, and zero automatic retries.
+**Goal**: Retain the fixed optional Azure Translator v3 adapter while proving
+exact target, minimal payload, safe credential reference, fresh consent,
+secret blocking, bounded response validation, and zero automatic retries. It
+is not a supported-use or F011 live-service prerequisite.
 
 **Independent Test**: A controlled transport records attempted contacts and
 proves denial/dismissal/stale/mismatch/reuse/secret cases make zero calls while
 one freshly confirmed safe request sends only ordered segments and fixed
-language metadata; real Azure validation remains a separate approved manual
-gate.
+language metadata; no Azure account or real contact is required.
 
 ### Tests first (RED)
 
@@ -133,11 +133,11 @@ gate.
 - [X] T032 [US2] Emit only the three safe Azure selection entries including the key-reference name, reject nested/binary conflicts, and prove `settings.rs` neither reads nor copies the actual key value from the parent Zed environment into settings, arguments, or the generated launch profile in `zed-extension/src/settings.rs`
 - [X] T033 [US2] Wire Azure through the existing CLI request-specific confirmation and redacted result boundary without adding arguments, raw provider diagnostics, or persistent content in `crates/translator-cli/src/main.rs`
 - [X] T034 [US2] Run the focused Azure/core/CLI/LSP/extension RED-to-GREEN suites through `Makefile` and confirm a second remote request cannot reuse the first request's consent
-- [X] T035 [US2] Finalize but do not execute the `REMOTE-CLI-01`/`REMOTE-ZED-01` procedure, parent-environment key-reference prerequisite, fresh-consent cases, 15-second budget check, safe case IDs, and redacted fields in `specs/007-operational-providers/manual-validation.md`; real Azure execution is deferred to T056 after T054 passes
+- [X] T035 [US2] Document the optional adapter's controlled fresh-consent, key-reference, 15-second budget, response and redaction cases in `specs/007-operational-providers/manual-validation.md` without requiring `REMOTE-CLI-01`/`REMOTE-ZED-01`, an account, a key, or real Azure contact
 
-**Checkpoint**: US2 is independently testable with controlled doubles. Real
-Azure execution remains deferred to T056 and requires explicit account/privacy
-review, a user-supplied external key reference, and per-request consent.
+**Checkpoint**: US2 is independently testable and complete with controlled
+doubles. Any later real Azure use remains advanced opt-in functionality and is
+not an F011 acceptance gate.
 
 ---
 
@@ -207,11 +207,11 @@ quality checks, complete redacted evidence review, and synchronize feature
 status without widening scope.
 
 - [X] T052 Make the final gate T001 contract case GREEN by adding `test-operational-providers` with the exact Rust and shell test inventory, include it in the supported validation interface, and keep automatic execution offline/credential-free in `Makefile`
-- [X] T053 [P] Document implemented lifecycle commands, security/privacy boundaries, Azure account/F0 caveats, resource budgets, license/publication gate, worktree storage guard, complete removal, and MCP/Agent compatibility-only scope in `README.md` and `specs/007-operational-providers/quickstart.md`
+- [X] T053 [P] Document implemented lifecycle commands, no-account supported path, optional Azure privacy boundaries, resource budgets, license/publication gate, worktree storage guard, complete removal, and MCP/Agent compatibility-only scope in `README.md` and `specs/007-operational-providers/quickstart.md`
 - [X] T054 Run `make workspace-storage-check`, `make test-operational-providers`, `make test-real-provider-config`, `make test-direct-zed-translation`, `make test-zed-extension`, `make test`, `make fmt`, and `make clippy`, fixing only failures attributable to paths listed in `specs/007-operational-providers/tasks.md`
 - [X] T055 Run `make deny` and review `ops/providers/libretranslate/provider.lock`, `Cargo.lock`, `zed-extension/Cargo.lock`, `compose.yaml`, and model-license metadata for mutable references, unreviewed sources, unresolved redistribution, or dependency drift
-- [ ] T056 Only after T054 and T055 pass, obtain explicit approval and required external prerequisites, execute the real clean-checkout local and Azure CLI/direct-Zed matrix plus offline/rollback/negative cases, record 120-second readiness and 15-second invocation compliance, then review all rows for non-mutation/redaction and leave status incomplete if anything is missing or prohibited in `specs/007-operational-providers/manual-validation.md`; progress: `LOCAL-CLI-01`, `LOCAL-ZED-01`, `REMOTE-DENY-01`, `REMOTE-DISMISS-01`, `REMOTE-STALE-01`, `REMOTE-REUSE-01`, `REMOTE-SECRET-01`, `REMOTE-MISSING-KEY-01`, `REMOTE-AUTH-QUOTA-01`, offline, failed-update and rollback pass, while Azure success and the remaining manual cases stay open
-- [X] T057 Update implemented requirement traceability, checklist results, gate status, and remaining external publication/license blockers without claiming F011 complete prematurely in `specs/007-operational-providers/spec.md`, `specs/007-operational-providers/checklists/provider-operations-privacy.md`, and `specs/007-operational-providers/plan.md`
+- [X] T056 Only after T054 and T055 pass and explicit destructive-cleanup approval exists, verify ordinary stop/clean preservation, execute only `make provider-local-clean CONFIRM=remove-provider-data`, prove removal is limited to the fixed project resources, record `LOCAL-CLEAN-01`, and complete the non-mutation/redaction review in `specs/007-operational-providers/manual-validation.md`; required real `LOCAL-CLI-01`, `LOCAL-ZED-01`, offline, idempotency, failed-update and rollback evidence already passes, while optional remote observations are supplemental and require no account/key
+- [X] T057 Synchronize the accepted no-account scope, implemented traceability, checklist results, gate status, optional remote boundary, future embedded-local direction, independent publication/license blocker and evidence contract across `specs/007-operational-providers/spec.md`, `specs/007-operational-providers/plan.md`, `specs/007-operational-providers/research.md`, `specs/007-operational-providers/data-model.md`, `specs/007-operational-providers/contracts/`, `specs/007-operational-providers/quickstart.md`, `specs/007-operational-providers/checklists/`, `tests/integration/operational_provider_evidence_contract.sh`, `README.md`, `docs/PLAN.md`, `docs/feature-map.md`, `docs/decisions.md`, and `docs/adr/0005-operational-provider-pair.md`
 
 ---
 
@@ -229,8 +229,9 @@ status without widening scope.
 - **US4 (Phase 6)**: Depends on US1 and US2 adapters; lifecycle-failure coverage
   also depends on US3.
 - **Phase 7 (Polish)**: Depends on every selected story. T056 additionally
-  depends on T054 and T055 plus explicit approval/external prerequisites.
-  Missing real-service evidence keeps F011 open rather than being bypassed.
+  depends on T054 and T055 plus explicit approval for the project-scoped
+  destructive cleanup. Missing required local evidence keeps F011 open; live
+  remote evidence is not required.
 
 ### Within each phase/story
 
@@ -240,12 +241,12 @@ status without widening scope.
   subsets GREEN.
 - T011-T014 must fail before T015-T019; T021 requires their GREEN result and
   prepares documentation only and performs no real service execution.
-- T022-T027 must fail before T028-T033; T035 requires GREEN automatic tests,
-  but prepares documentation only and performs no real Azure execution.
+- T022-T027 must fail before T028-T033; T035 requires GREEN automatic tests
+  and documents that no real Azure execution is required.
 - T036-T037 must fail before T038-T042.
 - T044-T047 must fail before T048-T050.
-- T056 is the only task authorized to execute real providers and cannot start
-  until the full automatic and supply-chain gates T054-T055 pass.
+- T056 is the only remaining task authorized to destructively remove the real
+  local provider resources and cannot start until T054-T055 pass.
 - Production Rust uses typed `Result`/`?`; `unwrap`/`expect` remain test-only.
 - Refactor only after the relevant RED tests pass and never weaken exact-target,
   consent, secret, size, timeout, response, non-mutation, or redaction checks.
@@ -325,21 +326,22 @@ Task T047: Write evidence privacy contract tests.
 
 1. **Foundation**: exact provider configuration and safe locality.
 2. **US1**: real project-scoped offline translation.
-3. **US2**: exact Azure path with per-request consent.
+3. **US2**: optional exact Azure path with per-request consent, controlled-test only for F011.
 4. **US3**: update/rollback/removal safety.
 5. **US4**: complete failure diagnosis and redaction.
-6. **Completion**: full automated gates plus real-service evidence review.
+6. **Completion**: full automated gates plus real local-service evidence and cleanup review.
 
 ### Security stop conditions
 
 - Stop before any global install, `sudo`, service/system configuration, Docker
   global prune, unrestricted endpoint, raw credential storage, or real `.env`.
-- Stop before real LibreTranslate/Azure execution unless T054-T055 pass, the
-  user explicitly authorizes the external operation, and prerequisites are
-  supplied safely; only T056 performs that execution.
-- Stop and keep F011 incomplete if model redistribution rights, F0 eligibility,
-  endpoint/privacy terms, automatic gates, or required evidence no longer meet
-  the reviewed contracts.
+- Stop before real LibreTranslate execution or project-data cleanup unless
+  T054-T055 pass and the user explicitly authorizes the operation; only T056
+  performs the remaining destructive cleanup.
+- Stop and keep F011 incomplete if automatic gates or required local evidence
+  no longer meet the reviewed contracts. Model redistribution rights continue
+  to gate packaging/publication independently; optional remote changes disable
+  that adapter without invalidating mock/local.
 
 ---
 

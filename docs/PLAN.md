@@ -121,15 +121,18 @@ Direccion actual:
 - desde F006, toda feature que toque Zed debe avanzar la extension directa o
   documentar una limitacion concreta de la API de Zed que obligue a un puente;
 - F010 esta completada como flujo directo LSP con smoke manual aprobado;
-- F011/configuracion operativa de proveedores reales esta implementada y en
-  validacion real parcial en `specs/007-operational-providers/`;
-- F011 selecciona LibreTranslate 1.9.6 fijado por digest para el camino local y
-  Azure AI Translator Text v3 global F0 para el camino remoto; el camino local
-  CLI/Zed directo/offline/fallo de update/rollback ya paso; Azure real y casos
-  manuales restantes siguen pendientes;
+- F011/configuracion operativa de proveedores reales esta completada en
+  `specs/007-operational-providers/`;
+- F011 selecciona LibreTranslate 1.9.6 fijado por digest como camino soportado
+  sin cuenta ni API key; CLI/Zed directo/offline/fallo de update/rollback y
+  limpieza project-scoped pasan;
+- Azure AI Translator Text v3 permanece como adaptador avanzado opcional bajo
+  target fijo, consentimiento por solicitud y pruebas controladas; no requiere
+  evidencia real ni bloquea F011;
 - el modelo Argos `en-es` se aprovisionara localmente, pero no se redistribuira
   mientras upstream no declare su licencia;
-- F009/publicacion queda pospuesta hasta completar F011.
+- F009/publicacion queda pospuesta mientras se decide la secuencia con F012 y
+  se resuelve el gate independiente de licencia/redistribucion.
 
 ## Flujo por feature
 
@@ -270,22 +273,22 @@ specs/007-operational-providers/
 ```
 
 - usar LibreTranslate 1.9.6 fijado por digest como proveedor local/offline;
-- usar Azure AI Translator Text v3, recurso global F0, como proveedor
-  remoto/online sin exigir un plan Translator de pago como camino base;
+- conservar Azure AI Translator Text v3 como adaptador remoto avanzado
+  opcional, nunca como requisito del camino base;
 - preparar el proveedor local como servicio reproducible y aislado del
   proyecto, sin instalar runtimes o servicios globales en Fedora;
 - mantener LibreTranslate solo en red interna y publicar loopback mediante un
   relay project-scoped de destino fijo, sin logs de contenido;
 - documentar inicio, parada, actualizacion, persistencia, verificacion y
   rollback del camino local;
-- configurar el proveedor remoto por HTTPS, host allowlisted, secretos fuera
+- mantener el adaptador remoto por HTTPS, host allowlisted, secretos fuera
   del repositorio y confirmacion por cada solicitud;
-- validar ambos proveedores con traducciones sinteticas reales desde CLI y el
-  flujo directo de Zed;
+- validar el proveedor local con traducciones sinteticas reales desde CLI y el
+  flujo directo de Zed; validar la seguridad remota con dobles controlados;
 - conservar `MockProvider` como default, no-mutacion, redaccion, limites y
   bloqueo de secretos;
-- exigir evidencia manual contra servicios reales ademas de los stubs
-  automatizados.
+- exigir evidencia manual contra el servicio local real ademas de los stubs
+  automatizados, sin cuenta ni API key.
 - no redistribuir el modelo Argos `en-es` mientras su licencia siga sin
   declarar en upstream; este gate debe resolverse antes de publicar un bundle.
 

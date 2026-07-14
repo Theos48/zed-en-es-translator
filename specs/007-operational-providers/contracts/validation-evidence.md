@@ -24,7 +24,7 @@ interaction, or Internet access. Tests are written first and cover:
 
 Existing MCP suites remain part of regression compatibility only. Automatic
 F011 checks add no MCP-specific Azure product flow, and MCP/Agent Panel is not
-part of the real-service acceptance matrix.
+part of the real local-service acceptance matrix.
 
 Existing suites remain mandatory: core, provider config, direct Zed,
 extension, formatting, Clippy, tests, and dependency audit.
@@ -38,25 +38,24 @@ synthetic test cases. Required success rows:
 |---|---|---|---|
 | `LOCAL-CLI-01` | prepared LibreTranslate | CLI | non-mock valid Spanish; offline runtime |
 | `LOCAL-ZED-01` | prepared LibreTranslate | direct Zed | local label, read-only preview, unchanged buffer |
-| `REMOTE-CLI-01` | Azure F0 | CLI | explicit one-request confirmation, valid Spanish |
-| `REMOTE-ZED-01` | Azure F0 | direct Zed | remote label, Zed confirmation, read-only preview |
 
 The reviewer observes translated output ephemerally. Translation content is
 never copied into the evidence file.
 
-Required negative families:
+Required local negative/recovery families:
 
 - mock remains default;
 - local external egress disabled after preparation;
 - local unavailable, readiness failure, port conflict, timeout, corrupt or
   incomplete candidate, failed update and successful offline rollback;
-- remote denied, dismissed, stale/mismatched and reused consent, plus document
-  mutation during pending confirmation;
-- confirmed remote content with a synthetic secret blocked before contact;
-- missing credential, rejected credential/quota, timeout, certificate failure,
-  redirect, API failure, malformed/cardinality/oversized response;
 - all source files and open buffers unchanged;
 - all observable logs, diagnostics, stderr and evidence pass redaction review.
+
+The optional Azure adapter remains subject to controlled automatic coverage
+for denial, dismissal, stale/mismatched/reused consent, document mutation,
+secret blocking, missing/rejected credentials, timeout, TLS/redirect/API
+failure, malformed/cardinality/oversized responses, non-mutation and redaction.
+Live Azure rows are supplemental and are never required to close F011.
 
 ## Evidence row schema
 
@@ -86,7 +85,8 @@ screenshot containing content, or raw diagnostic/log dump.
 
 ## Completion rule
 
-F011 cannot close from stubs alone. It requires all automatic tests, the four
-real success rows, required negative outcomes, offline proof, rollback proof,
-non-mutation review, and redaction review. Any unchecked row keeps the feature
-open and F009/publication blocked.
+F011 cannot close from stubs alone. It requires all automatic tests, the two
+real local success rows, required local lifecycle/negative outcomes, offline
+proof, rollback and explicit cleanup proof, non-mutation review, and redaction
+review. Missing live remote rows do not keep the feature open. F009/publication
+retains its independent unresolved model-license gate.

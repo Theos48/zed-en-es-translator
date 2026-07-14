@@ -1,21 +1,22 @@
 # Data Model: Operational Real Providers
 
-This feature adds operational state and one provider adapter; it does not add a
-database. Versioned records are declarative files, project-local runtime state
-is disposable metadata, and secrets/content are never persisted.
+This feature adds operational state and retains one optional provider adapter;
+it does not add a database. Versioned records are declarative files,
+project-local runtime state is disposable metadata, and secrets/content are
+never persisted.
 
 ## OperationalProviderProfile
 
-Reviewed identity of a supported provider.
+Reviewed identity of a supported provider or optional advanced adapter.
 
 | Field | Type | Rules |
 |---|---|---|
-| `id` | enum | `mock`, `libretranslate_local`, or `azure_translator` |
+| `id` | enum | `mock`, supported `libretranslate_local`, or optional `azure_translator` |
 | `locality` | enum | `offline`, `local`, or `remote` |
 | `software_identity` | string | Safe release/service identity; never a URL containing user data |
 | `language_pair` | tuple | Exactly `en -> es` |
 | `endpoint_policy` | enum | none, loopback-only, or fixed Azure global host |
-| `credential_reference_required` | bool | False for supported local profile; true for Azure |
+| `credential_reference_required` | bool | False for supported local profile; true only when optional Azure is selected |
 | `runtime_artifacts` | list | Safe lock references, never source/translation/credentials |
 | `readiness_policy` | enum | mock-ready, local health+translation, or remote configuration-only |
 
@@ -99,7 +100,8 @@ any stopped state
 
 ## RemoteAccessConfiguration
 
-Parsed process configuration for Azure Translator.
+Parsed process configuration for the optional Azure Translator adapter. This
+entity is absent from the supported no-account local path.
 
 | Field | Type | Rules |
 |---|---|---|
@@ -148,15 +150,16 @@ Ephemeral execution state shared by real-provider paths.
 
 ## ValidationRecord
 
-Human-reviewed, redacted evidence row. It may be committed only after its
-privacy checks pass.
+Human-reviewed, redacted evidence row. Required real-service rows are local;
+optional remote observations may be retained as supplemental controlled
+evidence. A row may be committed only after its privacy checks pass.
 
 | Field | Required | Example-safe value |
 |---|---|---|
 | `case_id` | yes | `LOCAL-CLI-01` |
 | `timestamp_utc` | yes | ISO-8601 timestamp |
 | `surface` | yes | `cli` or `zed-direct` |
-| `locality` | yes | `local` or `remote` |
+| `locality` | yes | `local`; `remote` only for supplemental observations |
 | `provider_identity` | yes | Safe release/service/tier label |
 | `artifact_identity` | local only | Digest prefix/model versions, no host path |
 | `expected_outcome` | yes | Normalized condition |

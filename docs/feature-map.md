@@ -29,14 +29,15 @@ Estado actual:
 - Completado formal: F010 mediante
   `specs/006-direct-zed-translation/`, incluidas tres validaciones manuales en
   Zed.
-- Activo formal: F011 mediante `specs/007-operational-providers/`; especificar,
-  aclarar y planificar estan completos, implementacion/evidencia pendientes.
-- Siguiente gate: aprobar el plan y generar tareas de F011.
+- Completado formal: F011 mediante `specs/007-operational-providers/`, incluido
+  el camino local real, ciclo de vida, limpieza y evidencia redaccionada.
+- Siguiente gate: preparar F012 para el modelo local embebido/no-Docker antes
+  de decidir el alcance de publicacion.
 
-Prioridad actual: configurar y validar proveedores reales mediante F011 antes de
-promover F009. No conviene publicar una extension cuyo adaptador de proveedor
-existe, pero que aun no tiene evidencia de traduccion extremo a extremo con un
-proveedor local/offline real y otro remoto/online real.
+Prioridad actual: preparar F012 sobre la base local/offline real y sin cuenta
+cerrada por F011. El remoto permanece opcional y controlado; la siguiente
+mejora de UX de proveedor debe estudiar un modelo local embebido/no-Docker con
+licencia, tamano, actualizacion y empaquetado revisados.
 
 Regla de direccion desde F006: las features que toquen Zed deben ser
 extension-first. El Agent Panel puede usarse para validar integracion o cubrir
@@ -187,8 +188,8 @@ Criterios:
 Objetivo: preparar el proyecto para distribucion.
 
 Estado: futuro posterior a F011. La publicacion debe esperar a que exista una
-experiencia directa de extension sin Agent y que los caminos local/offline y
-remoto/online hayan sido configurados y validados con proveedores reales.
+experiencia directa de extension sin Agent, un camino local real validado sin
+cuenta y una decision legalmente revisada para cualquier modelo distribuido.
 
 Criterios:
 
@@ -233,17 +234,17 @@ Criterios iniciales para `speckit-specify`:
 
 ## F011: configuracion operativa de proveedores reales
 
-Objetivo: pasar de un adaptador configurable probado con dobles de prueba a dos
-caminos de traduccion reales y verificables desde la extension directa de Zed:
-uno local/offline y otro remoto/online.
+Objetivo: pasar de un adaptador configurable probado con dobles de prueba a un
+camino de traduccion local/offline real y verificable desde la extension
+directa de Zed, conservando remoto como opcion avanzada default-deny.
 
-Estado: activo formal en `specs/007-operational-providers/` antes de
-F009/publicacion. `speckit-clarify` permitio cuenta gratuita y API key sin
-suscripcion de pago obligatoria. `speckit-plan` selecciono LibreTranslate 1.9.6
-fijado por digest como camino local y Azure AI Translator Text v3 global F0
-como camino remoto. El modelo Argos `en-es` se aprovisionara localmente pero no
-se redistribuira mientras upstream no declare su licencia. Implementacion y
-evidencia real siguen pendientes.
+Estado: completado formal en `specs/007-operational-providers/` antes de
+F009/publicacion. La aclaracion vigente reemplazo el permiso inicial de cuenta:
+el camino soportado no exige cuenta, suscripcion ni API key. LibreTranslate
+1.9.6 fijado por digest paso CLI, Zed directo, offline, update fallido,
+rollback y limpieza project-scoped. Azure permanece opcional con
+pruebas de seguridad controladas. El modelo Argos `en-es` se aprovisiona
+localmente pero no se redistribuira mientras upstream no declare su licencia.
 
 Criterios iniciales para `speckit-specify`:
 
@@ -252,16 +253,17 @@ Criterios iniciales para `speckit-specify`:
 - documentar inicio, parada, actualizacion, datos persistentes, verificacion y
   rollback del proveedor local sin instalar runtimes o servicios globales en
   Fedora;
-- configurar un proveedor remoto real mediante HTTPS y host allowlisted, sin
-  convertirlo en default ni enviar texto sin confirmacion por solicitud;
+- mantener cualquier adaptador remoto opcional mediante HTTPS y host
+  allowlisted, sin convertirlo en default ni enviar texto sin confirmacion por
+  solicitud;
 - mantener `MockProvider` como default determinista cuando no haya
   configuracion explicita, conforme a la constitucion;
 - mantener secretos reales fuera del repositorio y documentar solo nombres de
   variables o referencias seguras;
 - mostrar en Zed si la traduccion usara modo offline/local o remoto/online antes
   de ejecutar la solicitud;
-- validar traduccion inglesa a espanola con contenido sintetico tanto por CLI
-  como por el flujo directo de Zed para ambos proveedores reales;
+- validar traduccion inglesa a espanola local real con contenido sintetico
+  tanto por CLI como por el flujo directo de Zed;
 - demostrar que no se modifican buffers o archivos y que logs, errores y
   evidencias no contienen texto fuente, traducciones, URLs sensibles, tokens o
   secretos;
@@ -269,8 +271,31 @@ Criterios iniciales para `speckit-specify`:
   confirmacion y bloqueo de secretos antes del contacto remoto;
 - conservar limites, segmentacion, preservacion Markdown y errores
   normalizados existentes;
-- registrar evidencia manual redaccionada contra los servicios reales; los
-  stubs siguen siendo validos para automatizacion, pero no cierran por si solos
-  esta feature;
+- registrar evidencia manual redaccionada contra el servicio local real; los
+  stubs siguen siendo validos para automatizar controles remotos, pero no
+  cierran por si solos el camino local;
 - no incluir publicacion, proveedor de pago obligatorio, instalacion global en
   el host ni mutacion automatica del buffer.
+
+## F012: proveedor local embebido sin Docker
+
+Objetivo: ofrecer la experiencia normal de traduccion sin cuenta, API key,
+servicio remoto ni ciclo Docker visible para el usuario, manteniendo ejecucion
+local, privacidad y actualizaciones verificables.
+
+Estado: futuro; requiere un ciclo Spec Kit propio despues de cerrar F011.
+
+Criterios iniciales para `speckit-specify`:
+
+- evaluar runtimes/modelos on-device con soporte real `en -> es`, licencia y
+  procedencia aptas para distribucion;
+- medir tamano de extension/modelo, RAM, CPU, latencia y tiempo de primera
+  preparacion en el host objetivo;
+- decidir si el modelo se empaqueta, se descarga con consentimiento o se
+  gestiona como artefacto project/user-scoped con integridad verificable;
+- conservar `MockProvider` como fallback determinista, no-mutacion, limites,
+  segmentacion, proteccion Markdown, redaccion y errores normalizados;
+- no instalar runtimes o servicios globales ni depender de endpoints web no
+  oficiales;
+- validar CLI y flujo directo Zed con red deshabilitada despues de cualquier
+  preparacion autorizada.

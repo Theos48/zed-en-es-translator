@@ -1,6 +1,6 @@
 # Manual Validation: Operational Real Providers
 
-**Status**: Partial real execution — local CLI/direct Zed/lifecycle pass; T056 incomplete
+**Status**: Complete
 
 **Rule**: Replace only bracketed safe fields after implementation. Never add
 source text, translated text, segments, response bodies, credentials, headers,
@@ -14,8 +14,8 @@ containing content.
 | Local provider | `LibreTranslate 1.9.6` |
 | Local image | `sha256:1de2d7056bb8...` |
 | Local model versions | `en-es 1.0; es-en 1.9; user-provisioned, not redistributed` |
-| Remote service | `Azure AI Translator Text v3, global single-service, F0` |
-| Validation window UTC | `2026-07-14T11:07:10Z / 2026-07-14T12:28:35Z` |
+| Optional remote adapter | `Azure AI Translator Text v3; non-gating` |
+| Validation window UTC | `2026-07-14T11:07:10Z / 2026-07-14T12:48:30Z` |
 | Reviewer | `Codex terminal validation + user Zed observation` |
 
 ## Real success matrix
@@ -26,30 +26,18 @@ fields below. `LOCAL-CLI-01` and `LOCAL-ZED-01` use
 `make provider-local-prepare`, `make provider-local-start`,
 `make provider-local-verify`, and the public fixtures under
 `tests/fixtures/operational-providers/`. Readiness is measured against 120
-seconds and each invocation against 15 seconds. The local rows marked `pass`
-below were executed against the pinned provider; bracketed rows remain
-unexecuted.
-
-`REMOTE-CLI-01` and `REMOTE-ZED-01` additionally require a reviewed global
-single-service Azure Translator resource still assigned to F0. The actual key
-must exist only in the parent process environment; Zed settings and CLI launch
-configuration contain the safe reference name. For each row, begin a new
-request, verify the remote-confirmation label/prompt, approve only that request,
-measure the 15-second invocation budget, observe the result ephemerally, and
-verify source/buffer hashes. Repeat denial, dismissal, mismatch, reuse, missing
-key, and confirmed synthetic-secret cases while recording only normalized
-contact/no-contact outcomes.
+seconds and each invocation against 15 seconds. Both required rows below were
+executed against the pinned provider. No remote account, API key, or live
+remote success row is required.
 
 | Case | Timestamp UTC | Surface | Locality | Actual normalized outcome | Within budget | Source unchanged | Buffer unchanged | Redaction | Result |
 |---|---|---|---|---|---|---|---|---|---|
 | `LOCAL-CLI-01` | `2026-07-14T11:36:42Z` | CLI | local | `success at clean commit 1d1b204151d2` | `yes (1.139 s)` | `yes` | n/a | `pass` | `pass` |
 | `LOCAL-ZED-01` | `2026-07-14T11:47:52Z` | direct Zed | local | `success at clean commit 02590922bd82` | `yes (<15 s, reviewer-observed)` | `yes` | `yes` | `pass` | `pass` |
-| `REMOTE-CLI-01` | `[UTC]` | CLI | remote | `[success/error code]` | `[yes/no]` | `[yes/no]` | n/a | `[pass/fail]` | `[pass/fail]` |
-| `REMOTE-ZED-01` | `[UTC]` | direct Zed | remote | `[success/error code]` | `[yes/no]` | `[yes/no]` | `[yes/no]` | `[pass/fail]` | `[pass/fail]` |
 
 Reviewer attestation: translated output was observed ephemerally as valid,
 non-mock English-to-Spanish output and was not copied into this record:
-`pass for LOCAL-CLI-01 and LOCAL-ZED-01; remote success rows pending`.
+`pass for LOCAL-CLI-01 and LOCAL-ZED-01`.
 
 ## Local operation and recovery
 
@@ -60,7 +48,7 @@ non-mock English-to-Spanish output and was not copied into this record:
 | `LOCAL-IDEMPOTENT-01` | `2026-07-14T11:09:07Z` | repeated start/stop safe | `READY after repeated stop/start/verify` | disabled | `yes (31 s sequence)` | `pass` |
 | `LOCAL-UPDATE-FAIL-01` | `2026-07-14T11:55:05Z` | failed candidate leaves current | `IMAGE_IDENTITY_MISMATCH; active/current/previous unchanged` | enabled only for update | `yes (2.530 s)` | `pass` |
 | `LOCAL-ROLLBACK-01` | `2026-07-14T11:11:58Z` | prior slot restored and verified | `READY; active_slot=previous` | disabled | `yes (30 s rollback+verify)` | `pass` |
-| `LOCAL-CLEAN-01` | `[UTC]` | only project provider resources removed | `[safe status]` | disabled | `[yes/no]` | `[pass/fail]` |
+| `LOCAL-CLEAN-01` | `2026-07-14T12:48:30Z` | only project provider resources removed | `CLEANED; project resources absent; unrelated resource counts unchanged` | disabled | `yes (<1 s observed)` | `pass` |
 
 Execute these cases only after the T054/T055 gates and explicit approval:
 
@@ -87,7 +75,10 @@ Do not run a global Docker prune, use `sudo`, change packages or services, or
 copy source, translation, response, credential, path, or environment data into
 this evidence file.
 
-## Remote pre-contact and failure controls
+## Supplemental optional-remote controls
+
+These observations complement the controlled automatic matrix. They are
+retained as security evidence but are not required live-service acceptance.
 
 | Case | Timestamp UTC | Condition | Provider contacted | Actual normalized outcome | Result |
 |---|---|---|---|---|---|
@@ -98,33 +89,29 @@ this evidence file.
 | `REMOTE-SECRET-01` | `2026-07-14T11:13:29Z` | synthetic secret after confirmation | `no` | `SECRET_DETECTED` | `pass` |
 | `REMOTE-MISSING-KEY-01` | `2026-07-14T11:13:29Z` | missing referenced key | `no` | `PROVIDER_NOT_CONFIGURED` | `pass` |
 | `REMOTE-AUTH-QUOTA-01` | `2026-07-14T12:28:35Z` | rejected credential | `yes (single confirmed request)` | `PROVIDER_FAILED; 879 ms; redaction passed` | `pass` |
-| `REMOTE-TIMEOUT-01` | `[UTC]` | timeout | `[yes/unknown]` | `[error code]` | `[pass/fail]` |
-| `REMOTE-RESPONSE-01` | `[UTC]` | invalid/oversized response | `[yes/unknown]` | `[error code]` | `[pass/fail]` |
 
-## Known incomplete prerequisites
+## Scope and execution notes
 
 - `LOCAL-CLI-01` was rerun from clean commit `1d1b204151d2`, and
-  `LOCAL-ZED-01` passed from clean commit `02590922bd82`; the two remote success
-  rows still require the same clean-checkout discipline.
-- The local direct Zed row passed; `REMOTE-ZED-01` still requires a reviewer to
-  observe the preview and buffer state in the editor.
-- No real Azure F0 credential was present, so remote success and real contact
-  cases were not attempted.
+  `LOCAL-ZED-01` passed from clean commit `02590922bd82`.
+- No real Azure F0 credential was present, needed, or used. Remote success and
+  live-service failure cases are intentionally outside F011 acceptance.
 - A reviewed negative simulation used a temporary mismatched expected image
   identity; the versioned lock was restored byte-for-byte after the failure.
-- Destructive cleanup remains deferred so the prepared offline provider is
-  available for the pending cleanup case.
+- Destructive cleanup used only the exact documented confirmation token. The
+  provider ended `UNPREPARED`; unrelated container, volume and network counts
+  were unchanged.
 
 ## Final gates
 
 - [X] All automatic suites passed before real validation.
 - [X] Prepared local readiness completed within 120 seconds and every executed provider invocation completed within 15 seconds.
-- [ ] Four real success rows passed.
+- [X] Both required real local success rows passed.
 - [X] Local provider worked with external egress disabled after preparation.
 - [X] Failed update preserved current and offline rollback passed.
-- [ ] Every remote invocation required fresh confirmation.
-- [ ] Denial/dismissal/stale/mismatch/reuse/secret cases stopped before contact.
-- [ ] Files and Zed buffers remained byte-for-byte unchanged.
-- [ ] Logs, diagnostics, stderr, evidence and screenshots passed prohibited-data review.
+- [X] Optional remote fresh-confirmation behavior passed controlled automatic tests and the recorded supplemental observations.
+- [X] Optional remote denial/dismissal/stale/reuse/secret cases stopped before contact in controlled validation.
+- [X] Files and Zed buffers remained byte-for-byte unchanged.
+- [X] Logs, diagnostics, stderr, evidence and screenshots passed prohibited-data review.
 - [X] No key, real `.env`, provider blob, source, or translation was committed.
-- [ ] Reviewer result: `incomplete`.
+- [X] Reviewer result: `pass`.

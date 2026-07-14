@@ -128,10 +128,15 @@ is never part of the repository's ordinary `make clean`.
 - Separating ordinary build cleanup from provider data avoids accidental
   deletion of large, prepared artifacts.
 
-## Decision: Azure Translator Text F0 is the supported remote provider
+## Decision: The supported F011 path requires no external account
 
-The remote acceptance path will use one global single-service Azure Translator
-resource on the F0 tier and the fixed endpoint:
+F011 closes on the real local LibreTranslate path through CLI and direct Zed.
+The already implemented Azure Translator adapter remains available only as an
+advanced opt-in integration with controlled automated security coverage. A
+live Azure account, resource, API key, or real remote response is not part of
+F011 acceptance.
+
+The optional adapter keeps its fixed endpoint:
 
 ```text
 POST https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=en&to=es
@@ -144,26 +149,27 @@ redirect, proxy inheritance, or retry is forbidden.
 
 **Rationale**:
 
-- F0 provides a no-paid-Translator-plan acceptance path and documented quota
-  with no Translator overage on that tier.
-- The fixed global endpoint allows an exact host/path allowlist and avoids new
-  settings beyond the existing four provider environment keys.
-- Azure documents that synchronous text translation processes text at the REST
-  API and does not persist submitted text.
+- Requiring account creation, identity/payment data, resource provisioning and
+  secret management would make the primary extension experience materially
+  more burdensome than the validated local no-account path.
+- Removing live Azure from acceptance does not require removing the hardened
+  adapter or weakening its fixed target, consent, secret and redaction gates.
+- Controlled tests prove the optional remote boundary deterministically
+  without disclosing content or depending on third-party service state.
 
 **Privacy boundary**: the v3 global endpoint is handled by the closest
 available data center and Microsoft documents that failover may route a request
 outside that geography. It therefore provides no project-enforced data
 residency. The current authoritative data-privacy page states no persistence
 for Text Translation but does not make an explicit training-use promise; this
-plan does not infer one. F011 sends public synthetic content for acceptance and
-requires per-request disclosure/confirmation for any later use.
+plan does not infer one. Any later optional use requires per-request
+disclosure/confirmation and remains outside F011 real-service acceptance.
 
 **Account caveat**: creating an Azure free account may require a phone number
-and payment card. Azure documents that a free account must move to pay-as-you-go
-after its introductory period to remain active; the Translator resource itself
-must remain explicitly on F0 for this feature. The quickstart must present this
-before the user opts into remote validation.
+and payment card. Azure documents that a free account may need to move to
+pay-as-you-go after its introductory period to remain active. Those
+prerequisites are precisely why Azure is not required for supported use or
+feature completion.
 
 **Sources**:
 
@@ -177,13 +183,28 @@ before the user opts into remote validation.
 
 **Alternatives considered**:
 
-- DeepL API Free: rejected because current API terms permit indefinite storage
-  of submitted content for service improvement unless stronger terms apply.
-- Google Cloud Translation: rejected because account/billing configuration can
-  transition into paid usage rather than a hard no-overage F0 resource.
+- An unofficial Google Translate web endpoint such as the one used by
+  `vscode-comment-translate`: rejected as a supported product dependency
+  because it emulates a private web-client protocol, submits content through
+  an undocumented endpoint/query, and offers no stable API or reviewed data
+  contract.
+- Google Cloud Translation: rejected for the no-account baseline because its
+  official setup requires a Cloud project, billing and authentication.
+- DeepL API Free and other credentialed services: rejected as the baseline
+  because they still require third-party account/credential management and an
+  external privacy dependency.
 - Public community LibreTranslate mirrors: rejected because endpoint ownership,
   privacy terms, availability, and quota are not controlled enough for a
   supported remote contract.
+- An embedded no-Docker local model: preferred as a future UX direction but
+  deferred until runtime size, model provenance/license, update, packaging and
+  Zed integration have their own specification and acceptance plan.
+
+**Additional sources**:
+
+- [vscode-comment-translate Google adapter](https://github.com/intellism/vscode-comment-translate/blob/master/src/translate/GoogleTranslate.ts)
+- [Google Cloud Translation setup](https://cloud.google.com/translate/docs/setup)
+- [Google Cloud Translation authentication](https://cloud.google.com/translate/docs/authentication)
 
 ## Decision: Extend provider selection without widening configuration
 
@@ -252,7 +273,7 @@ Before any pinned image, model, API version, host, F0 eligibility, service
 privacy statement, or terms reference changes, `provider-local-update` must
 stop at a review gate. Certificate failure and unexpected redirect fail closed;
 free-tier removal or privacy-policy drift leaves mock/local available and
-blocks remote acceptance until a new planning decision is recorded.
+blocks optional remote use until a new planning decision is recorded.
 
 **Rationale**:
 

@@ -1,9 +1,10 @@
-# Contract: Azure Translator Remote Provider
+# Contract: Optional Azure Translator Remote Adapter
 
 ## Service boundary
 
-The only supported managed service is Azure AI Translator Text, global
-single-service resource, F0 tier, API version 3.0.
+The only implemented managed-service adapter is Azure AI Translator Text,
+global single-service resource, F0 tier, API version 3.0. It is an advanced
+opt-in path and is not required for supported F011 use or acceptance.
 
 ```http
 POST /translate?api-version=3.0&from=en&to=es HTTP/1.1
@@ -44,7 +45,7 @@ its protocol mapping is separately specified and tested.
 
 ## Account and consent disclosure
 
-Before remote setup/acceptance, documentation must state:
+Before any optional remote setup, documentation must state:
 
 - an Azure account and API key are required;
 - account creation may require phone and payment-card information;
@@ -60,13 +61,13 @@ Before remote setup/acceptance, documentation must state:
   guarantee;
 - the current authoritative privacy page does not explicitly promise that
   submitted text is excluded from training; the project makes no such claim
-  and restricts acceptance to public synthetic content;
+  and permits only deliberately selected content after disclosure;
 - content leaves the machine and user confirmation is required for every
   request regardless of provider privacy statements.
 
 If F0, endpoint, retention/privacy, account eligibility, or terms no longer
-match the reviewed contract, remote validation stops. Mock and local paths
-remain available.
+match the reviewed contract, optional remote use stops. Mock and local paths
+remain available and F011 completion is unaffected.
 
 ## Transport controls
 

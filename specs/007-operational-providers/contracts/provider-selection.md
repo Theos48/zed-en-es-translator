@@ -9,7 +9,7 @@ No real secret may be stored as a value of these keys.
 |---|---|---|---|---|
 | Mock default | absent or `mock` | absent | absent | absent/false |
 | LibreTranslate local | `libretranslate` | `http://127.0.0.1:5000` | absent | absent/false |
-| Azure remote | `azure_translator` | absent | required safe variable name | exactly `true` |
+| Azure remote (optional advanced) | `azure_translator` | absent | required safe variable name | exactly `true` |
 
 Unknown, duplicate, incomplete, conflicting, empty, or mode-inapplicable values
 fail with `PROVIDER_NOT_CONFIGURED` before provider contact.
@@ -18,7 +18,7 @@ fail with `PROVIDER_NOT_CONFIGURED` before provider contact.
 
 - Mock: `offline`
 - Reviewed LibreTranslate profile: `local`
-- Azure Translator: `remote - confirmation required`
+- Optional Azure Translator: `remote - confirmation required`
 
 CLI and LSP execution plus the Zed code-action label derive from the same
 parsed `ProviderConfiguration`. Startup fails closed if locality and selected
@@ -46,7 +46,7 @@ The existing generic LibreTranslate adapter may retain broader loopback test
 support internally, but the F011 operational commands and acceptance profile
 use only the exact target above.
 
-### Azure Translator
+### Optional Azure Translator
 
 - Scheme: exact `https`.
 - Host: exact `api.cognitive.microsofttranslator.com`.
@@ -59,7 +59,7 @@ use only the exact target above.
 ## Request gates
 
 The existing request/segment/response contracts remain authoritative. Every
-real invocation uses this order:
+supported local or optional remote invocation uses this order:
 
 1. input/file/format/limit validation;
 2. segmentation and protection;

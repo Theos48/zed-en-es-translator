@@ -1,10 +1,11 @@
-# ADR 0005: pareja operativa de proveedores reales
+# ADR 0005: proveedor local operativo y remoto opcional
 
 ## Estado
 
-Aceptado e implementado para F011. La validacion real local por CLI, operacion
-offline y rollback paso; Zed directo, Azure real y el resto de la matriz
-manual siguen pendientes en `specs/007-operational-providers/`.
+Aceptado, implementado y validado para F011, matizado por D086. La validacion
+real local por CLI y Zed directo, operacion offline, update fallido, rollback,
+limpieza project-scoped y revision final pasan en
+`specs/007-operational-providers/`.
 
 ## Contexto
 
@@ -12,8 +13,9 @@ F004/feature 005 implemento un adaptador compatible con LibreTranslate y los
 controles genericos de provider, pero su evidencia automatizada usa stubs. F010
 ya expone la traduccion mediante CLI y un flujo directo LSP de Zed. Antes de
 publicar, el proyecto necesita demostrar un camino local que funcione sin red
-despues de prepararse y uno remoto gratuito/no pago que mantenga consentimiento
-por solicitud, secretos fuera del repositorio y destinos exactos.
+despues de prepararse. El remoto conserva consentimiento por solicitud,
+secretos fuera del repositorio y destino exacto, pero no debe obligar a crear
+una cuenta o gestionar una API key para usar o cerrar la feature.
 
 La seleccion tambien debe resolver operacion cotidiana: versionado, integridad,
 persistencia, readiness real, actualizacion, rollback, recursos, privacidad y
@@ -49,9 +51,10 @@ Los modelos Argos se adquieren localmente para el usuario y se verifican contra
 hashes observados por el proyecto. No se redistribuyen ni se hornean en una
 imagen mientras la licencia del paquete `en-es` siga sin declarar en upstream.
 
-### Proveedor remoto
+### Adaptador remoto opcional
 
-Usar Azure AI Translator Text v3 con un recurso global single-service en F0:
+Conservar Azure AI Translator Text v3 como integracion avanzada opt-in con un
+recurso global single-service en F0:
 
 ```text
 https://api.cognitive.microsofttranslator.com/translate
@@ -67,15 +70,16 @@ Se deshabilitan redirects, proxy heredado y retries. Cada solicitud requiere
 confirmacion nueva, seguida del gate de secretos, antes de contacto. Se
 conservan los limites y `ErrorCode` existentes.
 
-La documentacion debe explicar que una cuenta Azure puede pedir telefono y
+Si alguien decide usar la integracion opcional, la documentacion debe explicar
+que una cuenta Azure puede pedir telefono y
 tarjeta, y puede requerir conversion de la cuenta a pay-as-you-go tras el
 periodo introductorio, aunque el recurso Translator permanezca explicitamente
 en F0. El endpoint global no garantiza residencia geografica y la pagina
 vigente de privacidad documenta no persistencia, pero no promete explicitamente
-exclusion de entrenamiento; el proyecto no afirmara esas garantias y usara
-contenido sintetico publico para aceptacion. Si cambian F0, endpoint,
-privacidad, retencion o terminos, el remoto se bloquea hasta nueva revision;
-mock/local siguen disponibles.
+exclusion de entrenamiento; el proyecto no afirmara esas garantias. Si cambian
+F0, endpoint, privacidad, retencion o terminos, el remoto se bloquea hasta
+nueva revision; mock/local siguen disponibles. F011 no exige cuenta, key ni
+contacto real con Azure.
 
 ## Razon
 
@@ -85,9 +89,9 @@ mock/local siguen disponibles.
   ausencia de egress.
 - Separar el relay loopback de LibreTranslate conserva acceso desde el host sin
   abrir una ruta de salida en el contenedor que procesa la traduccion.
-- Azure F0 ofrece cuota cerrada sin un plan Translator de pago obligatorio y
-  un endpoint global exacto, mejor que un mirror comunitario o una URL remota
-  arbitraria.
+- El adaptador Azure ya implementado conserva un endpoint global exacto y
+  controles utiles, pero su cuenta/key lo hacen inadecuado como experiencia
+  base obligatoria.
 - Reutilizar las cuatro variables D075 evita otra superficie de secretos en
   Zed.
 - Mantener el mock como default y exigir confirmacion fresca conserva la
@@ -99,14 +103,19 @@ mock/local siguen disponibles.
 - El repositorio agrega assets Compose/lock, un relay Python ejecutado dentro
   de la misma imagen fijada y comandos Make para el ciclo de vida local, pero
   no un runtime instalado en Fedora.
-- Los tests automaticos seguiran usando dobles controlados; cuatro pruebas
-  reales y una matriz negativa redactada seran obligatorias para cerrar F011.
+- Los tests automaticos seguiran usando dobles controlados; dos pruebas locales
+  reales, ciclo de vida/recuperacion/limpieza y revision redactada son
+  obligatorios para cerrar F011. Azure real no lo es.
 - La operacion local consume descargas y almacenamiento apreciables y conserva
   un slot previo para rollback.
-- El usuario remoto debe gestionar una cuenta/key fuera del repositorio y
-  aceptar el limite de privacidad de enviar contenido confirmado a Microsoft.
+- El usuario que opte por remoto debe gestionar su cuenta/key fuera del
+  repositorio y aceptar el limite de privacidad de enviar contenido confirmado
+  a Microsoft; el usuario normal no necesita hacerlo.
 - F009 no puede redistribuir el modelo actual hasta resolver su licencia o
   seleccionar otra estrategia revisada.
+- Un proveedor local embebido/no-Docker queda diferido a F012 porque requiere
+  evaluar licencia/procedencia, runtime, tamano, recursos, actualizacion y
+  empaquetado.
 
 ## Criterio de revision
 

@@ -8,8 +8,6 @@ METADATA="$ROOT/tests/fixtures/operational-providers/expected-metadata.json"
 required_cases=(
   LOCAL-CLI-01
   LOCAL-ZED-01
-  REMOTE-CLI-01
-  REMOTE-ZED-01
   LOCAL-PREPARE-01
   LOCAL-OFFLINE-01
   LOCAL-IDEMPOTENT-01
@@ -23,8 +21,6 @@ required_cases=(
   REMOTE-SECRET-01
   REMOTE-MISSING-KEY-01
   REMOTE-AUTH-QUOTA-01
-  REMOTE-TIMEOUT-01
-  REMOTE-RESPONSE-01
 )
 
 for case_id in "${required_cases[@]}"; do

@@ -2,8 +2,7 @@
 
 This is the implemented operational path and the final acceptance procedure.
 The automatic controlled checks and the approved real local CLI/direct-Zed/
-offline/failed-update/rollback runs pass. Task T056 remains open for Azure and
-the remaining manual rows.
+offline/failed-update/rollback/cleanup runs pass. T056 and F011 are complete.
 
 ## Prerequisites
 
@@ -15,19 +14,8 @@ the remaining manual rows.
   installed by this feature.
 - Local preparation/update needs Internet access; prepared local translation,
   status, stop, and rollback do not.
-- Remote validation needs an Azure account, a global single-service Translator
-  resource explicitly assigned to F0, and its key. Azure account creation may
-  require a phone number and payment card. Azure says a free account may need
-  conversion to pay-as-you-go after its introductory period to remain active;
-  the Translator resource must still remain F0. Review current
-  [Translator pricing](https://azure.microsoft.com/en-us/pricing/details/translator/)
-  and [Azure account options](https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account)
-  before opting in.
-- The fixed global endpoint may process at the closest available data center
-  and fail over outside that geography. Microsoft documents no persistence for
-  Text Translation, but its current privacy page does not explicitly promise
-  exclusion from model training. This project therefore makes no residency or
-  training-use guarantee and uses public synthetic content for acceptance.
+- No external account, subscription, API key, or remote service is required
+  for supported use or F011 acceptance.
 
 Never create or commit a real `.env` file. Never paste a provider key into Zed
 settings, command arguments, a terminal transcript, or validation evidence.
@@ -54,10 +42,9 @@ The storage guard rejects a checkout or worktree on `/tmp`, `/dev/shm`,
 build storage. Keep the main checkout and every registered worktree on the
 documented persistent path and use `make worktree-audit` when adding one.
 
-Do not execute real local preparation, local acceptance, Azure acceptance, or
-write actual manual outcomes until every automatic gate above passes. Story
-implementation may prepare the redacted procedures earlier, but real execution
-is a final gated activity.
+Do not execute real local preparation or write actual manual outcomes until
+every automatic gate above passes. Story implementation may prepare the
+redacted procedures earlier, but real execution is a final gated activity.
 
 ## 2. Prepare the local provider
 
@@ -136,63 +123,21 @@ Restart the language server, invoke the code action on the public synthetic
 fixture, verify the `[local]` label and read-only hover preview, then verify the
 buffer/file hash is unchanged. Do not capture the hover content in evidence.
 
-## 5. Configure Azure Translator F0 safely
+## 5. Understand the optional remote adapter
 
-Create the resource from Microsoft's current
-[resource guide](https://learn.microsoft.com/en-us/azure/ai-services/translator/how-to/create-translator-resource).
-Use the global single-service Translator resource on F0; custom/region-specific
-endpoints are unsupported.
-
-Choose a safe environment variable name and supply its value through your
-existing local secret-capable session, outside repository files:
-
-```text
-AZURE_TRANSLATOR_KEY=<secret value exists only in the launching environment>
-```
-
-Provider selection uses references only:
-
-```text
-TRANSLATOR_PROVIDER=azure_translator
-TRANSLATOR_PROVIDER_API_KEY_ENV=AZURE_TRANSLATOR_KEY
-TRANSLATOR_ALLOW_REMOTE_PROVIDER=true
-```
-
-`TRANSLATOR_PROVIDER_URL` must be absent. Configuration alone never confirms a
-request.
-
-## 6. Validate remote CLI and direct Zed
-
-For each surface, submit only the public synthetic fixture, confirm that the
-UI/CLI identifies remote disclosure, grant exactly this one request, observe a
-valid Spanish result, and retain no translated text.
-
-Repeat with a second request and verify confirmation is required again. Then
-run denial/dismissal/stale/mismatch and synthetic-secret cases and prove the
-provider was not contacted. Validate timeout, missing/rejected key, quota, and
-safe generic failure handling without recording raw service output.
-
-On the reviewed Zed 1.10.3 host, dismissing `window/showMessageRequest` may be
-rendered only as the generic `Error: execute command`; the redacted LSP result
-must still be `REMOTE_CONFIRMATION_REQUIRED`. Record the normalized result and
-the generic host rendering, never a raw log.
-
-Treat document mutation while that prompt is open as a distinct stale-target
-case: the bound request must fail before contact with `INVALID_INPUT`. Zed may
-render the same generic `Error: execute command`; record the normalized LSP
-result rather than inferring an error code from the host UI.
-
-For Zed local settings, add only the three safe provider-selection values
-above. The actual `AZURE_TRANSLATOR_KEY` value must already exist in the Zed
-parent process environment. The extension passes only the reference name and
-must not read or copy the value into `binary.env`, settings, arguments, the
-launch profile, diagnostics, or evidence.
+The hardened Azure adapter remains in the codebase as advanced opt-in
+functionality, but this quickstart does not ask the user to create an account,
+resource, or key. Its exact target, safe credential-reference, per-request
+confirmation, secret-blocking, timeout, response-validation and redaction
+boundaries are proven by `make test-operational-providers` and documented in
+`contracts/azure-translator.md`. A live remote run contributes no required
+F011 acceptance row.
 
 MCP/Agent Panel is only a compatibility bridge. Its existing regression tests
 must remain green, but it is not configured or validated as an F011 product
-surface and contributes no row to the real-service acceptance matrix.
+surface and contributes no row to the real local-service acceptance matrix.
 
-## 7. Exercise update and rollback
+## 6. Exercise update and rollback
 
 An update is never automatic. After reviewing and changing the versioned lock:
 
@@ -209,7 +154,7 @@ make provider-local-rollback
 make provider-local-verify
 ```
 
-## 8. Stop or explicitly remove local provider data
+## 7. Stop or explicitly remove local provider data
 
 Normal stop preserves prepared data and is safe to repeat:
 
@@ -228,10 +173,11 @@ make provider-local-clean CONFIRM=remove-provider-data
 It may remove only resources belonging to the fixed provider Compose project;
 it must never run a global Docker prune or remove unrelated host tools.
 
-## 9. Record evidence
+## 8. Record evidence
 
 Fill `manual-validation.md` with normalized outcomes and safe identities only.
-Verify that it contains all four real success rows, offline proof, rollback,
-remote pre-contact denials, non-mutation and redaction checks. If any row would
+Verify that it contains both real local success rows, offline proof, rollback,
+explicit cleanup, non-mutation and redaction checks. Optional remote control
+results may remain as supplemental evidence. If any row would
 require source text, translation, a secret, raw response, endpoint, or local
 path, record the normalized observation instead.

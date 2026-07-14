@@ -26,7 +26,7 @@ specs/003-zed-wrapper/                completada formal
 specs/004-zed-ux-flow/                completada formal
 specs/005-real-provider-config/        completada formal
 specs/006-direct-zed-translation/      completada formal
-specs/007-operational-providers/       validacion real parcial; Azure/Zed pendientes
+specs/007-operational-providers/       completada formal
 ```
 
 La primera feature entrega un MVP tecnico offline: core Rust, `MockProvider`,
@@ -79,17 +79,18 @@ decisiones viven en D073-D075 y ADR 0004.
 
 La septima feature implementa el camino automatico y operativo de F011 en
 `specs/007-operational-providers/`. Selecciona LibreTranslate 1.9.6 fijado
-por digest como camino local/offline y Azure AI Translator Text v3 con recurso
-global F0 como camino remoto/online. `MockProvider` sigue siendo default; el
-camino remoto usa host HTTPS fijo, key por referencia y confirmacion nueva por
-solicitud. Estan implementados la configuracion exacta, los adaptadores, las
-pruebas controladas y el ciclo local candidate/current/previous. La validacion
-real local por CLI y Zed directo, sin egress, con fallo de update aislado y con
-rollback paso; Azure real y los casos manuales restantes mantienen T056
-abierta. MCP/Agent Panel conserva solo cobertura de compatibilidad y no es
-una superficie de aceptacion F011. El modelo Argos `en-es` no se redistribuira
-mientras upstream no declare su licencia.
-F009/empaquetado y publicacion queda despues de cerrar ambos gates.
+por digest como camino soportado local/offline sin cuenta ni API key.
+`MockProvider` sigue siendo default. El adaptador Azure AI Translator Text v3
+permanece como opcion avanzada: usa host HTTPS fijo, key por referencia y
+confirmacion nueva por solicitud, pero no es requisito de uso ni aceptacion.
+Estan implementados la configuracion exacta, los adaptadores, las pruebas
+controladas y el ciclo local candidate/current/previous. La validacion real
+local por CLI y Zed directo, sin egress, con fallo de update aislado y rollback
+paso; la limpieza project-scoped y la evidencia final tambien pasan. MCP/Agent
+Panel conserva solo cobertura de compatibilidad y no
+es una superficie de aceptacion F011. El modelo Argos `en-es` no se
+redistribuira mientras upstream no declare su licencia; ese gate legal sigue
+siendo independiente para F009/empaquetado y publicacion.
 
 El proveedor local se administra solo mediante la interfaz versionada del
 proyecto:
@@ -113,10 +114,10 @@ LibreTranslate permanece solo en la red interna y sin puerto publicado; un
 relay minimo del mismo proyecto expone `127.0.0.1:5000`, reenvia unicamente al
 destino interno fijo y no registra contenido. No se instala Python en Fedora:
 el relay se ejecuta dentro de la imagen fijada del proveedor.
-Azure requiere una cuenta, un recurso Translator global single-service en F0
-y una key heredada mediante referencia: su valor nunca vive en settings,
-archivos versionados ni evidencia. La guia completa de privacidad, validacion,
-rollback, licencia y remocion esta en
+El camino soportado no requiere cuenta, suscripcion ni key. Si alguien opta de
+forma independiente por el adaptador remoto avanzado, sus credenciales siguen
+fuera de settings, archivos versionados y evidencia. La guia completa de
+privacidad, validacion, rollback, licencia y remocion esta en
 `specs/007-operational-providers/quickstart.md`.
 
 Rust se ejecuta mediante la imagen Docker oficial fijada en `Makefile`; no se

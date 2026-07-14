@@ -7,22 +7,24 @@
 
 ## Summary
 
-Operationalize exactly two reviewed real translation paths while preserving
+Operationalize one supported no-account real translation path while preserving
 the existing safe core and direct Zed workflow:
 
 - local/offline: LibreTranslate 1.9.6 CPU image pinned by digest, provisioned
   by project commands into candidate/current/previous Docker storage, isolated
   on an internal network behind a fixed project relay published only on
   `127.0.0.1:5000`, and proven to translate after external egress is disabled;
-- remote/online: Azure AI Translator Text v3, global F0 resource, fixed HTTPS
-  host/path, API key resolved through an existing safe environment reference,
-  no redirect/proxy/retry, and fresh confirmation before every request.
+- optional remote/online: retain the implemented Azure AI Translator Text v3
+  adapter behind fixed HTTPS target, safe credential-reference, explicit
+  enablement and fresh per-request confirmation gates. It is an advanced
+  integration, not a prerequisite for supported use or F011 acceptance.
 
-`MockProvider` remains the deterministic default. Both paths continue through
+`MockProvider` remains the deterministic default. Both implementations continue through
 `translator-core`, its segmentation/limits/secret gate/response validation,
 and the same CLI and direct Zed surfaces. Automated tests use controlled
 doubles; feature completion additionally requires redacted manual evidence
-against both real services.
+against the real local service through both surfaces. No account, subscription,
+API key, or remote live-service contact is required.
 
 MCP/Agent Panel remains a compatibility bridge under D065/D072. F011 adds no
 provider-specific MCP product flow or real-service acceptance surface; existing
@@ -45,8 +47,8 @@ credential persistence
 
 **Testing**: Rust unit/contract/integration tests through Make/Docker; shell
 contract tests for lifecycle and documentation; controlled HTTP/process
-doubles for automation; four real-service manual acceptance runs through CLI
-and direct Zed
+doubles for automation; two real local-service manual acceptance runs through
+CLI and direct Zed
 
 **Target Platform**: Fedora KDE `x86_64`, Docker/Compose project isolation,
 CPU-only local provider, current local Zed development extension
@@ -56,19 +58,20 @@ project-scoped provider container and hardened loopback relay
 
 **Performance Goals**: Prepared local provider model-ready in <=120 seconds on
 the reviewed workstation; every provider invocation within the existing
-15-second budget; Azure request remains within 256 elements, 20 KiB input and
-40 KiB validated output
+15-second budget; the optional Azure request remains within 256 elements,
+20 KiB input and 40 KiB validated output
 
 **Constraints**: 20 KiB input, 4 KiB/segment, 256 segments, 40 KiB output,
 15-second timeout; local service capped at 4 CPUs/4 GiB RAM with 4 GiB free disk
-prerequisite; no normal-runtime egress; remote exact-host HTTPS; mock default;
+prerequisite; no normal-runtime egress; optional remote exact-host HTTPS; mock default;
 no redirects, inherited proxy, retries, arbitrary endpoints, host installs,
-source/buffer mutation, recorded content, or model redistribution
+source/buffer mutation, recorded content, model redistribution, or mandatory
+external account/credential
 
-**Scale/Scope**: One English-to-Spanish local provider, one
-English-to-Spanish remote provider, three provider modes, two user-facing
-surfaces, eight local lifecycle commands, four real success runs plus negative
-privacy/recovery matrix
+**Scale/Scope**: One supported English-to-Spanish local provider, one optional
+English-to-Spanish remote adapter, three provider modes, two user-facing
+surfaces, eight local lifecycle commands, two required real success runs plus
+the local recovery and controlled remote-privacy matrices
 
 ## Spec Kit Execution Record
 
@@ -84,12 +87,17 @@ SPECIFY_FEATURE=007-operational-providers \
   .specify/scripts/bash/setup-plan.sh --json
 SPECIFY_FEATURE=007-operational-providers \
   .specify/scripts/bash/check-prerequisites.sh --json
+SPECIFY_FEATURE=007-operational-providers \
+  .specify/scripts/bash/setup-plan.sh --json
 ```
 
-Clarification closed one material question: the remote path may require a free
-account and API key, but not a paid subscription. The provider/privacy domain
-checklist was then added because this feature crosses external service,
-credential, artifact, lifecycle, and evidence boundaries.
+The latest clarification supersedes the earlier account allowance: supported
+use and F011 completion require no external account or API key. The validated
+local CLI/direct-Zed path is the product acceptance path; the implemented Azure
+adapter remains optional and is covered with controlled security tests only.
+An embedded no-Docker local model is deferred to a later planning cycle. The
+provider/privacy checklist remains applicable because the optional adapter,
+artifact lifecycle, and evidence boundaries still need explicit controls.
 
 ## Constitution Check
 
@@ -99,8 +107,8 @@ credential, artifact, lifecycle, and evidence boundaries.
   provider responses remain ephemeral preview/CLI results and ambiguity fails
   closed.
 - **Offline-first provider boundary**: Mock is still default. Local runtime has
-  no external egress after explicit preparation. Azure is disabled unless
-  explicitly configured and separately confirmed per invocation.
+  no external egress after explicit preparation. Optional Azure use is disabled
+  unless explicitly configured and separately confirmed per invocation.
 - **Test-first development**: Tasks must begin with failing provider adapter,
   target, lifecycle, privacy, error, non-mutation and redaction tests. Real
   service checks supplement rather than replace controlled automated tests.
@@ -127,8 +135,9 @@ Complete in [research.md](./research.md):
 2. separate online artifact preparation from no-egress normal runtime;
 3. do not redistribute the Argos model while its license is unresolved;
 4. use candidate/current/previous slots for update and rollback;
-5. use Azure Translator v3 global F0 for remote acceptance;
-6. add `azure_translator` without adding provider settings or arbitrary URLs;
+5. retain Azure Translator v3 as an optional advanced adapter, not an
+   acceptance dependency;
+6. keep `azure_translator` without adding provider settings or arbitrary URLs;
 7. retain stable normalized errors and never retry remote requests;
 8. set measurable resource budgets and upstream change-control gates.
 
@@ -144,12 +153,12 @@ All `NEEDS CLARIFICATION` markers are resolved.
 - [local-provider-lifecycle.md](./contracts/local-provider-lifecycle.md)
   specifies preparation, offline operation, update, rollback, cleanup, and
   resource budgets.
-- [azure-translator.md](./contracts/azure-translator.md) fixes request,
-  credential, privacy, transport, and response rules.
+- [azure-translator.md](./contracts/azure-translator.md) fixes the optional
+  adapter's request, credential, privacy, transport, and response rules.
 - [validation-evidence.md](./contracts/validation-evidence.md) separates
-  controlled automated tests from mandatory real-service evidence.
-- [quickstart.md](./quickstart.md) defines the post-implementation acceptance
-  path and account/privacy warnings.
+  controlled optional-remote tests from mandatory real local-service evidence.
+- [quickstart.md](./quickstart.md) defines the no-account local acceptance path
+  and clearly isolates the optional remote adapter.
 - [manual-validation.md](./manual-validation.md) is the redacted evidence
   template; it remains explicitly unexecuted at the planning gate.
 
@@ -178,7 +187,7 @@ hashes, and populate candidate. Promotion is transactional at the state level;
 rollback is offline and uses previous. The model blobs and runtime metadata
 remain ignored and are never packaged.
 
-### 3. Azure adapter behind `Provider`
+### 3. Optional Azure adapter behind `Provider`
 
 Create a focused `AzureTranslatorProvider` in `translator-core`. Reuse the
 blocking `ureq` boundary with global 15-second timeout and proxy disabled; set
@@ -193,12 +202,12 @@ contact and sends no invented parameter, header, or metadata.
 
 ### 4. CLI and direct Zed operational validation
 
-Add `translator-cli-release` and the focused automatic gate. Update safe Zed
-launch validation for the new mode while keeping the existing allowlist and
-ensuring the extension emits only the key-reference name. The actual key value
-must already exist in the parent Zed process environment and is resolved by the
-provider; `settings.rs`, `binary.env`, launch arguments, and the generated
-profile never contain that value.
+Add `translator-cli-release` and the focused automatic gate. Validate the local
+profile through CLI and direct Zed. Keep safe Zed launch validation for the
+optional remote mode while preserving the existing allowlist and ensuring the
+extension emits only a key-reference name. If a user independently opts in,
+the actual value must exist in the parent Zed process environment and is never
+copied into `settings.rs`, `binary.env`, arguments, or the generated profile.
 Preserve the direct workflow's request-specific `showMessageRequest`, secret
 gate and read-only hover.
 
@@ -208,11 +217,12 @@ regressions against the shared core boundary, not as F011 acceptance evidence.
 ### 5. Evidence and documentation
 
 Automatic tests never call real providers. Once implementation gates pass, a
-reviewer performs the four real-service runs, offline and rollback checks, and
-remote negative matrix using public synthetic fixtures. Only normalized safe
-fields enter the manual record. F009 remains blocked until F011 evidence is
-complete and the model redistribution license is resolved or publication
-chooses a legally reviewed alternative.
+reviewer performs the two real local-service runs, offline, lifecycle,
+rollback and explicit-cleanup checks using public synthetic fixtures. The
+optional remote negative matrix is proven with controlled tests and any prior
+manual observations remain supplemental rather than gating. Only normalized
+safe fields enter the manual record. F009 remains blocked on its independent
+model redistribution/license review, not on an Azure account.
 
 ## Project Structure
 
@@ -309,8 +319,8 @@ Implementation work must follow this order:
 7. failing update/rollback/cleanup and cross-surface failure tests;
 8. minimal recovery, error mapping and redaction implementation;
 9. complete automatic regression, formatting, lint and supply-chain gates;
-10. only then execute real local and Azure CLI/direct-Zed validation, including
-   no-egress, rollback and negative consent/secret cases;
+10. only then execute real local CLI/direct-Zed validation, including
+    no-egress, rollback and explicit project-scoped cleanup;
 11. redaction audit and final manual record review.
 
 Expected automatic verification interface after implementation:
@@ -336,27 +346,27 @@ tests.
   runtime.
 - Model licensing remains explicitly unresolved; no redistribution or bundling.
 - Local normal operation and rollback have no external egress.
-- Azure host/path/API version are constants; a certificate failure, redirect,
+- Optional Azure host/path/API version are constants; a certificate failure, redirect,
   custom URL or proxy path fails closed.
-- Azure F0/account/privacy/terms are reviewed before each real validation; any
-  material change blocks remote acceptance without disabling mock/local.
+- Optional Azure use is outside F011 real-service acceptance; any upstream or
+  privacy change blocks that advanced adapter without disabling mock/local.
 - Raw response/provider debug detail is never user-visible or evidence.
 - A failed update cannot mutate current; a failed rollback cannot destroy the
   last known-good reference.
 - Ordinary cleanup cannot remove persistent provider slots.
 
-## Gate Status after Automatic Implementation
+## Final Gate Status
 
 | Gate | Status | Evidence / prerequisite |
 |---|---|---|
 | `speckit-specify` | complete | `spec.md` plus 16/16 requirements checklist |
-| `speckit-clarify` | complete | prerequisite resolved feature; 2/2 material answers encoded in spec, including MCP/Agent compatibility-only scope |
+| `speckit-clarify` | complete | prerequisite resolved feature; 3/3 material answers encoded, including MCP/Agent compatibility-only scope and the no-account local acceptance decision |
 | `speckit-checklist` | complete | provider operations/privacy checklist evaluated against design artifacts |
-| `speckit-plan` | complete | `setup-plan`, research, data model, contracts, quickstart, evidence template, constitution re-check |
-| `speckit-tasks` | complete | `setup-tasks --json` resolved the active feature; `tasks.md` contains 57 dependency-ordered TDD/security tasks with 22 explicit parallel opportunities |
-| `speckit-analyze` | complete after remediation | non-destructive rerun resolves 39/39 requirements with no CRITICAL/HIGH finding; TDD interface checks, final-only real validation, tone/format, key-reference, clean-checkout, budget, evidence and MCP scope corrections are encoded |
-| `speckit-implement` | automatic scope complete through convergence T062; T056 partial | TDD implementation and all automatic Rust/shell/security/supply-chain gates pass; approved real local CLI/direct Zed/offline/idempotency/failed-update/rollback and pre-contact negatives pass, while Azure real, clean and remaining clean-checkout evidence remain pending |
-| `speckit-converge` | clean after remediation | Phase 8 added and completed T058-T062 for probe validation, atomic physical-slot rotation, prior-image rollback, fail-safe cleanup and safe state/override handling; follow-up assessment found no uncovered buildable work, while existing T056 remains the explicit external acceptance gate |
+| `speckit-plan` | complete after scope synchronization | `setup-plan`, research, data model, contracts, quickstart, evidence template and constitution re-check align on local-only real acceptance plus optional remote controls |
+| `speckit-tasks` | complete | `setup-tasks --json` resolved the active feature; `tasks.md` contains 62 dependency-ordered TDD/security tasks with 22 explicit parallel opportunities |
+| `speckit-analyze` | complete after remediation | scope rerun covers 39/39 requirements with no CRITICAL/HIGH finding; its two MEDIUM status/count drifts were corrected |
+| `speckit-implement` | complete | all 62 tasks pass; T056 proves scoped cleanup and safe evidence, while T057 synchronizes the no-account/optional-remote decision |
+| `speckit-converge` | complete | final append-only assessment checked 39 requirements/criteria, 15 acceptance scenarios, 8 design decisions and 5 constitutional principles; zero gaps and no new task |
 
 T054 passed `workspace-storage-check`, `test-operational-providers`,
 `test-real-provider-config`, `test-direct-zed-translation`,
@@ -364,13 +374,15 @@ T054 passed `workspace-storage-check`, `test-operational-providers`,
 `cargo-deny` for both workspaces with only allowed transitive duplicate-version
 warnings. Manual review found no mutable provider image/index reference or
 Cargo dependency drift; model redistribution remains
-`forbidden-until-resolved`. Subsequent T056 execution used the real pinned
-local provider without credentials; no Azure credential was present or used.
+`forbidden-until-resolved`. T056 used the real pinned local provider without
+credentials, proved ordinary stop/clean preservation, removed only the fixed
+project resources, and left unrelated Docker counts unchanged. No Azure
+credential was present, needed, or used.
 
 ## Complexity Tracking
 
-No constitution violation requires an exception. The two real provider
-boundaries are required by FR-001 and remain behind the existing `Provider`
+No constitution violation requires an exception. The supported real local
+provider and optional remote adapter remain behind the existing `Provider`
 trait. Docker lifecycle state is the minimum reversible structure needed for
 offline update/rollback. The unresolved model license is tracked as a
 publication/redistribution gate rather than weakened or silently accepted.
