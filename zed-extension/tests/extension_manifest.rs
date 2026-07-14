@@ -69,9 +69,7 @@ fn manifest_text() -> String {
 }
 
 fn parsed_manifest() -> toml::Value {
-    manifest_text()
-        .parse()
-        .expect("extension manifest should be valid TOML")
+    toml::from_str(&manifest_text()).expect("extension manifest should be valid TOML")
 }
 
 fn context_server_ids(manifest: &toml::Value) -> Vec<&str> {
