@@ -15,7 +15,7 @@ containing content.
 | Local image | `sha256:1de2d7056bb8...` |
 | Local model versions | `en-es 1.0; es-en 1.9; user-provisioned, not redistributed` |
 | Remote service | `Azure AI Translator Text v3, global single-service, F0` |
-| Validation window UTC | `2026-07-14T11:07:10Z / 2026-07-14T11:22:50Z` |
+| Validation window UTC | `2026-07-14T11:07:10Z / 2026-07-14T11:36:42Z` |
 | Reviewer | `Codex terminal validation` |
 
 ## Real success matrix
@@ -42,7 +42,7 @@ contact/no-contact outcomes.
 
 | Case | Timestamp UTC | Surface | Locality | Actual normalized outcome | Within budget | Source unchanged | Buffer unchanged | Redaction | Result |
 |---|---|---|---|---|---|---|---|---|---|
-| `LOCAL-CLI-01` | `2026-07-14T11:08:08Z` | CLI | local | `success (real provider)` | `yes (275 ms)` | `yes` | n/a | `pass` | `pass` |
+| `LOCAL-CLI-01` | `2026-07-14T11:36:42Z` | CLI | local | `success at clean commit 1d1b204151d2` | `yes (1.139 s)` | `yes` | n/a | `pass` | `pass` |
 | `LOCAL-ZED-01` | `[UTC]` | direct Zed | local | `[success/error code]` | `[yes/no]` | `[yes/no]` | `[yes/no]` | `[pass/fail]` | `[pass/fail]` |
 | `REMOTE-CLI-01` | `[UTC]` | CLI | remote | `[success/error code]` | `[yes/no]` | `[yes/no]` | n/a | `[pass/fail]` | `[pass/fail]` |
 | `REMOTE-ZED-01` | `[UTC]` | direct Zed | remote | `[success/error code]` | `[yes/no]` | `[yes/no]` | `[yes/no]` | `[pass/fail]` | `[pass/fail]` |
@@ -103,8 +103,8 @@ this evidence file.
 
 ## Known incomplete prerequisites
 
-- The implementation is uncommitted, so this run cannot claim a literal clean
-  checkout even though provider state/resources began clean.
+- `LOCAL-CLI-01` was rerun from clean commit `1d1b204151d2`; the remaining real
+  success rows still require the same clean-checkout discipline.
 - The direct Zed binary is prepared, but both interactive Zed rows require a
   reviewer to observe the preview and buffer hash in the editor.
 - No Azure F0 credential/reference was present, so no real Azure request was
