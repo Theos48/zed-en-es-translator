@@ -15,7 +15,7 @@ containing content.
 | Local image | `sha256:1de2d7056bb8...` |
 | Local model versions | `en-es 1.0; es-en 1.9; user-provisioned, not redistributed` |
 | Remote service | `Azure AI Translator Text v3, global single-service, F0` |
-| Validation window UTC | `2026-07-14T11:07:10Z / 2026-07-14T12:08:49Z` |
+| Validation window UTC | `2026-07-14T11:07:10Z / 2026-07-14T12:14:18Z` |
 | Reviewer | `Codex terminal validation + user Zed observation` |
 
 ## Real success matrix
@@ -93,7 +93,7 @@ this evidence file.
 |---|---|---|---|---|---|
 | `REMOTE-DENY-01` | `2026-07-14T11:13:11Z` | denied | `no` | `REMOTE_CONFIRMATION_REQUIRED` | `pass` |
 | `REMOTE-DISMISS-01` | `2026-07-14T12:08:49Z` | dismissed | `no (loopback-only process namespace)` | `REMOTE_CONFIRMATION_REQUIRED; host UI showed generic error` | `pass` |
-| `REMOTE-STALE-01` | `[UTC]` | stale/mismatched consent | `[no/unknown]` | `[error code]` | `[pass/fail]` |
+| `REMOTE-STALE-01` | `2026-07-14T12:14:18Z` | document changed during consent | `no (loopback-only process namespace)` | `INVALID_INPUT; stale target rejected; host UI showed generic error` | `pass` |
 | `REMOTE-REUSE-01` | `[UTC]` | prior consent reused | `[no/unknown]` | `[error code]` | `[pass/fail]` |
 | `REMOTE-SECRET-01` | `2026-07-14T11:13:29Z` | synthetic secret after confirmation | `no` | `SECRET_DETECTED` | `pass` |
 | `REMOTE-MISSING-KEY-01` | `2026-07-14T11:13:29Z` | missing referenced key | `no` | `PROVIDER_NOT_CONFIGURED` | `pass` |

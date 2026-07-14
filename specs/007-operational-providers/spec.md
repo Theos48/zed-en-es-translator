@@ -182,7 +182,7 @@ Out of scope:
 | FR-001-FR-004, FR-007-FR-014 | Exact provider matrix, pinned local profile, fixed Azure adapter, mock default, payload/limit/consent tests | automatic gates pass |
 | FR-005-FR-006, FR-021-FR-022 | Project Make lifecycle, isolated provider plus loopback relay, candidate/current/previous state, offline verification, update, rollback and token-gated removal tests | automatic gates pass; real prepare/offline/idempotency/failed-update/rollback pass; clean row pending |
 | FR-015-FR-018, FR-SEC-A-D, FR-TEST-A | Core/CLI/LSP/Zed failure, timeout, redaction, secret, non-mutation and evidence-contract matrices | automatic gates pass |
-| FR-019-FR-020; SC-001-SC-009, SC-011 | Four real service/surface rows and real negative/offline/rollback evidence | T056 partial: local CLI/direct Zed, offline/failed-update/rollback and four pre-contact negatives pass; Azure and remaining rows pending |
+| FR-019-FR-020; SC-001-SC-009, SC-011 | Four real service/surface rows and real negative/offline/rollback evidence | T056 partial: local CLI/direct Zed, offline/failed-update/rollback and five pre-contact negatives pass; Azure and remaining rows pending |
 | FR-023 | Provider image/license metadata recorded; model license unresolved and redistribution forbidden | implemented publication gate; upstream resolution pending |
 | SC-010 | Full workspace, direct Zed, extension, format, Clippy and cargo-deny gates | pass |
 

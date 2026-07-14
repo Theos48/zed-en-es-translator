@@ -177,6 +177,11 @@ rendered only as the generic `Error: execute command`; the redacted LSP result
 must still be `REMOTE_CONFIRMATION_REQUIRED`. Record the normalized result and
 the generic host rendering, never a raw log.
 
+Treat document mutation while that prompt is open as a distinct stale-target
+case: the bound request must fail before contact with `INVALID_INPUT`. Zed may
+render the same generic `Error: execute command`; record the normalized LSP
+result rather than inferring an error code from the host UI.
+
 For Zed local settings, add only the three safe provider-selection values
 above. The actual `AZURE_TRANSLATOR_KEY` value must already exist in the Zed
 parent process environment. The extension passes only the reference name and

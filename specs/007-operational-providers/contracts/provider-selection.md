@@ -71,8 +71,10 @@ real invocation uses this order:
 8. reconstruction without mutation.
 
 Confirmation applies to one invocation only. A denial, dismissal, stale or
-mismatched response, or prior confirmation returns
-`REMOTE_CONFIRMATION_REQUIRED` before network contact.
+mismatched confirmation response, or prior confirmation returns
+`REMOTE_CONFIRMATION_REQUIRED` before network contact. If the bound document
+changes or closes while confirmation is pending, target validation instead
+returns `INVALID_INPUT` before network contact.
 
 ## Error mapping
 

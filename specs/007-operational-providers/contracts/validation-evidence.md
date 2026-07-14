@@ -14,7 +14,8 @@ interaction, or Internet access. Tests are written first and cover:
   cardinality;
 - local readiness and lifecycle state-machine failures using controlled
   process/HTTP boundaries;
-- remote denial/dismissal/stale/mismatch/prior-consent reuse before contact;
+- remote denial/dismissal/stale or mismatched confirmation/prior-consent reuse,
+  plus document mutation during pending confirmation, before contact;
 - secret blocking after confirmation and before contact;
 - timeout, TLS/DNS/HTTP/auth/quota/malformed/empty/oversized outcomes;
 - shared CLI/LSP configuration and safe locality labels;
@@ -49,7 +50,8 @@ Required negative families:
 - local external egress disabled after preparation;
 - local unavailable, readiness failure, port conflict, timeout, corrupt or
   incomplete candidate, failed update and successful offline rollback;
-- remote denied, dismissed, stale/mismatched and reused consent;
+- remote denied, dismissed, stale/mismatched and reused consent, plus document
+  mutation during pending confirmation;
 - confirmed remote content with a synthetic secret blocked before contact;
 - missing credential, rejected credential/quota, timeout, certificate failure,
   redirect, API failure, malformed/cardinality/oversized response;

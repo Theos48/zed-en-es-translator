@@ -22,6 +22,13 @@ Expected outcomes:
 - all earlier CLI, MCP, provider, and Zed compatibility tests remain green;
 - formatting and Clippy pass with warnings denied.
 
+For remote confirmation, denial, dismissal, or an invalid confirmation
+response maps to `REMOTE_CONFIRMATION_REQUIRED`. A document change or close
+while confirmation is pending invalidates the bound target and maps to
+`INVALID_INPUT`, always before provider contact. Zed may render either result
+as the generic `Error: execute command`, so validation records the normalized
+LSP result.
+
 ## Prepare The Direct Artifact
 
 ```bash
