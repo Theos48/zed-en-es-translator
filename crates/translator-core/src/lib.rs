@@ -1,3 +1,4 @@
+pub mod azure_translator;
 pub mod contract;
 pub mod errors;
 pub mod libretranslate;
@@ -27,6 +28,7 @@ pub use provider::{
 pub use provider_config::{
     ProviderConfiguration, ProviderLocality, ProviderMode, ProviderTarget,
     ENV_ALLOW_REMOTE_PROVIDER, ENV_PROVIDER, ENV_PROVIDER_API_KEY_ENV, ENV_PROVIDER_URL,
+    LIBRETRANSLATE_OPERATIONAL_URL,
 };
 pub use redaction::{redact_failure, redact_text};
 pub use workspace::{load_allowed_file, LoadedFile};
@@ -200,3 +202,7 @@ fn translate_file_inner(
 
     TranslateSuccess::new(translated_text)
 }
+pub use azure_translator::{
+    AzureTranslatorProvider, AzureTransport, AzureTransportError, UreqAzureTransport,
+    AZURE_TRANSLATOR_ENDPOINT,
+};

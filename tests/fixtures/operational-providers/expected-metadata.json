@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "language_pair": "en-es",
+  "tone": "technical_neutral",
+  "preserve_formatting": true,
+  "case_ids": [
+    "LOCAL-CLI-01",
+    "LOCAL-ZED-01",
+    "REMOTE-CLI-01",
+    "REMOTE-ZED-01",
+    "LOCAL-PREPARE-01",
+    "LOCAL-OFFLINE-01",
+    "LOCAL-IDEMPOTENT-01",
+    "LOCAL-UPDATE-FAIL-01",
+    "LOCAL-ROLLBACK-01",
+    "LOCAL-CLEAN-01",
+    "REMOTE-DENY-01",
+    "REMOTE-DISMISS-01",
+    "REMOTE-STALE-01",
+    "REMOTE-REUSE-01",
+    "REMOTE-SECRET-01",
+    "REMOTE-MISSING-KEY-01",
+    "REMOTE-AUTH-QUOTA-01",
+    "REMOTE-TIMEOUT-01",
+    "REMOTE-RESPONSE-01"
+  ],
+  "required_evidence_fields": [
+    "case_id",
+    "timestamp_utc",
+    "surface",
+    "locality",
+    "normalized_outcome",
+    "within_budget",
+    "source_unchanged",
+    "buffer_unchanged",
+    "redaction_passed",
+    "reviewer_result"
+  ],
+  "allowed_localities": ["local", "remote"],
+  "allowed_results": ["pass", "fail"],
+  "prohibited_evidence_fields": [
+    "source_text",
+    "translated_text",
+    "segments",
+    "response_body",
+    "credential",
+    "headers",
+    "environment",
+    "workspace_root",
+    "local_path"
+  ]
+}

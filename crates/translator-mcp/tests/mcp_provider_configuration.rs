@@ -29,7 +29,7 @@ fn mcp_uses_configured_local_provider() {
 }
 
 fn response_server(response_body: &'static str) -> String {
-    let listener = TcpListener::bind("127.0.0.1:0").expect("bind stub server");
+    let listener = TcpListener::bind("127.0.0.1:5000").expect("bind operational stub server");
     let url = format!("http://{}", listener.local_addr().expect("local addr"));
     thread::spawn(move || {
         let (mut stream, _) = listener.accept().expect("accept request");

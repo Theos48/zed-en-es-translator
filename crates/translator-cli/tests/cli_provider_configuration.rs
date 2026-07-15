@@ -18,7 +18,8 @@ fn cli_uses_mock_provider_when_unconfigured() {
 
 #[test]
 fn cli_selects_local_libretranslate_provider_from_environment() {
-    let url = common::response_server(r#"{"translatedText":["Salida real local."]}"#);
+    let url =
+        common::operational_local_response_server(r#"{"translatedText":["Salida real local."]}"#);
     let output = run_cli_with_env(
         request_json("Read the docs.", false),
         &[(ENV_PROVIDER, "libretranslate"), (ENV_PROVIDER_URL, &url)],

@@ -4,18 +4,22 @@ pub const ENV_PROVIDER: &str = "TRANSLATOR_PROVIDER";
 pub const ENV_PROVIDER_URL: &str = "TRANSLATOR_PROVIDER_URL";
 pub const ENV_PROVIDER_API_KEY_ENV: &str = "TRANSLATOR_PROVIDER_API_KEY_ENV";
 pub const ENV_ALLOW_REMOTE_PROVIDER: &str = "TRANSLATOR_ALLOW_REMOTE_PROVIDER";
+pub const LIBRETRANSLATE_OPERATIONAL_URL: &str = "http://127.0.0.1:5000";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ProviderMode {
     Mock,
     LibreTranslate,
+    AzureTranslator,
 }
 
 impl ProviderMode {
     fn parse(value: Option<&str>) -> Result<Self, TranslateFailure> {
-        match value.map(str::trim).filter(|value| !value.is_empty()) {
-            None | Some("mock") => Ok(Self::Mock),
+        match value.map(str::trim) {
+            None => Ok(Self::Mock),
+            Some("mock") => Ok(Self::Mock),
             Some("libretranslate") => Ok(Self::LibreTranslate),
+            Some("azure_translator") => Ok(Self::AzureTranslator),
             Some(_) => Err(provider_not_configured("Unsupported provider mode.")),
         }
     }
@@ -114,15 +118,48 @@ impl ProviderConfiguration {
         allow_remote: Option<&str>,
     ) -> Result<Self, TranslateFailure> {
         let mode = ProviderMode::parse(provider)?;
-        let allow_remote = parse_bool_env(allow_remote)?;
-        let api_key_env = parse_api_key_env(api_key_env)?;
-
-        let target = match mode {
-            ProviderMode::Mock => None,
+        let (target, api_key_env) = match mode {
+            ProviderMode::Mock => {
+                reject_present(url, "Provider URL is not valid for mock mode.")?;
+                reject_present(
+                    api_key_env,
+                    "Provider API key reference is not valid for mock mode.",
+                )?;
+                if parse_remote_allowance(allow_remote)? {
+                    return Err(provider_not_configured(
+                        "Remote allowance is not valid for mock mode.",
+                    ));
+                }
+                (None, None)
+            }
             ProviderMode::LibreTranslate => {
                 let url =
                     url.ok_or_else(|| provider_not_configured("Provider URL is required."))?;
-                Some(ProviderTarget::parse(url, allow_remote)?)
+                if url != LIBRETRANSLATE_OPERATIONAL_URL {
+                    return Err(provider_not_configured(
+                        "The local provider target is not supported.",
+                    ));
+                }
+                reject_present(
+                    api_key_env,
+                    "Provider API key reference is not valid for local mode.",
+                )?;
+                if parse_remote_allowance(allow_remote)? {
+                    return Err(provider_not_configured(
+                        "Remote allowance is not valid for local mode.",
+                    ));
+                }
+                (Some(ProviderTarget::parse(url, false)?), None)
+            }
+            ProviderMode::AzureTranslator => {
+                reject_present(url, "Provider URL overrides are not supported.")?;
+                let api_key_env = parse_required_api_key_env(api_key_env)?;
+                if allow_remote.map(str::trim) != Some("true") {
+                    return Err(provider_not_configured(
+                        "Remote allowance must be enabled for this provider.",
+                    ));
+                }
+                (None, Some(api_key_env))
             }
         };
 
@@ -142,24 +179,27 @@ pub(crate) fn provider_not_configured(message: impl Into<String>) -> TranslateFa
     TranslateFailure::new(ErrorCode::ProviderNotConfigured, message)
 }
 
-fn parse_bool_env(value: Option<&str>) -> Result<bool, TranslateFailure> {
-    match value.map(str::trim).filter(|value| !value.is_empty()) {
-        None | Some("false" | "0") => Ok(false),
-        Some("true" | "1") => Ok(true),
+fn parse_remote_allowance(value: Option<&str>) -> Result<bool, TranslateFailure> {
+    match value.map(str::trim) {
+        None | Some("false") => Ok(false),
+        Some("true") => Ok(true),
         Some(_) => Err(provider_not_configured(
             "Provider remote allowance has an invalid value.",
         )),
     }
 }
 
-fn parse_api_key_env(value: Option<&str>) -> Result<Option<String>, TranslateFailure> {
-    let Some(trimmed) = value.map(str::trim).filter(|value| !value.is_empty()) else {
-        return Ok(None);
-    };
+fn parse_required_api_key_env(value: Option<&str>) -> Result<String, TranslateFailure> {
+    let trimmed = value
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .ok_or_else(|| provider_not_configured("Provider API key reference is required."))?;
 
     let mut chars = trimmed.chars();
     let Some(first) = chars.next() else {
-        return Ok(None);
+        return Err(provider_not_configured(
+            "Provider API key environment reference is invalid.",
+        ));
     };
     if !(first == '_' || first.is_ascii_alphabetic())
         || !chars.all(|ch| ch == '_' || ch.is_ascii_alphanumeric())
@@ -169,7 +209,14 @@ fn parse_api_key_env(value: Option<&str>) -> Result<Option<String>, TranslateFai
         ));
     }
 
-    Ok(Some(trimmed.to_string()))
+    Ok(trimmed.to_string())
+}
+
+fn reject_present(value: Option<&str>, message: &'static str) -> Result<(), TranslateFailure> {
+    if value.is_some() {
+        return Err(provider_not_configured(message));
+    }
+    Ok(())
 }
 
 fn host_from_authority(authority: &str) -> Option<&str> {

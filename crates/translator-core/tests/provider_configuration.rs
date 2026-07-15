@@ -26,22 +26,16 @@ fn parses_loopback_libretranslate_target() {
 }
 
 #[test]
-fn parses_non_local_allow_remote_flag() {
-    let config = ProviderConfiguration::from_values(
+fn rejects_non_operational_libretranslate_remote_target() {
+    let err = ProviderConfiguration::from_values(
         Some("libretranslate"),
         Some("https://translations.example.invalid"),
         Some("TRANSLATOR_TEST_API_KEY"),
         Some("true"),
     )
-    .expect("remote config");
+    .expect_err("remote LibreTranslate config must fail");
 
-    let target = config.target.expect("target");
-    assert_eq!(target.locality(), ProviderLocality::NonLocal);
-    assert!(target.allow_remote());
-    assert_eq!(
-        config.api_key_env.as_deref(),
-        Some("TRANSLATOR_TEST_API_KEY")
-    );
+    assert_provider_not_configured(err);
 }
 
 #[test]

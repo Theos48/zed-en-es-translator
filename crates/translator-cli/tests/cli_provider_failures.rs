@@ -7,7 +7,7 @@ mod common;
 
 #[test]
 fn cli_redacts_provider_failure_stdout_and_stderr() {
-    let url = common::response_server_with_status(
+    let url = common::operational_local_response_server_with_status(
         429,
         r#"{"error":"source_text=Read the docs. Authorization: Bearer fake_token"}"#,
     );

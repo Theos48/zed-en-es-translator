@@ -144,28 +144,25 @@ impl Default for ProviderSettings {
 
 impl ProviderSettings {
     fn env(&self) -> Vec<(String, String)> {
-        if self.mode == "mock" {
-            return Vec::new();
+        match self.mode.as_str() {
+            "mock" => Vec::new(),
+            "libretranslate" => vec![
+                (ENV_PROVIDER.to_string(), self.mode.clone()),
+                (
+                    ENV_PROVIDER_URL.to_string(),
+                    self.url.clone().unwrap_or_default(),
+                ),
+            ],
+            "azure_translator" => vec![
+                (ENV_PROVIDER.to_string(), self.mode.clone()),
+                (
+                    ENV_PROVIDER_API_KEY_ENV.to_string(),
+                    self.api_key_env.clone().unwrap_or_default(),
+                ),
+                (ENV_ALLOW_REMOTE_PROVIDER.to_string(), "true".to_string()),
+            ],
+            _ => Vec::new(),
         }
-
-        let mut env = vec![
-            ("TRANSLATOR_PROVIDER".to_string(), self.mode.clone()),
-            (
-                "TRANSLATOR_PROVIDER_URL".to_string(),
-                self.url.clone().unwrap_or_default(),
-            ),
-        ];
-        if let Some(api_key_env) = &self.api_key_env {
-            env.push((
-                "TRANSLATOR_PROVIDER_API_KEY_ENV".to_string(),
-                api_key_env.clone(),
-            ));
-        }
-        env.push((
-            "TRANSLATOR_ALLOW_REMOTE_PROVIDER".to_string(),
-            self.allow_remote.to_string(),
-        ));
-        env
     }
 }
 
@@ -269,22 +266,37 @@ fn parse_provider_environment(
 }
 
 fn validate_provider_settings(provider: &ProviderSettings) -> Result<(), DiagnosticEvent> {
-    if provider.mode == "libretranslate" && provider.url.is_none() {
-        return Err(unsafe_setting("provider.url"));
-    }
-    if let Some(url) = &provider.url {
-        if is_non_local_url(url) && !provider.allow_remote {
-            return Err(unsafe_setting("provider.allow_remote"));
+    match provider.mode.as_str() {
+        "mock"
+            if provider.url.is_none()
+                && provider.api_key_env.is_none()
+                && !provider.allow_remote =>
+        {
+            Ok(())
         }
+        "libretranslate"
+            if provider.url.as_deref() == Some("http://127.0.0.1:5000")
+                && provider.api_key_env.is_none()
+                && !provider.allow_remote =>
+        {
+            Ok(())
+        }
+        "azure_translator"
+            if provider.url.is_none()
+                && provider.api_key_env.is_some()
+                && provider.allow_remote =>
+        {
+            Ok(())
+        }
+        _ => Err(unsafe_setting("provider")),
     }
-
-    Ok(())
 }
 
 fn parse_provider_mode(mode: &str) -> Result<String, DiagnosticEvent> {
     match mode.trim() {
-        "" | "mock" => Ok("mock".to_string()),
+        "mock" => Ok("mock".to_string()),
         "libretranslate" => Ok("libretranslate".to_string()),
+        "azure_translator" => Ok("azure_translator".to_string()),
         _ => Err(unsafe_setting("provider.mode")),
     }
 }
@@ -292,7 +304,7 @@ fn parse_provider_mode(mode: &str) -> Result<String, DiagnosticEvent> {
 fn parse_provider_url(url: &str) -> Result<Option<String>, DiagnosticEvent> {
     let trimmed = url.trim().trim_end_matches('/');
     if trimmed.is_empty() {
-        return Ok(None);
+        return Err(unsafe_setting("provider.url"));
     }
     let Some(after_scheme) = trimmed
         .strip_prefix("http://")
@@ -313,7 +325,7 @@ fn parse_provider_url(url: &str) -> Result<Option<String>, DiagnosticEvent> {
 fn parse_api_key_env(value: &str) -> Result<Option<String>, DiagnosticEvent> {
     let trimmed = value.trim();
     if trimmed.is_empty() {
-        return Ok(None);
+        return Err(unsafe_setting("provider.api_key_env"));
     }
     let mut chars = trimmed.chars();
     let Some(first) = chars.next() else {
@@ -329,8 +341,8 @@ fn parse_api_key_env(value: &str) -> Result<Option<String>, DiagnosticEvent> {
 
 fn parse_allow_remote_environment(value: &str) -> Result<bool, DiagnosticEvent> {
     match value.trim() {
-        "true" | "1" => Ok(true),
-        "false" | "0" => Ok(false),
+        "true" => Ok(true),
+        "false" => Ok(false),
         _ => Err(unsafe_setting(
             "command.env.TRANSLATOR_ALLOW_REMOTE_PROVIDER",
         )),
@@ -343,25 +355,6 @@ fn conflicting_provider_configuration() -> DiagnosticEvent {
         DiagnosticCode::UnsafeLaunchConfiguration,
         "Rejected conflicting provider configuration from nested settings and binary environment.",
     )
-}
-
-fn is_non_local_url(url: &str) -> bool {
-    let Some(after_scheme) = url
-        .strip_prefix("http://")
-        .or_else(|| url.strip_prefix("https://"))
-    else {
-        return true;
-    };
-    let authority = after_scheme
-        .split(['/', '?', '#'])
-        .next()
-        .unwrap_or_default();
-    let host = if let Some(rest) = authority.strip_prefix('[') {
-        rest.split_once(']').map(|(host, _)| host).unwrap_or("")
-    } else {
-        authority.split(':').next().unwrap_or("")
-    };
-    !(host.eq_ignore_ascii_case("localhost") || host == "127.0.0.1" || host == "::1")
 }
 
 fn set_binary_path(

@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-07-14",
+  "image": {
+    "reference": "libretranslate/libretranslate:v1.9.6@sha256:1de2d7056bb8ad607a412f4563d9abe324ff632b43b5be9428bcc8e213aebb32",
+    "index_digest": "sha256:1de2d7056bb8ad607a412f4563d9abe324ff632b43b5be9428bcc8e213aebb32",
+    "platforms": {
+      "linux/amd64": "sha256:98d9ec356102a93ffb4e88046688a1a7ab2f3bf8e54b63588332c04f9686a668",
+      "linux/arm64": "sha256:97ea6d77c947129637d71f073a87912d3c44c984b299d77714a0956787721031"
+    }
+  },
+  "package_index": {
+    "repository": "argosopentech/argospm-index",
+    "revision": "ff90de60728f7c1338ff6b75974e4c89b2442d22"
+  },
+  "models": [
+    {
+      "direction": "en-es",
+      "version": "1.0",
+      "filename": "translate-en_es-1_0.argosmodel",
+      "source": "https://argos-net.com/v1/translate-en_es-1_0.argosmodel",
+      "sha256": "d698d0ef87ad70d5d184b7fa6965905bf4368f09a2bb9ffb165a79bac96af0c4",
+      "checksum_authority": "project-observed"
+    },
+    {
+      "direction": "es-en",
+      "version": "1.9",
+      "filename": "translate-es_en-1_9.argosmodel",
+      "source": "https://argos-net.com/v1/translate-es_en-1_9.argosmodel",
+      "sha256": "c54df2b62fceaf54a3ce5d97db6bf56efd7940063329f6778f4212d2acb370d4",
+      "checksum_authority": "project-observed"
+    }
+  ],
+  "license": {
+    "provider": "AGPL-3.0",
+    "model_status": "unresolved",
+    "redistribution": "forbidden-until-resolved"
+  }
+}

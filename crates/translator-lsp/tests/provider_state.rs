@@ -16,8 +16,8 @@ fn derives_safe_locality_labels_from_provider_configuration() {
     )
     .expect("local");
     let remote = ProviderConfiguration::from_values(
-        Some("libretranslate"),
-        Some("https://private-provider.example.invalid"),
+        Some("azure_translator"),
+        None,
         Some("PRIVATE_API_KEY_ENV"),
         Some("true"),
     )

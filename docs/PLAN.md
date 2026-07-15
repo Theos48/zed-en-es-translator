@@ -121,9 +121,18 @@ Direccion actual:
 - desde F006, toda feature que toque Zed debe avanzar la extension directa o
   documentar una limitacion concreta de la API de Zed que obligue a un puente;
 - F010 esta completada como flujo directo LSP con smoke manual aprobado;
-- F011/configuracion operativa de proveedores reales es la siguiente candidata
-  formal: debe validar un camino local/offline y otro remoto/online reales;
-- F009/publicacion queda pospuesta hasta completar F011.
+- F011/configuracion operativa de proveedores reales esta completada en
+  `specs/007-operational-providers/`;
+- F011 selecciona LibreTranslate 1.9.6 fijado por digest como camino soportado
+  sin cuenta ni API key; CLI/Zed directo/offline/fallo de update/rollback y
+  limpieza project-scoped pasan;
+- Azure AI Translator Text v3 permanece como adaptador avanzado opcional bajo
+  target fijo, consentimiento por solicitud y pruebas controladas; no requiere
+  evidencia real ni bloquea F011;
+- el modelo Argos `en-es` se aprovisionara localmente, pero no se redistribuira
+  mientras upstream no declare su licencia;
+- F009/publicacion queda pospuesta mientras se decide la secuencia con F012 y
+  se resuelve el gate independiente de licencia/redistribucion.
 
 ## Flujo por feature
 
@@ -150,6 +159,14 @@ bloqueado.
 
 Durante este flujo, `docs/feature-map.md` conserva el backlog. La feature
 formal vive en `specs/<feature>/`.
+
+Los worktrees temporales se crean bajo
+`~/dev/.worktrees/zed-en-es-translator/`, no bajo `/tmp` ni otro
+`tmpfs`/`ramfs`. Antes de compilar se ejecuta `make workspace-storage-check` y
+para detectar cualquier checkout registrado fuera de esta regla se usa `make
+worktree-audit`. La retirada se hace con `git worktree remove` y `git worktree
+prune`, despues de comprobar que el checkout este limpio y sin procesos o
+montajes activos.
 
 ## Roadmap
 
@@ -249,22 +266,31 @@ Completado como sexta feature formal, incluida validacion manual en Zed:
 
 ### 7. Configuracion operativa de proveedores reales
 
-Siguiente candidata formal mediante F011:
+Activa como septima feature formal:
 
-- seleccionar durante `clarify`/`plan` un proveedor local/offline real y uno
-  remoto/online real, sin exigir una cuenta de pago como camino base;
+```text
+specs/007-operational-providers/
+```
+
+- usar LibreTranslate 1.9.6 fijado por digest como proveedor local/offline;
+- conservar Azure AI Translator Text v3 como adaptador remoto avanzado
+  opcional, nunca como requisito del camino base;
 - preparar el proveedor local como servicio reproducible y aislado del
   proyecto, sin instalar runtimes o servicios globales en Fedora;
+- mantener LibreTranslate solo en red interna y publicar loopback mediante un
+  relay project-scoped de destino fijo, sin logs de contenido;
 - documentar inicio, parada, actualizacion, persistencia, verificacion y
   rollback del camino local;
-- configurar el proveedor remoto por HTTPS, host allowlisted, secretos fuera
+- mantener el adaptador remoto por HTTPS, host allowlisted, secretos fuera
   del repositorio y confirmacion por cada solicitud;
-- validar ambos proveedores con traducciones sinteticas reales desde CLI y el
-  flujo directo de Zed;
+- validar el proveedor local con traducciones sinteticas reales desde CLI y el
+  flujo directo de Zed; validar la seguridad remota con dobles controlados;
 - conservar `MockProvider` como default, no-mutacion, redaccion, limites y
   bloqueo de secretos;
-- exigir evidencia manual contra servicios reales ademas de los stubs
-  automatizados.
+- exigir evidencia manual contra el servicio local real ademas de los stubs
+  automatizados, sin cuenta ni API key.
+- no redistribuir el modelo Argos `en-es` mientras su licencia siga sin
+  declarar en upstream; este gate debe resolverse antes de publicar un bundle.
 
 ### 8. Empaquetado y publicacion
 

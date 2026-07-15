@@ -11,6 +11,7 @@ temp/
 *.log
 .env
 .env.*
+provider-cache/
 *.wasm
 Dockerfile*
 .dockerignore

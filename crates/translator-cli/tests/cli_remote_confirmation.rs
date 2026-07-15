@@ -1,7 +1,9 @@
 use std::io::Write;
 use std::process::{Command, Stdio};
 
-use translator_core::{ENV_ALLOW_REMOTE_PROVIDER, ENV_PROVIDER, ENV_PROVIDER_URL};
+use translator_core::{
+    ENV_ALLOW_REMOTE_PROVIDER, ENV_PROVIDER, ENV_PROVIDER_API_KEY_ENV, ENV_PROVIDER_URL,
+};
 
 #[test]
 fn cli_denies_unconfirmed_non_local_provider() {
@@ -41,9 +43,11 @@ fn remote_request(source_text: &str, remote_confirmed: bool) -> String {
 
 fn run_cli(input: String) -> std::process::Output {
     let mut child = Command::new(env!("CARGO_BIN_EXE_translator-cli"))
-        .env(ENV_PROVIDER, "libretranslate")
-        .env(ENV_PROVIDER_URL, "https://translations.example.invalid")
+        .env(ENV_PROVIDER, "azure_translator")
+        .env_remove(ENV_PROVIDER_URL)
+        .env(ENV_PROVIDER_API_KEY_ENV, "AZURE_TRANSLATOR_TEST_KEY")
         .env(ENV_ALLOW_REMOTE_PROVIDER, "true")
+        .env("AZURE_TRANSLATOR_TEST_KEY", "fake-public-test-key")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())

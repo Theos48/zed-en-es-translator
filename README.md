@@ -26,6 +26,7 @@ specs/003-zed-wrapper/                completada formal
 specs/004-zed-ux-flow/                completada formal
 specs/005-real-provider-config/        completada formal
 specs/006-direct-zed-translation/      completada formal
+specs/007-operational-providers/       completada formal
 ```
 
 La primera feature entrega un MVP tecnico offline: core Rust, `MockProvider`,
@@ -76,15 +77,59 @@ copy/insert/apply quedan fuera. La configuracion de proveedor directa usa solo
 la allowlist `lsp.en-es-translator.binary.env` validada en Zed real; estas
 decisiones viven en D073-D075 y ADR 0004.
 
-El siguiente hito del roadmap es F011: configurar y validar desde el flujo
-directo de Zed un proveedor local/offline real y otro remoto/online real. F009,
-empaquetado y publicacion, queda despues de ese hito. La seleccion concreta de
-proveedores se cerrara durante `speckit-clarify` y `speckit-plan`, manteniendo
-`MockProvider` como default, secretos fuera del repositorio y confirmacion por
-solicitud para cualquier envio remoto.
+La septima feature implementa el camino automatico y operativo de F011 en
+`specs/007-operational-providers/`. Selecciona LibreTranslate 1.9.6 fijado
+por digest como camino soportado local/offline sin cuenta ni API key.
+`MockProvider` sigue siendo default. El adaptador Azure AI Translator Text v3
+permanece como opcion avanzada: usa host HTTPS fijo, key por referencia y
+confirmacion nueva por solicitud, pero no es requisito de uso ni aceptacion.
+Estan implementados la configuracion exacta, los adaptadores, las pruebas
+controladas y el ciclo local candidate/current/previous. La validacion real
+local por CLI y Zed directo, sin egress, con fallo de update aislado y rollback
+paso; la limpieza project-scoped y la evidencia final tambien pasan. MCP/Agent
+Panel conserva solo cobertura de compatibilidad y no
+es una superficie de aceptacion F011. El modelo Argos `en-es` no se
+redistribuira mientras upstream no declare su licencia; ese gate legal sigue
+siendo independiente para F009/empaquetado y publicacion.
+
+El proveedor local se administra solo mediante la interfaz versionada del
+proyecto:
+
+```bash
+make provider-local-prepare
+make provider-local-start
+make provider-local-status
+make provider-local-verify
+make provider-local-stop
+make provider-local-update
+make provider-local-rollback
+make provider-local-clean CONFIRM=remove-provider-data
+```
+
+Preparar/actualizar requiere red y al menos 4 GiB libres; el contenedor queda
+limitado a 4 CPU y 4 GiB RAM. Start, status, verify, stop y rollback usan el
+artefacto ya preparado sin descarga. Stop y `make clean` conservan sus datos;
+la eliminacion completa exige el token exacto y se limita al proyecto Compose.
+LibreTranslate permanece solo en la red interna y sin puerto publicado; un
+relay minimo del mismo proyecto expone `127.0.0.1:5000`, reenvia unicamente al
+destino interno fijo y no registra contenido. No se instala Python en Fedora:
+el relay se ejecuta dentro de la imagen fijada del proveedor.
+El camino soportado no requiere cuenta, suscripcion ni key. Si alguien opta de
+forma independiente por el adaptador remoto avanzado, sus credenciales siguen
+fuera de settings, archivos versionados y evidencia. La guia completa de
+privacidad, validacion, rollback, licencia y remocion esta en
+`specs/007-operational-providers/quickstart.md`.
 
 Rust se ejecuta mediante la imagen Docker oficial fijada en `Makefile`; no se
 instala `rustc` ni `cargo` globalmente para este proyecto por defecto.
+
+Los worktrees y sus artefactos de compilacion deben vivir en almacenamiento
+persistente, nunca bajo `/tmp`, `/dev/shm` u otro `tmpfs`/`ramfs`. Para
+revisiones temporales se usa
+`~/dev/.worktrees/zed-en-es-translator/<nombre>`. `make
+workspace-storage-check` valida el checkout actual antes de cualquier build
+Rust y `make worktree-audit` revisa todos los worktrees registrados. La guarda
+se prueba sin compilar con `make test-worktree-storage`.
 
 La calidad obligatoria se valida localmente y en cada pull request con los
 mismos targets del `Makefile`: formato, Clippy, pruebas y `cargo-deny`. La
@@ -95,6 +140,9 @@ de ambos workspaces y las acciones de GitHub.
 Validacion principal:
 
 ```bash
+make workspace-storage-check
+make worktree-audit
+make test-worktree-storage
 make zed-extension-prepare
 make zed-direct-prepare
 make test-direct-zed-translation
@@ -102,6 +150,7 @@ make test-zed-extension
 make test-zed-ux-flow
 make test-core
 make test-mcp
+make test-operational-providers
 make test-real-provider-config
 make test
 make fmt
@@ -150,6 +199,7 @@ del proveedor; la evidencia redactada vive en
 - [ADR 0002: arquitectura y tecnologia inicial](docs/adr/0002-architecture-and-technology.md)
 - [ADR 0003: servidor MCP Rust con rmcp](docs/adr/0003-mcp-server-rust-rmcp.md)
 - [ADR 0004: flujo directo Zed mediante LSP](docs/adr/0004-direct-zed-lsp-workflow.md)
+- [ADR 0005: pareja operativa de proveedores reales](docs/adr/0005-operational-provider-pair.md)
 - [Investigacion: estructura Zed y Spec Kit](docs/research/zed-spec-kit-repo-structure.md)
 - [Investigacion: contrato de traduccion y Provider](docs/research/provider-contract.md)
 - [Investigacion: archivos y comentarios](docs/research/supported-files-and-comments.md)
