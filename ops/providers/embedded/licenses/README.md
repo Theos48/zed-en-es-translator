@@ -42,6 +42,19 @@ This closes the official-download provenance gap. It does not close the
 license gap: `mozilla/remote-settings-data` has no repository license and its
 LFS pointers do not carry an artifact license field.
 
+There is one stronger identity bridge for the largest attachment. At archived
+`mozilla/firefox-translations-models` commit
+`e7957fc407441a5e3e35bbcbf9d60d9b35764618`, the MPL-2.0 repository's
+`models/base-memory/enes/metadata.json` records the exact locked decompressed
+model SHA-256 `3b1c3995…` and size 31,561,787 bytes, together with the same
+language pair and architecture. The repository's three gzip LFS pointer names
+also match the locked model, vocabulary and lexical-shortlist installed names.
+Their compressed identities differ because the reviewed delivery uses Zstandard,
+and no gzip/model body was downloaded for this comparison. The committed
+metadata does not provide equivalent decompressed identities for vocabulary and
+lexical shortlist, so this strengthens but does not silently complete the
+three-artifact license conclusion.
+
 ## Native evidence inventory
 
 The machine-readable actual-binary inventory is
@@ -93,6 +106,8 @@ Primary evidence:
 
 - <https://github.com/mozilla/translations/tree/f31423c7c2c6ed8ae57d71a3d19a9db6f156060e>
 - <https://github.com/mozilla/firefox-translations-models>
+- <https://github.com/mozilla/firefox-translations-models/blob/e7957fc407441a5e3e35bbcbf9d60d9b35764618/LICENSE>
+- <https://github.com/mozilla/firefox-translations-models/blob/e7957fc407441a5e3e35bbcbf9d60d9b35764618/models/base-memory/enes/metadata.json>
 - <https://github.com/mozilla/remote-settings-data/commit/2cf7ff66844260317726822990a7f47a4730ec8a>
 - <https://github.com/mozilla/remote-settings-data/blob/2cf7ff66844260317726822990a7f47a4730ec8a/attachments/main-workspace/translations-models-v2/1d705201-9be0-40c4-a0b4-18d1e3973777.zst>
 - <https://github.com/mozilla/remote-settings-data/blob/2cf7ff66844260317726822990a7f47a4730ec8a/attachments/main-workspace/translations-models-v2/b2b5907b-8759-4cc8-a721-89c283e6e45b.zst>
