@@ -3,9 +3,7 @@
 use std::path::PathBuf;
 use std::thread::{self, JoinHandle};
 
-use lsp_server::{
-    Connection, Message, Notification, Request, RequestId, Response, ResponseError, ResponseKind,
-};
+use lsp_server::{Connection, Message, Notification, Request, RequestId, Response, ResponseError};
 use lsp_types::{Position, Range};
 use serde_json::{json, Value};
 use translator_core::{MockProvider, Provider};
@@ -18,17 +16,11 @@ pub trait ResponseExt {
 
 impl ResponseExt for Response {
     fn result(&self) -> Option<&Value> {
-        match &self.response_kind {
-            ResponseKind::Ok { result } => Some(result),
-            ResponseKind::Err { .. } => None,
-        }
+        self.response_result.as_ref().ok()
     }
 
     fn error(&self) -> Option<&ResponseError> {
-        match &self.response_kind {
-            ResponseKind::Ok { .. } => None,
-            ResponseKind::Err { error } => Some(error),
-        }
+        self.response_result.as_ref().err()
     }
 }
 
