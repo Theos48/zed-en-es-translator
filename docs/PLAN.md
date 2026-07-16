@@ -6,7 +6,7 @@
 2. `specs/010-repository-convergence/` registra la limpieza completada y sus
    gates de convergencia.
 3. `specs/009-zed-marketplace-install/` conserva los requisitos, contratos y
-   gates de la release pendiente.
+   gates de la publicación en Gallery pendiente.
 4. `docs/decisions.md` y `docs/adr/` registran decisiones estables e historia
    explícitamente aceptada o supersedida.
 5. `docs/feature-map.md` mantiene el backlog futuro; `docs/diagrams.md` muestra
@@ -66,6 +66,10 @@ a los gates retenidos y redujo la documentación al producto publicado. Las
 identidades de binario y archivo registradas por 009 ya fueron regeneradas y
 validadas antes del tag.
 
+El release público `v0.1.0` ya fue generado por el workflow reproducible desde
+`fb2d76c`, y su archivo de 5,548,286 bytes coincide en tamaño y SHA-256 con el
+package lock. El check contra el tag, la URL y el asset públicos también pasa.
+
 ## Secuencia hasta `v0.1.0`
 
 ### 1. Convergencia del repositorio — completada
@@ -87,18 +91,21 @@ validadas antes del tag.
 - ejecutar formato, Clippy, dependencias, adquisición, package, offline,
   privacidad, licencias, recursos y remoción.
 
-### 3. Release del proyecto
+### 3. Release del proyecto — completada
 
-- revisar y fusionar la convergencia;
-- publicar el tag y asset que coinciden con el lock regenerado;
-- ejecutar el check público de release;
-- completar la aceptación interactiva en Zed con ese asset exacto.
+- convergencia revisada y fusionada;
+- tag y asset exactos publicados como `v0.1.0`;
+- check público de release completado.
 
 ### 4. Publicación en Gallery
 
-- enviar el cambio al registro oficial de extensiones de Zed;
-- esperar sus checks y merge;
+- cambio enviado como
+  [zed-industries/extensions#6843](https://github.com/zed-industries/extensions/pull/6843);
+- checks `package`, Danger y CLA completados;
+- esperar revisión/merge de Zed;
 - realizar 3/3 instalaciones limpias desde la Gallery;
+- completar en la primera instalación la aceptación interactiva con el asset
+  exacto;
 - verificar preparación visible, traducción offline, no-mutación, disable y
   uninstall sin pasos externos.
 
