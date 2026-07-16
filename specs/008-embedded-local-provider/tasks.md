@@ -224,11 +224,12 @@ Settings records were re-read by exact ID. All locked names, roles, `en-es`
 language, `base-memory` architecture, version, attachment locations, compressed
 and decompressed hashes/sizes match. The record schema exposes neither a
 `license` nor an `spdx` field. The reproducible runner's native link/license
-inventory and exact unresolved items are recorded in
-`ops/providers/embedded/licenses/README.md`. T066/T068 remain open because
-artifact-level conclusions, the complete actual-binary SBOM/notice package and
-both human approval records are absent; T070-T073 therefore remain correctly
-blocked and were not simulated.
+inventory, actual-binary SBOM and exact unresolved items are recorded in
+`ops/providers/embedded/licenses/README.md` and
+`ops/providers/embedded/licenses/native-sbom.json`. T066/T068 remain open
+because accepted artifact-level conclusions, notice/source handling and both
+human approval records are absent; T070-T073 therefore remain correctly blocked
+and were not simulated.
 
 ---
 
