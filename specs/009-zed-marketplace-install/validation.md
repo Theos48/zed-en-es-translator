@@ -63,6 +63,22 @@ This supporting smoke passed on 2026-07-16 with Zed 1.11.3 on Linux `x86_64`:
 This smoke reduces submission risk but does not close T057, FR-026 or the 3/3
 clean Gallery acceptance because it intentionally used a development extension.
 
+## Central Registry Submission Evidence
+
+- [zed-industries/extensions#6843](https://github.com/zed-industries/extensions/pull/6843)
+  submits extension version `0.1.0` at path `zed-extension` through HTTPS
+  submodule commit `0e5d7f5a7be9cd4b530a9a0039981230e071d80e`.
+- Upstream submission commit is
+  `970a532b0722f322fb6aca89cd53a6b191c09c1a` on the public fork branch.
+- [Upstream package run 29522063923](https://github.com/zed-industries/extensions/actions/runs/29522063923)
+  passed extension packaging, sorted-manifest and no-Git-LFS gates in 33
+  seconds.
+- [Upstream Danger run 29522063706](https://github.com/zed-industries/extensions/actions/runs/29522063706)
+  passed.
+- `verification/cla-signed` passed after the contributor accepted Zed's CLA and
+  the agent requested `@cla-bot check` on the PR. All submission checks are
+  green and the PR is mergeable.
+
 ## Automated Gate Matrix
 
 | Gate | Result | Evidence |
@@ -135,10 +151,10 @@ The interactive and Gallery gates remain intentionally open:
 |---|---|---|
 | T057 exact-package interactive Zed acceptance | BLOCKED | After the upstream registry entry is available, install from Gallery in a clean supported Zed profile and record only public fixture/version/outcome evidence. A dev extension or repository binary cannot replace this gate. |
 | T058 public tag and release asset | PASS | The reviewed `v0.1.0` release workflow published the exact locked archive and checksum; `make marketplace-release-check` passed against them. |
-| T060 central registry and Gallery acceptance | PARTIAL / EXTERNAL | The pre-submission dev-extension smoke passed against the exact public package. Submit the HTTPS submodule/version change to `zed-industries/extensions`; maintainer merge and the subsequent T057 plus two additional clean Gallery installations remain external. |
+| T060 central registry and Gallery acceptance | SUBMITTED / EXTERNAL | Upstream PR #6843 is mergeable and all checks pass. Maintainer merge and the subsequent T057 plus two additional clean Gallery installations remain external. |
 
-No product decision is needed to proceed. Submit upstream, wait for registry
-merge, then perform T057 and record 3/3 clean Gallery runs. Until those steps pass,
+No product decision or user-controlled gate remains. After maintainer merge,
+perform T057 and record 3/3 clean Gallery runs. Until those steps pass,
 FR-001, FR-026, FR-027, SC-001, SC-009 and SC-010 remain publication-level
 open gates even though their local contracts are implemented.
 

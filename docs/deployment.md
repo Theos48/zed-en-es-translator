@@ -15,8 +15,10 @@ La implementación y el candidato están validados. El release público `v0.1.0`
 contiene el archivo exacto de 5,548,286 bytes y SHA-256
 `9cddf1ede9a19e2e5ad6cdf1c3c775d218cdc455fc27462c8922e6ffd19108d3`;
 `make marketplace-release-check` confirma que tag, URL, versión, tamaño y hash
-coinciden con el package lock. Siguen pendientes el envío al registro oficial y,
-después del merge, la aceptación interactiva 3/3 desde Gallery.
+coinciden con el package lock. El PR
+[zed-industries/extensions#6843](https://github.com/zed-industries/extensions/pull/6843)
+ya pasa `package`, Danger y CLA; siguen pendientes el merge y la aceptación
+interactiva 3/3 desde Gallery.
 
 ## 1. Probar como dev extension
 
