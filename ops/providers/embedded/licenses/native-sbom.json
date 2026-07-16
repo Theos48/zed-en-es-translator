@@ -390,16 +390,34 @@
       "name": "Marian any_type helper",
       "version": "vendored",
       "scope": "inlined_headers",
-      "candidate_spdx": "NOASSERTION",
-      "review_status": "human_review_required",
+      "candidate_spdx": "MIT",
+      "review_status": "human_conclusion_recorded",
       "license_evidence": [
         {
           "source": "locked_source_tree",
           "path": "inference/marian-fork/src/3rd_party/any_type.h",
           "sha256": "0d69a0fb6c01f94de70fb20f0da14c194f361985790fd1342d0e3a3c1d8e225f",
           "note": "The header cites external inspiration URLs but contains no explicit license notice."
+        },
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/LICENSE.md",
+          "sha256": "fb3e48be2f3c9c85f3acf32d4ff115a803208e51ecab694000415c8bf1dd712b",
+          "note": "The helper is carried inside the Marian fork governed by this project-level MIT license."
+        },
+        {
+          "source": "upstream_repository",
+          "url": "https://github.com/marian-nmt/marian-dev/blob/master/src/3rd_party/any_type.h",
+          "note": "The Marian original and Mozilla fork carry the same helper without a separate component license; reviewed package metadata declares Marian as MIT."
         }
-      ]
+      ],
+      "human_conclusion": {
+        "date": "2026-07-16",
+        "authority": "project_maintainer",
+        "spdx": "MIT",
+        "scope": "Marian project component for local activation review",
+        "publication_effect": "none; F009 remains separately blocked"
+      }
     },
     {
       "id": "ssplit-cpp",
@@ -422,7 +440,7 @@
       "name": "PCRE2 8-bit static library",
       "version": "10.42-1",
       "scope": "static_link_from_build_image",
-      "candidate_spdx": "NOASSERTION",
+      "candidate_spdx": "LicenseRef-PCRE2-BSD-3-Clause-with-binary-exception AND BSD-2-Clause",
       "review_status": "human_review_required",
       "license_evidence": [
         {
@@ -430,9 +448,15 @@
           "path": "/usr/share/doc/libpcre2-dev/copyright",
           "sha256": "030511beb4d9d620ad09914c369c36ec0528dcf301d1923cc643c948ee7c6a38",
           "package": "libpcre2-dev:amd64=10.42-1",
-          "note": "The Debian copyright file records the PCRE2 BSD-style terms, the binary-library exception and separate sljit terms; a single SPDX expression is intentionally not inferred."
+          "note": "The Debian copyright file records the PCRE2 BSD-style terms, the binary-library exception and separate sljit BSD-2-Clause terms; these form the proposed composite SPDX expression."
+        },
+        {
+          "source": "upstream_release",
+          "url": "https://github.com/PCRE2Project/pcre2/blob/pcre2-10.42/LICENCE",
+          "note": "The upstream release records the PCRE2 three-clause terms plus its binary-library-like exception; the linked JIT closure also contains sljit code under BSD-2-Clause."
         }
-      ]
+      ],
+      "proposed_local_treatment": "Retain the complete PCRE2 10.42 license text with the native notice set; no F009 binary redistribution is authorized by this proposal."
     },
     {
       "id": "debian-runtime-system-libraries",
@@ -472,11 +496,6 @@
     }
   ],
   "unresolved_items": [
-    {
-      "id": "marian-any-type-attribution",
-      "blocking": true,
-      "required_action": "A human reviewer must determine the applicable license/attribution for any_type.h or replace it with reviewed code before activation."
-    },
     {
       "id": "pcre2-composite-conclusion",
       "blocking": true,

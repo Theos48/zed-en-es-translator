@@ -7,6 +7,12 @@ conclusions and approvals required by F012/F009. It is not legal advice and it
 does not authorize activation, bundling, rehosting, redistribution or
 publication.
 
+The concise remaining decision package is
+[`local-activation-review.md`](local-activation-review.md). It records the
+accepted Marian `any_type.h` conclusion and presents, without auto-approval,
+the exact PCRE2, native notice/source, system-library and Mozilla resource
+proposals for F012 local use.
+
 ## Exact scope reviewed mechanically
 
 - Runner source: `mozilla/translations` at
@@ -50,10 +56,14 @@ model SHA-256 `3b1c3995…` and size 31,561,787 bytes, together with the same
 language pair and architecture. The repository's three gzip LFS pointer names
 also match the locked model, vocabulary and lexical-shortlist installed names.
 Their compressed identities differ because the reviewed delivery uses Zstandard,
-and no gzip/model body was downloaded for this comparison. The committed
-metadata does not provide equivalent decompressed identities for vocabulary and
-lexical shortlist, so this strengthens but does not silently complete the
-three-artifact license conclusion.
+and no gzip/model body was downloaded for this comparison. The same official
+`remote-settings-data` commit also introduced uncompressed LFS objects whose
+OIDs and sizes exactly equal all three locked installed identities, including
+vocabulary `5ae254fa…` / 816,054 bytes and lexical shortlist `7d51237c…` /
+4,198,436 bytes. This closes the decompressed-identity bridge for all three
+artifacts. It still does not silently complete the license conclusion because
+the Remote Settings repository and records do not attach a license field to
+those objects.
 
 ## Native evidence inventory
 
@@ -77,8 +87,8 @@ identity evidence. Together they establish the following closure:
 | ssplit-cpp | Exact submodule `a311f98…`; only `ssplit.cpp.o` and `regex.cpp.o` link under candidate `Apache-2.0` | Optional LGPL nonbreaking-prefix data is neither linked nor packaged |
 | zlib, sse_mathfun and threadpool | Hashed zlib-style notices | Human conclusions/notice retention pending |
 | Microsoft CNTK call-stack helper | Source header declares MIT | Referenced upstream root notice is not adjacent to the vendored file |
-| Marian `any_type.h` | The final release contains its symbols; header cites external inspiration but has no explicit notice | `NOASSERTION`; attribution/conclusion is a blocking human item |
-| static PCRE2 | Exact Debian package `libpcre2-dev:amd64=10.42-1`; package copyright hash recorded | Composite PCRE2/sljit/binary-exception conclusion pending |
+| Marian `any_type.h` | The final release contains its symbols; the exact helper is carried by both the Marian original and the locked Mozilla fork under Marian's project-level MIT license | Maintainer conclusion recorded as `MIT`; preserve the original inspiration links; no separate F009 approval inferred |
+| static PCRE2 | Exact Debian package `libpcre2-dev:amd64=10.42-1`; package copyright hash and linked JIT/sljit evidence recorded | Proposed `LicenseRef-PCRE2-BSD-3-Clause-with-binary-exception AND BSD-2-Clause`; human acceptance pending |
 | Dynamic ELF allowlist | Exact bookworm glibc/libstdc++/libgcc/libm/loader package versions and notice hashes recorded | System-library delivery treatment pending |
 
 The build compiles generated ONNX/protobuf objects into `libmarian.a`, but the
@@ -112,6 +122,9 @@ Primary evidence:
 - <https://github.com/mozilla/remote-settings-data/blob/2cf7ff66844260317726822990a7f47a4730ec8a/attachments/main-workspace/translations-models-v2/1d705201-9be0-40c4-a0b4-18d1e3973777.zst>
 - <https://github.com/mozilla/remote-settings-data/blob/2cf7ff66844260317726822990a7f47a4730ec8a/attachments/main-workspace/translations-models-v2/b2b5907b-8759-4cc8-a721-89c283e6e45b.zst>
 - <https://github.com/mozilla/remote-settings-data/blob/2cf7ff66844260317726822990a7f47a4730ec8a/attachments/main-workspace/translations-models-v2/51318160-1249-451f-80fb-12e61f8c1def.zst>
+- <https://github.com/mozilla/remote-settings-data/blob/2cf7ff66844260317726822990a7f47a4730ec8a/attachments/main-workspace/translations-models/a4ba0e94-16de-4058-9a44-5bbbbb3c8640.bin>
+- <https://github.com/mozilla/remote-settings-data/blob/2cf7ff66844260317726822990a7f47a4730ec8a/attachments/main-workspace/translations-models/5ac5c966-d9b3-4e89-a972-4c23e82e7157.spm>
+- <https://github.com/mozilla/remote-settings-data/blob/2cf7ff66844260317726822990a7f47a4730ec8a/attachments/main-workspace/translations-models/1834a61e-0331-4c4a-bbc0-dda02afa8188.bin>
 - <https://firefox.settings.services.mozilla.com/v1/buckets/main/collections/translations-models-v2/records>
 - <https://www.mozilla.org/en-US/MPL/2.0/FAQ/>
 
@@ -138,9 +151,11 @@ digest and fresh matching approvals.
 
 ## Required completion package
 
-1. Human reviewer accepts or rejects the SBOM candidates, including an explicit
-   conclusion for Marian `any_type.h`, PCRE2's composite terms, system-library
-   treatment, retained notices and MPL covered-source handling.
+1. Human reviewer accepts or rejects the remaining SBOM candidates, including
+   PCRE2's composite terms, system-library treatment, retained notices and MPL
+   covered-source handling. Marian `any_type.h` was accepted as `MIT` on
+   2026-07-16 based on its inclusion in the MIT-licensed Marian project; its
+   original inspiration links remain preserved.
 2. Human reviewer accepts authoritative artifact-level attribution for the
    three exact Remote Settings attachments, or chooses another reviewed set.
 3. If accepted, record the reviewed SPDX/license source and

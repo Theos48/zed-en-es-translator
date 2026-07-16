@@ -62,8 +62,10 @@ the operating-system page cache warm; it does not claim a persistent provider,
 daemon or FFI lifetime. The six remaining tasks are the two human
 license/approval records and the four real/manual evidence runs that those
 records gate. The current native SBOM remains
-`review_status=blocked_human_conclusion` with five explicit blocking review
-items; none was converted into an automated legal or licensing conclusion.
+`review_status=blocked_human_conclusion` with four explicit blocking review
+items. The maintainer concluded Marian `any_type.h` is part of the
+MIT-licensed Marian project; the remaining items were not converted into an
+automated legal or licensing conclusion.
 
 ## Final command record
 

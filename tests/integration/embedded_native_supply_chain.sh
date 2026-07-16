@@ -32,7 +32,19 @@ done < <(jq -r '.recursive_dependencies[] | [.path, .commit] | @tsv' "$lock")
 [[ "$(jq -r .source.source_commit "$sbom")" == "$(jq -r .source_commit "$lock")" ]]
 [[ "$(jq '[.components[].id] | length == (unique | length) and length >= 20' "$sbom")" == "true" ]]
 [[ "$(jq '[.components[] | select(.review_status == "human_review_required")] | length > 0' "$sbom")" == "true" ]]
-[[ "$(jq '[.unresolved_items[].id] | index("marian-any-type-attribution") != null' "$sbom")" == "true" ]]
+[[ "$(jq '[.unresolved_items[].id] | index("marian-any-type-attribution") == null' "$sbom")" == "true" ]]
+[[ "$(jq '
+  .components[] |
+  select(.id == "marian-any-type") |
+  .candidate_spdx == "MIT" and
+  .review_status == "human_conclusion_recorded"
+' "$sbom")" == "true" ]]
+[[ "$(jq -r '
+  .components[] |
+  select(.id == "pcre2-static") |
+  .candidate_spdx
+' "$sbom")" == "LicenseRef-PCRE2-BSD-3-Clause-with-binary-exception AND BSD-2-Clause" ]]
+[[ "$(jq '[.unresolved_items[].id] | index("pcre2-composite-conclusion") != null' "$sbom")" == "true" ]]
 [[ "$(jq '[.excluded_components[].id] | index("onnx-protobuf") != null' "$sbom")" == "true" ]]
 
 while IFS=$'\t' read -r relative_path expected_sha; do

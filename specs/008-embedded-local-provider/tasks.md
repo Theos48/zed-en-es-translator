@@ -229,7 +229,10 @@ inventory, actual-binary SBOM and exact unresolved items are recorded in
 `ops/providers/embedded/licenses/native-sbom.json`. T066/T068 remain open
 because accepted artifact-level conclusions, notice/source handling and both
 human approval records are absent; T070-T073 therefore remain correctly blocked
-and were not simulated.
+and were not simulated. On 2026-07-16 the maintainer accepted Marian
+`any_type.h` as part of the MIT-licensed Marian project, reducing the explicit
+SBOM blocking review items from five to four without authorizing acquisition or
+F009 publication.
 
 ---
 
