@@ -1,13 +1,11 @@
 # zed-en-es-translator
 #
-# Objetivo:
-# - Versionar solo lo necesario para desarrollar, revisar y replicar la extension.
-# - Mantener fuera secretos, caches, builds, logs, artefactos locales de agentes
-#   y archivos generados por herramientas.
-# - Conservar docs/, specs/, .specify/, contratos, lockfiles y codigo fuente.
+# Solo se excluyen secretos, estado local y artefactos reproducibles. Codigo,
+# locks, documentacion, specs y assets del producto quedan visibles para
+# revision y versionado.
 
 ###############################################################################
-# Sistema operativo / escritorio
+# Sistema operativo y editores
 ###############################################################################
 
 .DS_Store
@@ -19,29 +17,19 @@ Desktop.ini
 *.orig
 *.rej
 *.bak
-
-###############################################################################
-# Editores e IDEs
-###############################################################################
-
 .vscode/
 .idea/
 *.code-workspace
-
-# Zed puede generar configuracion local de usuario/proyecto. Si mas adelante
-# necesitamos versionar configuracion especifica de la extension, se agregara
-# una excepcion explicita en vez de abrir todo el directorio.
 .zed/
 
 ###############################################################################
-# Secretos y configuracion privada
+# Secretos y estado privado
 ###############################################################################
 
 .env
 .env.*
 !.env.example
 !.env.sample
-
 *.pem
 *.key
 *.crt
@@ -50,11 +38,18 @@ Desktop.ini
 id_rsa
 id_ed25519
 *.kubeconfig
+secrets/
+credentials/
+provider-cache/
 
 ###############################################################################
-# Logs, diagnosticos locales y temporales
+# Estado local de herramientas
 ###############################################################################
 
+.agents/
+.codex/
+.cache/
+.local/
 *.log
 *.log.*
 logs/
@@ -62,153 +57,41 @@ log/
 tmp/
 temp/
 .tmp/
-.cache/
-.local/
 
 ###############################################################################
-# Agentes locales
-###############################################################################
-
-# Spec Kit advirtio que .agents/ puede contener credenciales o artefactos
-# privados dependiendo del agente. Las skills de Spec Kit pueden regenerarse con
-# `specify init --here --integration codex --integration-options="--skills"`.
-.agents/
-
-# Carpeta local de Codex dentro del proyecto; no es parte reproducible de la
-# extension ni de Spec Kit.
-.codex/
-
-###############################################################################
-# Rust
+# Builds y paquetes reproducibles
 ###############################################################################
 
 target/
 **/target/
-
-# Mantener Cargo.lock versionado para reproducibilidad cuando exista.
-!Cargo.lock
-
-###############################################################################
-# Node / TypeScript
-###############################################################################
-
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-dist/
-build/
-coverage/
-lcov.info
-.junit/
-junit.xml
-.nyc_output/
-.turbo/
-.vite/
-
-# Mantener lockfiles versionados para reproducibilidad cuando existan.
-!package-lock.json
-!pnpm-lock.yaml
-!yarn.lock
-
-###############################################################################
-# Zed extension / WASM / empaquetado
-###############################################################################
-
+native/translator-embedded-runtime/build/
+marketplace-artifacts/
 *.wasm
 *.wasm.map
 *.rlib
 *.rmeta
-*.d
 *.profraw
 *.profdata
 flamegraph.svg
-
 *.tar
 *.tar.gz
 *.tgz
 *.zip
 
 ###############################################################################
-# Spec Kit
+# Modelos y bases de datos locales
 ###############################################################################
 
-# Versionar .specify/ y specs/ porque son parte del flujo reproducible.
-!.specify/
-!.specify/**
-!specs/
-!specs/**
-
-# Si alguna ejecucion futura crea caches o backups dentro de Spec Kit, mantenerlos
-# fuera sin bloquear los artefactos fuente.
-.specify/**/.cache/
-.specify/**/*.bak
-.specify/**/*.tmp
-
-###############################################################################
-# Documentacion generada o exportada
-###############################################################################
-
-*.pdf
-*.png
-*.jpg
-*.jpeg
-*.svg
-
-# Excepcion futura: si algun asset visual pasa a ser parte real de la extension,
-# agregarlo por ruta explicita, por ejemplo:
-# !zed-extension/assets/logo.svg
-
-###############################################################################
-# Bases de datos, modelos y proveedores locales futuros
-###############################################################################
-
+models/
+model-cache/
 *.sqlite
 *.sqlite3
 *.db
-models/
-model-cache/
-provider-cache/
 
 ###############################################################################
-# Reportes y salidas locales de herramientas
+# Temporales internos de Spec Kit
 ###############################################################################
 
-reports/
-test-results/
-benchmark-results/
-
-###############################################################################
-# Archivos que SI esperamos versionar
-###############################################################################
-
-!README.md
-!AGENTS.md
-!docs/
-!docs/**
-!specs/
-!specs/**
-!skills-lock.json
-!Cargo.toml
-!package.json
-!Makefile
-!zed-extension/
-!zed-extension/**
-!crates/
-!crates/**
-
-# Las excepciones de codigo anteriores no deben reabrir salidas Cargo anidadas.
-crates/**/target/
-
-# La extension Zed es un crate Rust/WASM aislado: su target/ y su .wasm
-# compilado son artefactos de build, no fuente versionable.
-zed-extension/target/
-zed-extension/**/target/
-zed-extension/*.wasm
-zed-extension/**/*.wasm
-!mcp-server/
-!mcp-server/**
-!tests/
-!tests/**
+.specify/**/.cache/
+.specify/**/*.bak
+.specify/**/*.tmp

@@ -4,7 +4,6 @@ use std::fs;
 
 use serde_json::{json, Value};
 use translator_core::MAX_INPUT_BYTES;
-use translator_lsp::state::ProviderDescriptor;
 
 use common::{file_uri, range, ResponseExt as _, TestClient};
 
@@ -14,7 +13,7 @@ fn empty_range_translates_current_saved_document_snapshot() {
     let path = workspace.join("doc.md");
     fs::write(&path, "Disk content.").expect("disk file");
     let uri = file_uri(&path);
-    let mut client = TestClient::with_workspace(workspace, ProviderDescriptor::offline());
+    let mut client = TestClient::with_workspace(workspace);
     client.open(&uri, 3, "markdown", "Read the docs.");
 
     let execute = client.request_with_messages(
@@ -40,7 +39,7 @@ fn empty_range_rejects_stale_untitled_unsupported_and_oversized_targets() {
     let path = workspace.join("doc.txt");
     fs::write(&path, "Disk content.").expect("disk file");
     let uri = file_uri(&path);
-    let mut client = TestClient::with_workspace(workspace, ProviderDescriptor::offline());
+    let mut client = TestClient::with_workspace(workspace);
     client.open(&uri, 2, "plaintext", "Read the docs.");
 
     for params in [

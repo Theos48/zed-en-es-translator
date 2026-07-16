@@ -9,7 +9,7 @@ use lsp_server::{
 use lsp_types::{Position, Range};
 use serde_json::{json, Value};
 use translator_core::{MockProvider, Provider};
-use translator_lsp::{serve, state::ProviderDescriptor};
+use translator_lsp::serve;
 
 pub trait ResponseExt {
     fn result(&self) -> Option<&Value>;
@@ -39,22 +39,17 @@ pub struct TestClient {
 }
 
 impl TestClient {
-    pub fn new(descriptor: ProviderDescriptor) -> Self {
-        Self::with_provider(PathBuf::from("/workspace"), MockProvider::new(), descriptor)
+    pub fn new() -> Self {
+        Self::with_provider(PathBuf::from("/workspace"), MockProvider::new())
     }
 
-    pub fn with_workspace(workspace: PathBuf, descriptor: ProviderDescriptor) -> Self {
-        Self::with_provider(workspace, MockProvider::new(), descriptor)
+    pub fn with_workspace(workspace: PathBuf) -> Self {
+        Self::with_provider(workspace, MockProvider::new())
     }
 
-    pub fn with_provider<P: Provider + Send + 'static>(
-        workspace: PathBuf,
-        provider: P,
-        descriptor: ProviderDescriptor,
-    ) -> Self {
+    pub fn with_provider<P: Provider + Send + 'static>(workspace: PathBuf, provider: P) -> Self {
         let (server_connection, connection) = Connection::memory();
-        let server =
-            thread::spawn(move || serve(server_connection, workspace, provider, descriptor));
+        let server = thread::spawn(move || serve(server_connection, workspace, provider));
         let mut client = Self {
             connection,
             server: Some(server),

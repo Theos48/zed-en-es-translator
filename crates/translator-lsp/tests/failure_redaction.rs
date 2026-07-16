@@ -7,14 +7,13 @@ use serde_json::json;
 use translator_core::{
     ErrorCode, Provider, ProviderRequest, ProviderResponse, TranslateFailure, MAX_OUTPUT_BYTES,
 };
-use translator_lsp::state::ProviderDescriptor;
 
 use common::{range, ResponseExt as _, TestClient};
 
 #[test]
 fn invalid_command_uri_range_and_provider_failures_are_redacted() {
     let secret = "SOURCE_SECRET_123";
-    let mut invalid = TestClient::new(ProviderDescriptor::offline());
+    let mut invalid = TestClient::new();
     let uri = "file:///workspace/readme.md";
     invalid.open(uri, 1, "markdown", secret);
     for params in [
@@ -38,11 +37,7 @@ fn invalid_command_uri_range_and_provider_failures_are_redacted() {
             code,
             calls: Cell::new(0),
         };
-        let mut client = TestClient::with_provider(
-            PathBuf::from("/workspace"),
-            provider,
-            ProviderDescriptor::local(),
-        );
+        let mut client = TestClient::with_provider(PathBuf::from("/workspace"), provider);
         client.open(uri, 1, "markdown", "Read the docs.");
         let response = client.request(
             "workspace/executeCommand",
@@ -56,11 +51,8 @@ fn invalid_command_uri_range_and_provider_failures_are_redacted() {
     }
 
     for output in [Vec::new(), vec!["x".repeat(MAX_OUTPUT_BYTES + 1)]] {
-        let mut client = TestClient::with_provider(
-            PathBuf::from("/workspace"),
-            ShapeProvider { output },
-            ProviderDescriptor::local(),
-        );
+        let mut client =
+            TestClient::with_provider(PathBuf::from("/workspace"), ShapeProvider { output });
         client.open(uri, 1, "markdown", "Read the docs.");
         let response = client.request(
             "workspace/executeCommand",

@@ -42,12 +42,13 @@
 
 - **Safety-first translation**: Plan does not modify buffers, does not auto-replace editor
   content, and preserves ambiguous/code content instead of guessing.
-- **Offline-first provider boundary**: Default provider is mock/offline; any remote path is
-  disabled by default and requires explicit per-request confirmation in server/core.
+- **Single offline product boundary**: The shipped path is the Zed Gallery extension through
+  its verified adjacent LSP/core/embedded runtime package; Mock is a test double only and no
+  provider, endpoint, credential, arbitrary binary, MCP, Agent or CLI setting is exposed.
 - **Test-first development**: Plan includes failing tests/checks before implementation,
-  including negative security tests for file access, limits, logs, secrets, and provider timeout.
+  including negative security tests for file access, limits, logs, bounded processes and package identity.
 - **Explicit contracts and limits**: Plan defines or references `TranslateRequest`,
-  success/error shape, `ErrorCode`, Provider segment contract, CLI wire contract,
+  success/error shape, `ErrorCode`, Provider segment contract, LSP/embedded-process/package contracts,
   and 20 KiB input / 4 KiB segment / 256 segment / 40 KiB output / 15 s timeout limits.
 - **Minimal host footprint**: Plan avoids global project runtimes/services unless classified
   under host policy; secrets and real `.env` files are not versioned.

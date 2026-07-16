@@ -4,9 +4,7 @@ use std::collections::HashMap;
 use std::fmt;
 
 use lsp_types::{Range, Uri};
-use translator_core::{
-    ErrorCode, InputKind, ProviderConfiguration, ProviderMode, ProviderSelection, TranslateFailure,
-};
+use translator_core::{ErrorCode, InputKind, TranslateFailure};
 
 #[derive(Clone)]
 pub struct DocumentSnapshot {
@@ -173,108 +171,6 @@ impl fmt::Debug for DocumentStore {
             .field("document_count", &self.documents.len())
             .field("preview_count", &self.previews.len())
             .finish()
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ProviderLocalityLabel {
-    Offline,
-    Local,
-    Remote,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct ProviderDescriptor {
-    locality: ProviderLocalityLabel,
-    allow_remote: bool,
-}
-
-/// Provider selection and safe descriptor produced from one configuration.
-pub struct ProviderRuntime {
-    selection: ProviderSelection,
-    descriptor: ProviderDescriptor,
-}
-
-impl ProviderRuntime {
-    /// Consume one validated configuration to build execution and locality state.
-    ///
-    /// # Errors
-    ///
-    /// Returns the shared provider configuration error when selection cannot
-    /// be constructed, including a missing referenced remote credential.
-    pub fn from_configuration(
-        configuration: ProviderConfiguration,
-    ) -> Result<Self, TranslateFailure> {
-        let descriptor = ProviderDescriptor::from_configuration(&configuration);
-        let selection = ProviderSelection::from_configuration(configuration)?;
-        Ok(Self {
-            selection,
-            descriptor,
-        })
-    }
-
-    /// Split the already-matched execution provider and safe UI descriptor.
-    pub fn into_parts(self) -> (ProviderSelection, ProviderDescriptor) {
-        (self.selection, self.descriptor)
-    }
-}
-
-impl fmt::Debug for ProviderRuntime {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter
-            .debug_struct("ProviderRuntime")
-            .field("descriptor", &self.descriptor)
-            .finish_non_exhaustive()
-    }
-}
-
-impl ProviderDescriptor {
-    pub const fn offline() -> Self {
-        Self {
-            locality: ProviderLocalityLabel::Offline,
-            allow_remote: false,
-        }
-    }
-
-    pub const fn local() -> Self {
-        Self {
-            locality: ProviderLocalityLabel::Local,
-            allow_remote: false,
-        }
-    }
-
-    pub const fn remote(allow_remote: bool) -> Self {
-        Self {
-            locality: ProviderLocalityLabel::Remote,
-            allow_remote,
-        }
-    }
-
-    pub fn from_configuration(configuration: &ProviderConfiguration) -> Self {
-        match configuration.mode {
-            ProviderMode::Mock => Self::offline(),
-            ProviderMode::EmbeddedLocal => Self::offline(),
-            ProviderMode::LibreTranslate => Self::local(),
-            ProviderMode::AzureTranslator => Self::remote(true),
-        }
-    }
-
-    pub const fn locality(self) -> ProviderLocalityLabel {
-        self.locality
-    }
-
-    pub const fn allow_remote(self) -> bool {
-        self.allow_remote
-    }
-
-    pub const fn action_title(self) -> &'static str {
-        match self.locality {
-            ProviderLocalityLabel::Offline => "Translate English to Spanish [offline]",
-            ProviderLocalityLabel::Local => "Translate English to Spanish [local]",
-            ProviderLocalityLabel::Remote => {
-                "Translate English to Spanish [remote - confirmation required]"
-            }
-        }
     }
 }
 

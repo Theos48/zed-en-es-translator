@@ -10,23 +10,10 @@ pub fn translate_document(
     input_kind: InputKind,
     provider: &impl Provider,
 ) -> Result<String, TranslateFailure> {
-    translate_document_with_confirmation(content, input_kind, provider, false)
-}
-
-pub fn translate_document_with_confirmation(
-    content: &str,
-    input_kind: InputKind,
-    provider: &impl Provider,
-    remote_confirmed: bool,
-) -> Result<String, TranslateFailure> {
     let mut segment_count = 0;
     let translated = match input_kind {
-        InputKind::Text => {
-            translate_visible_text(content, provider, &mut segment_count, remote_confirmed)
-        }
-        InputKind::Markdown => {
-            translate_markdown(content, provider, &mut segment_count, remote_confirmed)
-        }
+        InputKind::Text => translate_visible_text(content, provider, &mut segment_count),
+        InputKind::Markdown => translate_markdown(content, provider, &mut segment_count),
     }?;
 
     if segment_count == 0 {
@@ -40,7 +27,6 @@ fn translate_markdown(
     content: &str,
     provider: &impl Provider,
     segment_count: &mut usize,
-    remote_confirmed: bool,
 ) -> Result<String, TranslateFailure> {
     let mut output = String::new();
     let mut in_fence: Option<String> = None;
@@ -102,13 +88,8 @@ fn translate_markdown(
             continue;
         }
 
-        let translated = translate_inline_visible(
-            line,
-            provider,
-            &mut in_code_span,
-            segment_count,
-            remote_confirmed,
-        )?;
+        let translated =
+            translate_inline_visible(line, provider, &mut in_code_span, segment_count)?;
         output.push_str(&translated);
     }
 
@@ -120,7 +101,6 @@ fn translate_inline_visible(
     provider: &impl Provider,
     in_code_span: &mut Option<usize>,
     segment_count: &mut usize,
-    remote_confirmed: bool,
 ) -> Result<String, TranslateFailure> {
     let mut output = String::new();
     let mut cursor = 0;
@@ -143,12 +123,8 @@ fn translate_inline_visible(
     while let Some(relative_start) = line[cursor..].find('`') {
         let start = cursor + relative_start;
         if start > cursor {
-            let translated = translate_visible_markdown_text(
-                &line[cursor..start],
-                provider,
-                segment_count,
-                remote_confirmed,
-            )?;
+            let translated =
+                translate_visible_markdown_text(&line[cursor..start], provider, segment_count)?;
             output.push_str(&translated);
         }
 
@@ -170,12 +146,7 @@ fn translate_inline_visible(
     }
 
     if cursor < line.len() {
-        let translated = translate_visible_markdown_text(
-            &line[cursor..],
-            provider,
-            segment_count,
-            remote_confirmed,
-        )?;
+        let translated = translate_visible_markdown_text(&line[cursor..], provider, segment_count)?;
         output.push_str(&translated);
     }
 
@@ -186,7 +157,6 @@ fn translate_visible_text(
     text: &str,
     provider: &impl Provider,
     segment_count: &mut usize,
-    remote_confirmed: bool,
 ) -> Result<String, TranslateFailure> {
     if text.trim().is_empty() {
         return Ok(text.to_string());
@@ -194,12 +164,11 @@ fn translate_visible_text(
 
     let segments = split_translatable_text(text);
     reserve_segments(segment_count, segments.len())?;
-    let request = ProviderRequest::with_remote_confirmation(
+    let request = ProviderRequest::new(
         segments,
         Language::English,
         Language::Spanish,
         Tone::TechnicalNeutral,
-        remote_confirmed,
     )?;
     let response = provider.translate(&request).map_err(redact_failure)?;
     ensure_provider_response_shape(&request, &response)?;
@@ -211,7 +180,6 @@ fn translate_visible_markdown_text(
     text: &str,
     provider: &impl Provider,
     segment_count: &mut usize,
-    remote_confirmed: bool,
 ) -> Result<String, TranslateFailure> {
     let mut output = String::new();
     let mut cursor = 0;
@@ -220,12 +188,8 @@ fn translate_visible_markdown_text(
         let marker_start = cursor + relative_start;
         let destination_start = marker_start + 2;
         if let Some(destination_end) = find_link_destination_end(text, destination_start) {
-            let translated = translate_visible_text(
-                &text[cursor..destination_start],
-                provider,
-                segment_count,
-                remote_confirmed,
-            )?;
+            let translated =
+                translate_visible_text(&text[cursor..destination_start], provider, segment_count)?;
             output.push_str(&translated);
             output.push_str(&text[destination_start..destination_end]);
             cursor = destination_end;
@@ -239,7 +203,6 @@ fn translate_visible_markdown_text(
             text.get(cursor..).unwrap_or_default(),
             provider,
             segment_count,
-            remote_confirmed,
         )?;
         output.push_str(&translated);
     }

@@ -2,16 +2,13 @@
 
 ## Estado
 
-Aceptado, reemplazado parcialmente por
-[ADR 0003](./0003-mcp-server-rust-rmcp.md) para la tecnologia del servidor MCP
-de F005, y matizado por D065, D066 y D071 para la experiencia de producto.
-Tambien queda matizado por D072 para la direccion extension-first desde F006.
+Superseded by [ADR 0007](./0007-repository-convergence.md). Las decisiones que
+originaron el core seguro permanecen vigentes a través de la constitución
+2.0.0; la arquitectura multipista descrita aquí es solo historia.
 
-Nota de vigencia: este ADR describe la arquitectura inicial. El Agent Panel fue
-suficiente para el MVP tecnico y la validacion F007, pero no gobierna el
-objetivo vigente. La siguiente direccion es una accion directa de extension Zed
-sin Agent. F006 se interpreta como fundacion de esa extension, no como inicio
-de un producto construido alrededor de Agent Panel.
+Todo el contenido siguiente describe alternativas y fronteras iniciales. La
+única arquitectura vigente está definida por ADR 0006, ADR 0007 y la
+constitución 2.0.0.
 
 ## Contexto
 
@@ -85,10 +82,9 @@ directamente y mapea errores del core a resultados MCP con `isError: true`.
 
 Los logs no deben contener texto fuente, segmentos, traducciones completas, secretos, headers, tokens ni rutas sensibles sin redaccion.
 
-Spec Kit ya esta inicializado. La planeacion estrategica vive en `docs/`, pero
-la implementacion de cada feature formal vive en `specs/<feature>/`. Para la
-feature activa, `specs/001-translation-core-contract/` gobierna requisitos,
-plan tecnico, contratos, tareas y quickstart.
+Spec Kit ya estaba inicializado. La planeación estratégica vive en `docs/` y
+la implementación activa en `specs/<feature>/`; Git conserva el ciclo formal
+que originó esta decisión.
 
 ## Consecuencias
 

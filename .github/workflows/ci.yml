@@ -25,6 +25,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Check retained repository boundary
+        run: make test-repository-boundary
+
       - name: Check formatting
         run: make fmt
 

@@ -6,21 +6,15 @@ use std::thread;
 use lsp_server::{Connection, ErrorCode, Message, Notification, Request, Response};
 use serde_json::json;
 use translator_core::MockProvider;
-use translator_lsp::{serve, state::ProviderDescriptor};
+use translator_lsp::serve;
 
 use common::ResponseExt as _;
 
 #[test]
 fn advertises_minimal_capabilities_and_handles_shutdown() {
     let (server, client) = Connection::memory();
-    let server_thread = thread::spawn(|| {
-        serve(
-            server,
-            PathBuf::from("/workspace"),
-            MockProvider::new(),
-            ProviderDescriptor::offline(),
-        )
-    });
+    let server_thread =
+        thread::spawn(|| serve(server, PathBuf::from("/workspace"), MockProvider::new()));
 
     client
         .sender

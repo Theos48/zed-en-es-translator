@@ -32,6 +32,13 @@ fn manifest_registers_one_direct_language_server_and_no_manual_surface() {
     }
 }
 
+#[test]
+fn language_server_launch_has_no_runtime_provider_setting() {
+    let source = include_str!("../src/lib.rs");
+
+    assert!(!source.contains("TRANSLATOR_PROVIDER"));
+}
+
 fn manifest_text() -> String {
     fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join("extension.toml"))
         .expect("extension manifest")

@@ -16,7 +16,7 @@ provide:
 - passing locked Rust/native build, format, lint, dependency, license,
   package-budget, offline and clean-install checks;
 - user documentation that begins with Gallery install and contains no terminal,
-  Docker, binary-path or provider-setting step.
+  Docker, binary-path or runtime-selection step.
 
 The extension repository must be public and the referenced commit must belong
 to a branch.

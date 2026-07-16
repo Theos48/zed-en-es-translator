@@ -1,70 +1,70 @@
 # Diagramas
 
-Diagramas Mermaid fuente para arquitectura y flujos estables. F010 esta
-completada en `specs/006-direct-zed-translation/`, incluida su validacion manual
-interactiva.
+Diagramas Mermaid de la única arquitectura soportada y sus fronteras estables.
 
-## Arquitectura directa actual
+## Arquitectura del producto
 
 ```mermaid
 flowchart LR
     user[Usuario en Zed]
-    action[Code action LSP]
-    preview[Hover Markdown en Zed]
-    extension[zed-extension]
+    gallery[Extension Gallery]
+    extension[Extensión Rust WASM]
+    work[Work dir propiedad de Zed]
+    package[Paquete local verificado]
     lsp[translator-lsp]
-    mcp[Servidor MCP]
-    cli[CLI Rust]
-    core[Core Rust]
-    provider[Provider]
-    mock[MockProvider]
-    local[Proveedor local LibreTranslate compatible]
-    remote[Proveedor remoto confirmado]
-    agent[Agent Panel puente F007]
+    core[translator-core]
+    runner[Runtime Bergamot privado]
+    models[Recursos Mozilla en-es]
+    preview[Hover de solo lectura]
 
-    user --> action
-    extension --> action
-    action --> lsp
-    lsp --> preview
+    user --> gallery
+    gallery --> extension
+    extension --> work
+    work --> package
+    package --> lsp
     lsp --> core
-    extension --> lsp
-    extension -. compatibilidad .-> mcp
-    cli -. frontera publica .-> core
-    mcp --> core
-    core --> provider
-    provider --> mock
-    provider --> local
-    provider -. confirmacion por request .-> remote
-    agent -. validacion historica .-> mcp
+    core --> runner
+    runner --> models
+    lsp --> preview
+    preview --> user
 ```
 
-## Flujo de producto objetivo
+Solo la extensión adquiere entradas públicas. LSP, core y runtime no descargan
+ni aceptan rutas o motores elegidos por el usuario.
+
+## Preparación del paquete
 
 ```mermaid
 flowchart TD
-    input[Seleccion o documento permitido]
-    command[Accion de la extension]
-    validate[Validar limites, workspace, UTF-8 y secretos]
-    provider{Proveedor requiere salir del equipo?}
-    confirm[Confirmacion explicita por solicitud]
-    translate[Traducir segmentos permitidos]
-    preview[Mostrar hover versionado en Zed]
-    keep[Conservar buffer y archivo sin cambios]
-    reject[Error normalizado redaccionado]
+    activate[Zed solicita el language server]
+    platform{Linux x86_64?}
+    current{Paquete activo válido?}
+    lock[Adquirir lock exclusivo]
+    download[Descargar fuentes fijas a staging]
+    verify[Validar tamaño hash layout y licencias]
+    promote[Promoción atómica]
+    ready[Lanzar LSP verificado]
+    previous[Conservar último paquete válido]
+    retry[Error redaccionado y retry normal]
+    unsupported[Mensaje de plataforma no soportada]
 
-    input --> command
-    command --> validate
-    validate --> provider
-    validate -. fallo .-> reject
-    provider -- no --> translate
-    provider -- si --> confirm
-    confirm -- aceptado --> translate
-    confirm -- omitido --> reject
-    translate --> preview
-    preview --> keep
+    activate --> platform
+    platform -- no --> unsupported
+    platform -- sí --> current
+    current -- sí --> ready
+    current -- no --> lock
+    lock --> download
+    download --> verify
+    verify -- válido --> promote
+    promote --> previous
+    previous --> ready
+    download -. fallo .-> retry
+    verify -. fallo .-> retry
 ```
 
-## Secuencia del flujo directo
+Staging nunca es ejecutable. Un fallo no desplaza un paquete activo verificado.
+
+## Traducción local
 
 ```mermaid
 sequenceDiagram
@@ -72,121 +72,55 @@ sequenceDiagram
     participant Zed
     participant LSP as translator-lsp
     participant Core as translator-core
-    participant Provider
+    participant Runtime as runtime embebido
 
-    User->>Zed: Abrir code action
-    Zed->>LSP: codeAction con URI rango y snapshot actual
-    LSP-->>Zed: Accion con localidad sin texto ni edit
-    User->>Zed: Ejecutar traduccion
-    Zed->>LSP: executeCommand con URI version rango y tipo
-    opt Provider remoto allowlisted
-        LSP->>Zed: showMessageRequest por esta solicitud
-        Zed-->>LSP: Confirmar o cancelar
-    end
-    LSP->>Core: Snapshot o seleccion permitida
-    Core->>Provider: Solo segmentos idioma y tono
-    Provider-->>Core: Segmentos traducidos
-    Core-->>LSP: Resultado validado
-    LSP-->>Zed: Preview listo sin contenido en notificacion
-    User->>Zed: Hover sobre rango vigente
-    Zed->>LSP: hover
-    LSP-->>Zed: Preview Markdown de solo lectura
+    User->>Zed: Ejecutar acción sobre selección o documento permitido
+    Zed->>LSP: Rango, URI y versión
+    LSP->>Core: Snapshot validado
+    Core->>Core: Límites, path, UTF-8 y segmentación segura
+    Core->>Runtime: Solo segmentos permitidos
+    Runtime-->>Core: Segmentos traducidos
+    Core-->>LSP: Resultado reconstruido y acotado
+    LSP-->>Zed: Preview vigente sin WorkspaceEdit
+    Zed-->>User: Hover de solo lectura
 ```
 
-## Estado del preview directo
+Un cambio o cierre del documento invalida el preview. Ningún paso escribe el
+buffer o el archivo fuente.
+
+## Estado local de adquisición
 
 ```mermaid
 stateDiagram-v2
-    [*] --> SinPreview
-    SinPreview --> ObjetivoValidado: executeCommand vigente
-    ObjetivoValidado --> ConfirmacionRemota: provider remoto
-    ObjetivoValidado --> Traduciendo: offline o local
-    ConfirmacionRemota --> Traduciendo: confirmacion positiva
-    ConfirmacionRemota --> Rechazado: cancelar timeout o cambio
-    Traduciendo --> PreviewVigente: resultado validado
-    Traduciendo --> Rechazado: fallo redaccionado
-    PreviewVigente --> SinPreview: didChange o didClose
-    PreviewVigente --> PreviewVigente: nueva traduccion reemplaza anterior
-    Rechazado --> SinPreview
+    [*] --> Ausente
+    Ausente --> Comprobando: activación soportada
+    Comprobando --> Descargando: lock adquirido
+    Comprobando --> Listo: activo válido
+    Descargando --> Listo: verificación y promoción
+    Descargando --> Fallido: red almacenamiento o integridad
+    Fallido --> Comprobando: retry desde Zed
+    Listo --> Comprobando: actualización
+    Comprobando --> Listo: candidato falla y activo sigue válido
+    Listo --> [*]: uninstall de Zed
 ```
 
-## Frontera de documentacion
+## Autoridad documental
 
 ```mermaid
 flowchart TD
-    constitution[Constitucion]
-    feature[specs/<feature>]
-    decisions[docs/decisions y ADRs]
-    context[docs/research product diagrams PLAN]
-    code[Codigo y pruebas]
+    constitution[Constitución 2.0.0]
+    cleanup[Feature 010 convergencia]
+    release[Feature 009 release]
+    decisions[Decisiones y ADRs]
+    roadmap[PLAN y feature map]
+    code[Código y gates retenidos]
 
-    constitution --> feature
-    feature --> code
-    decisions --> feature
-    context --> decisions
-```
-
-## Primer ciclo formal
-
-```mermaid
-flowchart LR
-    setup[Setup Rust/CLI]
-    contracts[Contratos y limites]
-    tests[Pruebas fallidas]
-    impl[Implementacion minima]
-    validate[make test]
-
-    setup --> contracts
-    contracts --> tests
-    tests --> impl
-    impl --> validate
-```
-
-## Lectura segura de archivo
-
-```mermaid
-flowchart TD
-    path[Path solicitado]
-    canonical[Canonicalizar workspace y path]
-    inside{Dentro del workspace?}
-    sensitive{Oculto o credencial?}
-    allowed{Extension permitida?}
-    size{Hasta 20 KiB?}
-    utf8{UTF-8 texto?}
-    read[Leer contenido]
-    reject[Error normalizado]
-
-    path --> canonical
-    canonical --> inside
-    inside -- no --> reject
-    inside -- si --> sensitive
-    sensitive -- si --> reject
-    sensitive -- no --> allowed
-    allowed -- no --> reject
-    allowed -- si --> size
-    size -- no --> reject
-    size -- si --> utf8
-    utf8 -- no --> reject
-    utf8 -- si --> read
-```
-
-## Provider por segmentos
-
-```mermaid
-flowchart LR
-    request[TranslateRequest]
-    protect[Proteger formato y contenido]
-    segments[Segmentos traducibles]
-    provider[Provider]
-    rebuild[Reconstruccion]
-    success[translated_text]
-    failure[ErrorCode + message]
-
-    request --> protect
-    protect --> segments
-    segments --> provider
-    provider --> rebuild
-    rebuild --> success
-    request -. validacion .-> failure
-    provider -. fallo .-> failure
+    constitution --> cleanup
+    constitution --> release
+    decisions --> cleanup
+    decisions --> release
+    cleanup --> code
+    release --> code
+    roadmap --> cleanup
+    roadmap --> release
 ```

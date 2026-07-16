@@ -14,9 +14,8 @@ Represents the public extension version installed by Zed.
 | `languages` | set | Markdown and Plain Text |
 | `license` | SPDX identifier | MIT for extension code |
 
-The published extension declares only the direct language server. MCP and
-developer-provider compatibility remain repository internals and are not part
-of the Gallery setup surface.
+The published extension declares only the direct language server. Feature 010
+removes every retired compatibility surface before the release is tagged.
 
 ## Published Package Lock
 
@@ -76,7 +75,7 @@ SHA-256, executable flag, source repository/commit and SPDX conclusion.
 | Required free storage before preparation | 512 MiB |
 | Peak translation RSS | 1 GiB |
 | Inference threads | 4 |
-| Provider deadline | 15 seconds |
+| Translation deadline | 15 seconds |
 
 The release validator computes actual values. The extension rejects declared
 or observed content beyond a budget before activation.
@@ -120,8 +119,9 @@ may remove stale staging only after it safely owns the lock.
 
 ## Translation Invocation
 
-The existing public request/result/error entities remain unchanged. For this
-feature the LSP selects a verified adjacent `Installed Package`, creates one
+The retained result/error contract is versioned by
+[translate-result.schema.json](./contracts/translate-result.schema.json). For
+this feature the LSP selects a verified adjacent `Installed Package`, creates one
 bounded `Translation Invocation`, and passes only ordered permitted segments,
 language metadata and tone through the private runner wire.
 

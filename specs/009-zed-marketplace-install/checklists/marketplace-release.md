@@ -18,10 +18,9 @@ evaluates the requirements themselves, not implementation behavior.
 - [x] CHK002 Is the primary journey complete from Gallery discovery through
   first real translation, including every setup step that is explicitly
   forbidden? [Completeness, Spec US1, FR-001, FR-003, FR-005]
-- [x] CHK003 Are the boundaries between the marketplace product, historical
-  MCP/Agent paths and developer-configurable providers stated so none can
-  silently become a prerequisite? [Completeness, Spec FR-010, FR-025; Scope
-  Boundaries]
+- [x] CHK003 Does the specification require retired compatibility and
+  configurable runtime paths to be absent before publication? [Completeness,
+  Spec FR-010, FR-025; Scope Boundaries]
 - [x] CHK004 Are requirements defined for absent, checking, downloading,
   ready, retryable failure, unsupported and last-known-good states?
   [Completeness, Spec US2, US4, FR-006, FR-012, FR-013, FR-017; Data Model]
@@ -64,10 +63,9 @@ evaluates the requirements themselves, not implementation behavior.
   privacy by keeping all document content out of downloads and all network
   capability out of inference? [Consistency, Spec FR-005, FR-008, FR-009,
   FR-022, FR-SEC-C; Research Decision 4]
-- [x] CHK015 Does the local marketplace default remain consistent with the
-  constitution's offline/mock default while leaving remote providers
-  explicitly configured and default-deny? [Consistency, Spec FR-010, FR-025,
-  FR-SEC-C; Plan Constitution Check]
+- [x] CHK015 Does the single verified local runtime remain consistent with the
+  constitution's offline product boundary and test-double-only rule?
+  [Consistency, Spec FR-010, FR-025, FR-SEC-C; Plan Constitution Check]
 - [x] CHK016 Are no-mutation, Markdown preservation and unsafe-input rejection
   requirements consistent across clean install, retry, offline and update
   scenarios? [Consistency, Spec FR-019, FR-020, FR-SEC-A, FR-SEC-B; SC-004]
@@ -178,6 +176,10 @@ evaluates the requirements themselves, not implementation behavior.
   portable ONNX SGEMM backend and exact nested Eigen gitlink change native
   implementation/provenance only; they do not change the supported platform,
   package source boundary, storage owner, extension ID or publication route.
+- Feature 010 replaced the former compatibility allowance in FR-025 with a
+  mandatory single-runtime repository boundary. CHK003 and CHK015 were updated
+  accordingly; all 43 requirement checks remain complete, but release evidence
+  must be regenerated from the converged candidate.
 - Focus areas: zero-setup UX, executable/model supply chain, offline/privacy,
   recovery/removal and marketplace publication.
 - Re-run during PR review if the package source, supported platform, model,

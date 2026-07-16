@@ -1,6 +1,4 @@
-use translator_core::{
-    translate_document_snapshot_with_confirmation, ErrorCode, MockProvider, MAX_INPUT_BYTES,
-};
+use translator_core::{translate_document_snapshot, ErrorCode, MockProvider, MAX_INPUT_BYTES};
 
 mod common;
 use common::{temp_case, write_file};
@@ -10,12 +8,11 @@ fn translates_current_snapshot_after_authorizing_the_disk_file() {
     let workspace = temp_case("snapshot_authorized");
     write_file(&workspace.join("doc.txt"), "Disk text.");
 
-    let success = translate_document_snapshot_with_confirmation(
+    let success = translate_document_snapshot(
         "doc.txt",
         workspace.to_str().expect("workspace"),
         "Read the docs.",
         &MockProvider::new(),
-        false,
     )
     .expect("snapshot translation");
 
@@ -32,12 +29,11 @@ fn preserves_markdown_protected_regions_from_the_snapshot() {
     write_file(&workspace.join("doc.md"), "Disk text.");
     let snapshot = "Read the docs.\n\n```rust\nlet value = \"Read\";\n```\n";
 
-    let success = translate_document_snapshot_with_confirmation(
+    let success = translate_document_snapshot(
         "doc.md",
         workspace.to_str().expect("workspace"),
         snapshot,
         &MockProvider::new(),
-        false,
     )
     .expect("snapshot translation");
 
@@ -58,12 +54,11 @@ fn rejects_unsupported_sensitive_and_missing_disk_targets() {
         (".env", ErrorCode::PathNotAllowed),
         ("missing.md", ErrorCode::FileNotFound),
     ] {
-        let error = translate_document_snapshot_with_confirmation(
+        let error = translate_document_snapshot(
             path,
             workspace.to_str().expect("workspace"),
             "Read the docs.",
             &MockProvider::new(),
-            false,
         )
         .expect_err("target must fail");
         assert_eq!(error.code, expected);
@@ -76,12 +71,11 @@ fn rejects_snapshot_over_the_input_limit() {
     write_file(&workspace.join("doc.txt"), "Disk text.");
     let snapshot = "x".repeat(MAX_INPUT_BYTES + 1);
 
-    let error = translate_document_snapshot_with_confirmation(
+    let error = translate_document_snapshot(
         "doc.txt",
         workspace.to_str().expect("workspace"),
         &snapshot,
         &MockProvider::new(),
-        false,
     )
     .expect_err("oversized snapshot must fail");
 
@@ -100,12 +94,11 @@ fn rejects_symlink_escape_even_when_the_snapshot_is_safe() {
     write_file(&outside, "Read the docs.");
     symlink(&outside, workspace.join("escape.md")).expect("symlink");
 
-    let error = translate_document_snapshot_with_confirmation(
+    let error = translate_document_snapshot(
         "escape.md",
         workspace.to_str().expect("workspace"),
         "Read the docs.",
         &MockProvider::new(),
-        false,
     )
     .expect_err("symlink escape must fail");
 

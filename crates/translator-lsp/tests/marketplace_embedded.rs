@@ -5,10 +5,7 @@ use std::os::unix::fs::PermissionsExt;
 use std::time::Duration;
 
 use serde_json::{json, Value};
-use translator_core::{
-    EmbeddedProcessProvider, EmbeddedProcessRunner, EmbeddedRunnerLimits, ProviderConfiguration,
-};
-use translator_lsp::state::ProviderDescriptor;
+use translator_core::{EmbeddedProcessProvider, EmbeddedProcessRunner, EmbeddedRunnerLimits};
 
 use common::{file_uri, range, ResponseExt as _, TestClient};
 
@@ -32,21 +29,13 @@ fn embedded_marketplace_provider_is_offline_and_previews_without_mutation() {
     )
     .expect("controlled runner");
     let provider = EmbeddedProcessProvider::from_verified_runner(runner);
-    let configuration =
-        ProviderConfiguration::from_values(Some("embedded_local"), None, None, None)
-            .expect("embedded configuration");
-    let descriptor = ProviderDescriptor::from_configuration(&configuration);
-    assert_eq!(
-        descriptor.action_title(),
-        "Translate English to Spanish [offline]"
-    );
 
     fs::create_dir_all(&workspace).expect("workspace");
     let document = workspace.join("source.md");
     let disk_source = b"Read this source.";
     fs::write(&document, disk_source).expect("source fixture");
     let uri = file_uri(&document);
-    let mut client = TestClient::with_provider(workspace.clone(), provider, descriptor);
+    let mut client = TestClient::with_provider(workspace.clone(), provider);
     client.open(&uri, 1, "markdown", "Read this source.");
 
     let execute = client.request(

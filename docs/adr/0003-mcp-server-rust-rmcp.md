@@ -2,13 +2,11 @@
 
 ## Estado
 
-Aceptado.
+Superseded by [ADR 0007](./0007-repository-convergence.md). Se conserva como
+registro de una integración ya retirada y no como interfaz soportada.
 
-Nota de vigencia: F006 ya implemento el wrapper local en `zed-extension/`. Para
-F010, el servidor MCP debe considerarse infraestructura reutilizable o puente
-de compatibilidad; la superficie principal de usuario debe ser una accion
-directa de extension sin Agent. D072 impide tratar MCP/Agent como camino de
-producto para nuevas features de Zed salvo fallback justificado.
+Todo el contenido siguiente describe una implementación retirada. No existe
+una compatibilidad soportada; ADR 0007 es la decisión de reemplazo.
 
 ## Contexto
 

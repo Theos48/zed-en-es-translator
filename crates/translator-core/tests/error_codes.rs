@@ -1,7 +1,7 @@
 use translator_core::ErrorCode;
 
 const RESULT_SCHEMA: &str = include_str!(
-    "../../../specs/001-translation-core-contract/contracts/translate-result.schema.json"
+    "../../../specs/009-zed-marketplace-install/contracts/translate-result.schema.json"
 );
 
 #[test]
@@ -19,9 +19,7 @@ fn exposes_complete_stable_error_code_list() {
             "PATH_NOT_ALLOWED",
             "NON_UTF8_INPUT",
             "NO_TRANSLATABLE_SEGMENTS",
-            "SECRET_DETECTED",
             "PROVIDER_NOT_CONFIGURED",
-            "REMOTE_CONFIRMATION_REQUIRED",
             "PROVIDER_FAILED",
             "PROVIDER_TIMEOUT",
             "INTERNAL_ERROR",

@@ -12,14 +12,14 @@ extension whose supported journey is install, open a document and translate.
 The extension uses Zed's documented language-server installation flow to
 download one fixed Linux `x86_64` package into the extension `work` directory,
 verify every executable and model resource, and launch `translator-lsp` with
-the local provider selected internally. Translation stays offline after that
+the embedded runtime selected internally. Translation stays offline after that
 preparation, and Zed removes the owned package when the extension is
 uninstalled.
 
 The implementation deliberately does not carry forward the user-visible F012
 lifecycle manager. It reuses only the tested bounded native process boundary,
 the portable translation runner and exact model identities from the prototype.
-There is no user command, Docker lifecycle, arbitrary path, provider setting,
+There is no user command, Docker lifecycle, arbitrary path, runtime setting,
 account, key, service or separate XDG store.
 
 ## Technical Context
@@ -56,7 +56,7 @@ existing 15-second request deadline; active package below 128 MiB, peak RSS
 below 1 GiB and at most four inference threads
 
 **Constraints**: No terminal, checkout, build, container, service, account,
-key, path or provider setting in the user journey; 20 KiB request, 4 KiB
+key, path or runtime setting in the user journey; 20 KiB request, 4 KiB
 segment, 256 segments and 40 KiB output; no source mutation or content logs;
 fixed HTTPS sources only; verify before activation; last-known-good fallback;
 extension-work storage only; Zed Extension Gallery publication rules
@@ -89,11 +89,11 @@ Phase 0 research. The optional agent-context hook is executed after the Phase
 
 - **Safety-first translation**: The existing read-only hover preview remains;
   neither acquisition nor translation edits a buffer, file or clipboard.
-- **Offline-first provider boundary**: The marketplace path selects an offline
-  local provider. Acquisition carries no document data, and existing remote
-  providers remain outside the primary flow and default-deny.
+- **Single offline product boundary**: The marketplace path selects only the
+  verified adjacent embedded runtime. Acquisition carries no document data,
+  and feature 010 removes every configurable translation path before release.
 - **Test-first development**: Every behavior change begins with extension,
-  package, provider or release-contract tests. Real clean-install and offline
+  package, process or release-contract tests. Real clean-install and offline
   evidence supplement controlled doubles.
 - **Explicit contracts and limits**: Existing request/result/error, segment,
   output and timeout contracts remain authoritative. Phase 1 adds versioned
@@ -145,6 +145,7 @@ specs/009-zed-marketplace-install/
 │   ├── acquisition.md
 │   ├── package-lock.schema.json
 │   ├── publication.md
+│   ├── translate-result.schema.json
 │   └── translation-package.md
 ├── checklists/
 │   └── requirements.md
@@ -159,7 +160,7 @@ crates/
 │   └── src/
 │       ├── embedded_process.rs       # bounded child-process boundary
 │       ├── embedded_protocol.rs      # versioned private runner wire
-│       └── embedded_provider.rs      # verified adjacent package provider
+│       └── embedded_provider.rs      # verified adjacent runtime boundary
 └── translator-lsp/                   # existing direct, read-only Zed UX
 
 native/
@@ -190,14 +191,14 @@ tests/
 **Structure Decision**: Keep acquisition and update state in the Zed extension
 because only it knows the sanctioned `work` directory and installation status.
 Keep translation and process limits in the existing Rust core/LSP. Reuse the
-native runner source from 008, but do not import its provider manager, consent
-CLI, separate XDG lifecycle or manual Make journey.
+native runner source from the prior prototype, but do not import its separate
+lifecycle or manual preparation journey.
 
 ## TDD and Verification Order
 
 1. failing package-lock/platform/state and no-manual-settings tests;
 2. failing download, hash, decompression, interruption and concurrency tests;
-3. failing adjacent-provider/process/timeout/redaction tests;
+3. failing adjacent-runtime/process/timeout/redaction tests;
 4. native reproducible-build, CPU, ELF, notice and package-budget checks;
 5. direct LSP read-only regression and 20-case real offline benchmark;
 6. marketplace-shaped clean Zed profile install/retry/disable/uninstall test;

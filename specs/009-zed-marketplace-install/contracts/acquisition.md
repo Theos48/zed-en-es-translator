@@ -44,13 +44,12 @@ hosts and runtime registry lookup are forbidden.
 ```text
 command: packages/<active-package>/bin/translator-lsp
 args: []
-env:
-  TRANSLATOR_PROVIDER=embedded_local
+env: []
 ```
 
 The command path is extension-owned and verified. The LSP resolves the runner
 and model set adjacent to its own executable. No arbitrary path, URL, argument
-or inherited provider setting participates in the marketplace journey.
+or inherited runtime setting participates in the marketplace journey.
 
 ## Failure Contract
 

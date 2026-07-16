@@ -2,10 +2,9 @@
 
 ## Estado
 
-Aceptado, implementado y validado para F011, matizado por D086. La validacion
-real local por CLI y Zed directo, operacion offline, update fallido, rollback,
-limpieza project-scoped y revision final pasan en
-`specs/007-operational-providers/`.
+Superseded by [ADR 0007](./0007-repository-convergence.md). El experimento
+operativo permanece como historia en Git; ninguna de sus superficies forma
+parte de la arquitectura o de las instrucciones vigentes.
 
 ## Contexto
 

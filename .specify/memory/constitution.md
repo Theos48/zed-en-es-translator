@@ -1,17 +1,16 @@
 <!--
 Sync Impact Report
-Version change: template -> 1.0.0
+Version change: 1.0.0 -> 2.0.0
 Modified principles:
-- Template principle 1 -> I. Safety-First Translation
-- Template principle 2 -> II. Offline-First Provider Boundary
-- Template principle 3 -> III. Test-First Development
-- Template principle 4 -> IV. Explicit Contracts And Limits
-- Template principle 5 -> V. Minimal Host Footprint
+- I. Safety-First Translation -> unchanged obligations, product boundary clarified
+- II. Offline-First Provider Boundary -> II. Single Offline Product Boundary
+- III. Test-First Development -> retained and aligned to Gallery/LSP gates
+- IV. Explicit Contracts And Limits -> retired CLI/MCP wire; retained package/LSP/runtime contracts
+- V. Minimal Host Footprint -> unchanged obligations, Zed-owned runtime clarified
 Added sections:
-- Security And Privacy Requirements
-- Development Workflow And Quality Gates
+- Repository Convergence Requirements
 Removed sections:
-- None
+- Future CLI/HTTP provider requirements
 Templates requiring updates:
 - .specify/templates/plan-template.md: updated
 - .specify/templates/spec-template.md: updated
@@ -27,84 +26,103 @@ Follow-up TODOs:
 ### I. Safety-First Translation
 
 The product MUST help the user read translated content without modifying the
-original buffer. No feature may replace, rewrite, or auto-edit editor content
-unless a later constitution amendment explicitly permits it. The system MUST
-preserve Markdown structure and protected code regions, and it MUST preserve
-ambiguous content instead of guessing. Full-file code translation is gated until
-there is a reliable segmenter/parser and negative tests proving that code is
-not translated accidentally.
+original buffer or source file. No feature may replace, rewrite or auto-edit
+editor content unless a later constitution amendment explicitly permits it.
+The system MUST preserve Markdown structure and protected code regions, and it
+MUST preserve ambiguous content instead of guessing. Full-file code
+translation remains gated until a reliable segmenter/parser and negative tests
+prove that code is not translated accidentally.
 
-Rationale: the main product risk is destructive translation of code or docs.
-Reading assistance is useful only if it does not alter source material.
+Rationale: reading assistance is useful only when it cannot damage the source
+material that the user is inspecting.
 
-### II. Offline-First Provider Boundary
+### II. Single Offline Product Boundary
 
-The default provider MUST be offline/mock and deterministic. Remote providers
-MUST be disabled by default, configured explicitly, and confirmed by the user
-for each translation request. Provider interfaces MUST receive only permitted
-translatable segments, language metadata, and tone. Providers MUST NOT receive
-file paths, workspace roots, protected code, environment variables, logs, or
-detected secrets.
+The only supported product path MUST be the Zed Gallery extension launching its
+verified, extension-owned local package through `translator-lsp`,
+`translator-core` and the private embedded runtime. Translation MUST remain
+local and offline after acquisition of fixed public package inputs. The shipped
+path MUST NOT expose a selectable provider, endpoint, credential, arbitrary
+binary, MCP/context server, Agent workflow or standalone CLI. `MockProvider`
+MAY exist only as an injected deterministic test double.
 
-Rationale: translation content may contain proprietary code, credentials,
-internal URLs, prompts, or private documentation. Cost-free internet is not the
-same as privacy-safe internet.
+Rationale: one immutable local path is simpler to install, audit and support,
+and prevents configuration from silently widening the privacy boundary.
 
 ### III. Test-First Development
 
-Every implementation task that changes behavior MUST start with failing tests
-or explicit checks. Core behavior MUST use TDD. Required coverage includes
-contract tests, unit tests for segmentation and reconstruction, CLI integration
-tests, and negative security tests. Tests MUST include path traversal, symlink
-escape, size limits, non-UTF-8 input, binary content, remote calls without
-confirmation, secret detection before remote calls, provider timeout, and log
-redaction.
+Every behavior change and removal wave MUST start with failing tests or an
+explicit negative contract. Core behavior MUST use TDD. Required retained
+coverage includes segmentation and reconstruction, read-only LSP behavior,
+path traversal and symlink escape, size limits, non-UTF-8 and binary input,
+process time/output limits, package acquisition and identity, offline
+operation, log redaction and Zed-owned removal. Obsolete surface tests MAY be
+deleted only after every live invariant has equivalent retained coverage.
 
-Rationale: the important behavior is defensive and easy to regress unless it is
+Rationale: the product's important behavior is defensive and easy to regress;
+repository deletion is safe only when the surviving boundary remains
 executable as tests.
 
 ### IV. Explicit Contracts And Limits
 
-All boundaries MUST be documented and versioned before implementation:
-`TranslateRequest`, success/error output, `ErrorCode`, provider segment
-contract, and TypeScript-to-Rust CLI wire contract. The MVP contract uses JSON
-UTF-8 over stdin/stdout, one request per process, exit code 0 for success,
-non-zero for failure, redacted stderr, and a timeout. Input and output limits
-MUST be explicit: 20 KiB input, 4 KiB per segment, 256 segments, 40 KiB output,
-and 15 s provider timeout unless amended.
+All active boundaries MUST be documented and versioned before implementation:
+the read-only LSP request/preview flow, core translation request/result/error
+types, provider segment contract, embedded process protocol, package manifest,
+acquisition identity and repository cleanup allowlists. The active limits MUST
+remain explicit: 20 KiB input, 4 KiB per segment, 256 segments, 40 KiB output
+and a 15 s translation timeout unless amended. Retired CLI and MCP wire
+contracts MUST NOT remain as supported interfaces.
 
-Rationale: Zed, MCP, TypeScript, Rust, and future providers are separate
-surfaces. Ambiguous contracts create security and integration bugs.
+Rationale: Zed, the LSP, core, private runner and fixed package are separate
+trust boundaries. Explicit limits and identities prevent ambiguous execution
+and supply-chain behavior.
 
 ### V. Minimal Host Footprint
 
-Project dependencies MUST be scoped to the project whenever possible. Global
-runtimes, SDKs, package managers, services, databases, or model installs are
-not allowed unless they are classified and approved under the host system
-policy. The project MUST use lockfiles, reviewed dependency versions, and
-supply-chain checks before publishing or enabling real providers. Real `.env`
-files and secrets MUST NOT be versioned.
+Project dependencies MUST be scoped to the project, its pinned build container
+or Zed's extension work directory. Global runtimes, SDKs, package managers,
+services, databases or model installs are not allowed unless classified and
+approved under the host system policy. The project MUST use lockfiles, reviewed
+dependency versions and supply-chain checks before publication. Real `.env`
+files and secrets MUST NOT be versioned. Normal cleanup MUST preserve fixed
+source inputs and MUST NOT target agent configuration, secrets or persistent
+user data.
 
-Rationale: the workstation policy prioritizes a clean Fedora host and
-maintainable development environments.
+Rationale: the workstation and installed extension remain maintainable when
+runtime state has a single owner and reproducible project inputs are bounded.
 
 ## Security And Privacy Requirements
 
-`translate_file` MUST read only inside the Zed-authorized workspace after
-canonicalizing the workspace and requested path. It MUST reject path traversal,
-unauthorized absolute paths, symlinks that escape the workspace, sensitive
-hidden files, binary content, non-UTF-8 content, and unsupported extensions.
+The product MUST reject path traversal, unauthorized absolute paths, symlinks
+that escape the authorized workspace, sensitive hidden files, unsupported file
+types, binary content and non-UTF-8 input before translation. Providers receive
+only permitted translatable segments, language metadata and tone; they MUST NOT
+receive file paths, workspace roots, protected code, environment variables or
+logs.
 
 Logs MUST NOT include source text, translated text, translatable segments,
-secrets, headers, tokens, or sensitive paths without redaction. Logs may include
-request ids, error codes, redacted provider names, sizes, durations, and
+secrets, headers, tokens, raw child output or sensitive paths. Diagnostics may
+include request ids, error codes, fixed component names, sizes, durations and
 redacted status.
 
-Future CLI providers MUST use allowlisted binaries, no shell execution,
-structured arguments, controlled cwd, minimal environment, stdin for text,
-timeout, and stdout/stderr limits. Future HTTP-local providers MUST be
-loopback-only. Future HTTP-remote providers MUST use HTTPS, host allowlists, no
-dangerous redirects, request-level confirmation, and privacy review.
+The embedded process MUST be resolved from the verified adjacent package,
+started without a shell, given structured arguments and bounded stdin, and
+subject to timeout and stdout/stderr limits. Translation-time network access
+and configuration-driven executable/provider selection are prohibited.
+
+## Repository Convergence Requirements
+
+Every tracked product, release, validation and documentation path MUST have a
+named consumer in the Gallery product or its governance/release process.
+Unsupported compatibility paths MUST be removed rather than hidden behind
+optional features. Git is the archive for completed implementation history;
+ADRs retain concise decisions and MUST mark superseded operational guidance
+with an explicit replacement.
+
+Generated cleanup MUST use a previewable allowlist. Normal cleanup may remove
+build and validation output while preserving fixed reusable source inputs. Any
+deep cache cleanup MUST be separately explicit and MUST never select `.git/`,
+`.agents/`, `.codex/`, secrets, real `.env` files or persistent user data.
 
 ## Development Workflow And Quality Gates
 
@@ -115,40 +133,40 @@ Development follows the official Spec Kit flow:
 3. Clarify when needed.
 4. Plan.
 5. Tasks.
-6. Analyze when useful.
+6. Analyze.
 7. Implement.
+8. Converge.
 
-The first formal feature MUST be technical and offline: Rust core,
-`MockProvider`, TypeScript-to-Rust CLI contract, limits, file-read security, and
-negative tests. It MUST NOT include a real provider, network calls, automatic
-buffer edits, or full-file code support.
-
-Before implementation, each feature plan MUST pass the Constitution Check. Any
-violation MUST be documented with a simpler alternative and rationale. Before
-closing a feature, its quickstart or validation notes MUST show how to run the
-relevant tests/checks.
+Before implementation, each feature plan MUST pass the Constitution Check and
+all domain checklists MUST be complete. Behavior changes require failing tests
+or explicit negative checks first. Rust format, Clippy, tests and dependency
+policy MUST run through the project Makefile and pinned container, never a host
+toolchain. Before publication, package acquisition, identity, offline,
+privacy, license, resource, removal and clean-install gates MUST pass against
+the exact candidate.
 
 ## Governance
 
 This constitution supersedes conflicting project planning documents. If a
-document conflicts with this constitution, update the document or amend the
-constitution before implementing.
+document conflicts with it, update the document or amend the constitution
+before implementing.
 
 Amendments require:
 
 - a new entry in `docs/decisions.md` or an ADR;
 - a clear rationale;
 - a semantic version bump;
-- updates to affected Spec Kit templates or feature specs.
+- updates to affected Spec Kit templates and active feature artifacts.
 
 Versioning policy:
 
-- MAJOR for removing or weakening a core principle;
-- MINOR for adding a principle, section, or material requirement;
+- MAJOR for removing or redefining a core principle or supported boundary;
+- MINOR for adding a principle, section or material requirement;
 - PATCH for wording clarifications that do not change obligations.
 
-Compliance review is required during `/speckit-plan`, `/speckit-tasks`, and
-before implementation begins. TDD, privacy default deny, workspace-only file
-access, and log redaction are non-negotiable gates.
+Compliance review is required during `/speckit-plan`, `/speckit-tasks`,
+`/speckit-analyze` and before implementation begins. TDD, read-only behavior,
+local/offline translation, workspace-safe file access, bounded processes and
+log redaction are non-negotiable gates.
 
-**Version**: 1.0.0 | **Ratified**: 2026-07-01 | **Last Amended**: 2026-07-01
+**Version**: 2.0.0 | **Ratified**: 2026-07-01 | **Last Amended**: 2026-07-16

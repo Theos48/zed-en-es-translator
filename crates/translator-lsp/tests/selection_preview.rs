@@ -1,13 +1,12 @@
 mod common;
 
 use serde_json::{json, Value};
-use translator_lsp::state::ProviderDescriptor;
 
 use common::{range, ResponseExt as _, TestClient};
 
 #[test]
 fn execute_command_caches_mock_translation_for_hover_without_source_mutation() {
-    let mut client = TestClient::new(ProviderDescriptor::offline());
+    let mut client = TestClient::new();
     let uri = "file:///workspace/readme.md";
     let source = "Read the docs.";
     client.open(uri, 1, "markdown", source);
@@ -39,7 +38,7 @@ fn execute_command_caches_mock_translation_for_hover_without_source_mutation() {
 
 #[test]
 fn plain_text_preview_is_escaped_and_new_preview_replaces_old_range() {
-    let mut client = TestClient::new(ProviderDescriptor::offline());
+    let mut client = TestClient::new();
     let uri = "file:///workspace/notes.txt";
     client.open(uri, 1, "plaintext", "# Read\nOpen the file.");
 
@@ -79,7 +78,7 @@ fn plain_text_preview_is_escaped_and_new_preview_replaces_old_range() {
 
 #[test]
 fn invalid_incremental_change_still_invalidates_the_previous_preview() {
-    let mut client = TestClient::new(ProviderDescriptor::offline());
+    let mut client = TestClient::new();
     let uri = "file:///workspace/readme.md";
     client.open(uri, 1, "markdown", "Read the docs.");
     client.request_with_messages(

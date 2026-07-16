@@ -25,11 +25,7 @@ fn default_redacted_message(code: ErrorCode) -> &'static str {
         ErrorCode::PathNotAllowed => "The requested path is not allowed.",
         ErrorCode::NonUtf8Input => "The input must be UTF-8 text.",
         ErrorCode::NoTranslatableSegments => "No translatable segments were found.",
-        ErrorCode::SecretDetected => "Potential secret content was detected.",
         ErrorCode::ProviderNotConfigured => "The provider is not configured for this request.",
-        ErrorCode::RemoteConfirmationRequired => {
-            "Remote provider confirmation is required for this request."
-        }
         ErrorCode::ProviderFailed => "The provider failed.",
         ErrorCode::ProviderTimeout => "The provider timed out.",
         ErrorCode::InternalError => "An internal error occurred.",

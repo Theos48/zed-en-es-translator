@@ -1,13 +1,12 @@
 mod common;
 
 use serde_json::Value;
-use translator_lsp::state::ProviderDescriptor;
 
 use common::{code_action_params, range, ResponseExt as _, TestClient};
 
 #[test]
 fn returns_source_free_non_editing_refactor_action_for_current_selection() {
-    let mut client = TestClient::new(ProviderDescriptor::offline());
+    let mut client = TestClient::new();
     let uri = "file:///workspace/readme.md";
     let source = "Read the docs.";
     client.open(uri, 7, "markdown", source);
@@ -35,7 +34,7 @@ fn returns_source_free_non_editing_refactor_action_for_current_selection() {
 
 #[test]
 fn returns_no_action_for_unsupported_language_snapshot() {
-    let mut client = TestClient::new(ProviderDescriptor::offline());
+    let mut client = TestClient::new();
     let uri = "file:///workspace/main.rs";
     client.open(uri, 1, "rust", "fn main() {}");
 

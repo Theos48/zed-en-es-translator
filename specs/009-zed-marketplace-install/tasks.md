@@ -9,12 +9,17 @@
 contract, acceptance or negative test and finishes with the focused passing
 gate before broader validation.
 
-**Constitution**: Preserve read-only translation, offline/default-deny provider
-boundaries, explicit limits, log redaction and project-container development.
+**Constitution**: Preserve read-only translation, the single offline product
+boundary, explicit limits, log redaction and project-container development.
 
 **Organization**: Tasks are grouped by user story so the zero-setup MVP can be
 implemented and evaluated before recovery, offline/removal and unsupported
 platform refinements.
+
+**Feature 010 reconciliation**: Completed tasks below remain the implementation
+record for the original package. Before T057-T060 continue, feature 010 removes
+retired repository surfaces, rebuilds the exact package and replaces all
+candidate sizes, hashes and validation evidence changed by convergence.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -42,7 +47,7 @@ without changing product behavior.
 story and create reproducible package validation.
 
 **⚠️ CRITICAL**: No user-story implementation starts until the portable runner,
-core provider and package lock have executable failing-first contracts.
+core embedded boundary and package lock have executable failing-first contracts.
 
 - [x] T006 [P] Add a failing schema/semantic contract for `ops/marketplace/package.lock.json` in `tests/integration/marketplace_package_lock.sh`
 - [x] T007 [P] Add failing controlled native runner wire/limit/UTF-8/cardinality tests in `native/translator-embedded-runtime/tests/runner_contract.sh`
@@ -56,7 +61,7 @@ core provider and package lock have executable failing-first contracts.
 - [x] T015 Run the focused foundation gates through `Makefile` and record the passing commands in `specs/009-zed-marketplace-install/quickstart.md`
 
 **Checkpoint**: A real portable local runner can be invoked only through the
-bounded core provider; no acquisition or marketplace setting exists yet.
+bounded core runtime boundary; no acquisition or marketplace setting exists yet.
 
 ---
 
@@ -66,15 +71,15 @@ bounded core provider; no acquisition or marketplace setting exists yet.
 package and produces a real read-only Spanish preview with no configuration.
 
 **Independent Test**: Install the marketplace-shaped extension in a clean Zed
-profile with no checkout, toolchain, provider or binary setting, open the public
-fixture and obtain a non-Mock Spanish hover preview using only Zed.
+profile with no checkout, toolchain or binary setting, open the public fixture
+and obtain a real Spanish hover preview using only Zed.
 
 ### Tests for User Story 1 ⚠️
 
 - [x] T016 [P] [US1] Add failing strict package-lock parsing, role uniqueness, budget and path-safety tests in `zed-extension/tests/package_lock.rs`
 - [x] T017 [P] [US1] Add a failing 20-run automatic clean-preparation acceptance with a controlled 10 Mbps HTTPS downloader and a 19/20 under-five-minute threshold in `zed-extension/tests/acquisition_happy_path.rs`
-- [x] T018 [P] [US1] Add a failing manifest/user-journey contract excluding context-server, binary-path and provider settings in `tests/integration/marketplace_no_setup.sh`
-- [x] T019 [P] [US1] Add a failing LSP embedded-provider locality and read-only preview test in `crates/translator-lsp/tests/marketplace_embedded.rs`
+- [x] T018 [P] [US1] Add a failing manifest/user-journey contract excluding retired integration, binary-path and runtime settings in `tests/integration/marketplace_no_setup.sh`
+- [x] T019 [P] [US1] Add a failing LSP embedded-runtime locality and read-only preview test in `crates/translator-lsp/tests/marketplace_embedded.rs`
 
 ### Implementation for User Story 1
 
@@ -82,7 +87,7 @@ fixture and obtain a non-Mock Spanish hover preview using only Zed.
 - [x] T021 [US1] Implement fixed-source download, byte caps and SHA-256 verification in `zed-extension/src/acquisition.rs`
 - [x] T022 [US1] Implement bounded pure-Rust Zstandard decoding and installed-object verification in `zed-extension/src/acquisition.rs`
 - [x] T023 [US1] Implement the supported clean preparation and atomic package promotion path in `zed-extension/src/acquisition.rs`
-- [x] T024 [US1] Replace manual LSP/context-server configuration with automatic direct-LSP launch and Zed installation statuses in `zed-extension/src/lib.rs` and `zed-extension/extension.toml`
+- [x] T024 [US1] Replace manual integration configuration with automatic direct-LSP launch and Zed installation statuses in `zed-extension/src/lib.rs` and `zed-extension/extension.toml`
 - [x] T025 [US1] Resolve the runner/models adjacent to `translator-lsp` and select `embedded_local` without a user path in `crates/translator-lsp/src/state.rs` and `crates/translator-core/src/embedded_provider.rs`
 - [x] T026 [US1] Create the deterministic LSP/runner/notices release archive in `scripts/marketplace/build-package.sh` and validate safe contents in `scripts/marketplace/validate-package.sh`
 - [x] T027 [US1] Fill the released server file identities in `ops/marketplace/package.lock.json` and make the extension compile that exact lock
@@ -182,13 +187,13 @@ repository and move from a project package to an actual Gallery submission.
 - [x] T051 [P] Synchronize current direction/status in `docs/PLAN.md` and `docs/feature-map.md` without deleting future-platform backlog detail
 - [x] T052 Review all 43 items in `specs/009-zed-marketplace-install/checklists/marketplace-release.md` against final artifacts and record any changed result inline
 - [x] T053 Add the deterministic tagged-package CI/release workflow in `.github/workflows/marketplace-package.yml`
-- [ ] T054 Add and run `marketplace-release-check` against the public tag/asset/version/lock in `Makefile` and `tests/integration/marketplace_release_check.sh`
+- [ ] T054 After feature 010 regenerates the candidate, run `marketplace-release-check` against the public tag/asset/version/lock in `Makefile` and `tests/integration/marketplace_release_check.sh`; the target already exists and currently fails only because the tag is absent
 - [x] T055 Run `make workspace-storage-check`, `make worktree-audit`, `make format`, `make fmt`, `make clippy`, `make deny` and `git diff --check`, fixing only feature-related findings
 - [x] T056 Run `make test` plus every marketplace-focused target and record the complete redacted gate matrix in `specs/009-zed-marketplace-install/validation.md`
-- [ ] T057 Run the pre-publication interactive Zed test with the exact release package (not a repository binary) and record redacted evidence in `specs/009-zed-marketplace-install/validation.md`
-- [ ] T058 Publish the exact public project tag/release asset named by `ops/marketplace/package.lock.json` and rerun `make marketplace-release-check`
+- [ ] T057 Run the pre-publication interactive Zed test with the exact post-convergence release package (not a repository binary) and record redacted evidence in `specs/009-zed-marketplace-install/validation.md`
+- [ ] T058 Publish the exact post-convergence public project tag/release asset named by `ops/marketplace/package.lock.json` and rerun `make marketplace-release-check`
 - [x] T059 Commit and push the feature branch with Conventional Commits, open the project PR and derive every Spec Kit/test/manual/external gate in its body from `specs/009-zed-marketplace-install/validation.md`
-- [ ] T060 Submit the HTTPS submodule/version change to `zed-industries/extensions`, then after upstream merge run three independent clean Gallery acceptances and append the 3/3 result to `specs/009-zed-marketplace-install/validation.md`
+- [ ] T060 Submit the HTTPS submodule/version change to `zed-industries/extensions` only after feature 010 and T054-T058 pass, then after upstream merge run three independent clean Gallery acceptances and append the 3/3 result to `specs/009-zed-marketplace-install/validation.md`
 
 ---
 
