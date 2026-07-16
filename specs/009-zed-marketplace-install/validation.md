@@ -1,6 +1,8 @@
 # Validation: Plug-and-Play Zed Marketplace Installation
 
 **Feature branch**: `009-zed-marketplace-install`
+**Implementation commit**: `bd26ecf`
+**Project PR**: [Theos48/zed-en-es-translator#15](https://github.com/Theos48/zed-en-es-translator/pull/15) (draft)
 **Validated**: 2026-07-16
 **Supported release profile**: Linux `x86_64`, English to Spanish
 **Result**: Project implementation and package gates pass. Public-release,
@@ -118,5 +120,5 @@ open gates even though their local contracts are implemented.
 - `speckit-implement`: PASS for project-controlled implementation and tests;
   publication tasks remain open above.
 - `speckit-converge`: PASS; no missing, partial, contradictory or unrequested
-  work was found outside the five already tracked publication/PR tasks, so no
+  work was found outside the four already tracked publication tasks, so no
   empty convergence phase was appended.

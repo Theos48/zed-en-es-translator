@@ -187,7 +187,7 @@ repository and move from a project package to an actual Gallery submission.
 - [x] T056 Run `make test` plus every marketplace-focused target and record the complete redacted gate matrix in `specs/009-zed-marketplace-install/validation.md`
 - [ ] T057 Run the pre-publication interactive Zed test with the exact release package (not a repository binary) and record redacted evidence in `specs/009-zed-marketplace-install/validation.md`
 - [ ] T058 Publish the exact public project tag/release asset named by `ops/marketplace/package.lock.json` and rerun `make marketplace-release-check`
-- [ ] T059 Commit and push the feature branch with Conventional Commits, open the project PR and derive every Spec Kit/test/manual/external gate in its body from `specs/009-zed-marketplace-install/validation.md`
+- [x] T059 Commit and push the feature branch with Conventional Commits, open the project PR and derive every Spec Kit/test/manual/external gate in its body from `specs/009-zed-marketplace-install/validation.md`
 - [ ] T060 Submit the HTTPS submodule/version change to `zed-industries/extensions`, then after upstream merge run three independent clean Gallery acceptances and append the 3/3 result to `specs/009-zed-marketplace-install/validation.md`
 
 ---
