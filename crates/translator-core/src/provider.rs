@@ -1,9 +1,9 @@
 use std::fmt;
 
 use crate::{
-    contains_obvious_secret, validate_segments, AzureTranslatorProvider, ErrorCode, Language,
-    LibreTranslateProvider, ProviderConfiguration, ProviderLocality, ProviderMode, ProviderTarget,
-    Tone, TranslatableSegment, TranslateFailure, MAX_OUTPUT_BYTES,
+    contains_obvious_secret, validate_segments, AzureTranslatorProvider, EmbeddedProcessProvider,
+    ErrorCode, Language, LibreTranslateProvider, ProviderConfiguration, ProviderLocality,
+    ProviderMode, ProviderTarget, Tone, TranslatableSegment, TranslateFailure, MAX_OUTPUT_BYTES,
 };
 
 #[derive(Clone, PartialEq, Eq)]
@@ -117,6 +117,7 @@ impl Provider for MockProvider {
 #[derive(Debug, Clone)]
 pub enum ProviderSelection {
     Mock(MockProvider),
+    EmbeddedLocal(EmbeddedProcessProvider),
     LibreTranslate(LibreTranslateProvider),
     AzureTranslator(AzureTranslatorProvider),
 }
@@ -131,6 +132,9 @@ impl ProviderSelection {
     ) -> Result<Self, TranslateFailure> {
         match configuration.mode {
             ProviderMode::Mock => Ok(Self::Mock(MockProvider::new())),
+            ProviderMode::EmbeddedLocal => Ok(Self::EmbeddedLocal(
+                EmbeddedProcessProvider::from_current_executable()?,
+            )),
             ProviderMode::LibreTranslate => {
                 let target = configuration.target.ok_or_else(|| {
                     TranslateFailure::new(
@@ -168,6 +172,7 @@ impl Provider for ProviderSelection {
     fn translate(&self, request: &ProviderRequest) -> Result<ProviderResponse, TranslateFailure> {
         match self {
             Self::Mock(provider) => provider.translate(request),
+            Self::EmbeddedLocal(provider) => provider.translate(request),
             Self::LibreTranslate(provider) => {
                 validate_real_provider_invocation(provider_target(provider), request)?;
                 provider.translate(request)

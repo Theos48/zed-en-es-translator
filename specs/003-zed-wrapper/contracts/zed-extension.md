@@ -32,7 +32,7 @@ version = "0.0.1"
 schema_version = 1
 authors = ["theos"]
 description = "Local English to Spanish translator MCP wrapper."
-repository = "https://github.com/theos/zed-en-es-translator"
+repository = "https://github.com/Theos48/zed-en-es-translator"
 
 [context_servers.translator-en-es]
 ```

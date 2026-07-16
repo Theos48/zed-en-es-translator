@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "source_repository": "https://github.com/mozilla/translations",
+  "source_commit": "f31423c7c2c6ed8ae57d71a3d19a9db6f156060e",
+  "bergamot_version": "v0.6.0",
+  "recursive_dependencies": [
+    {
+      "path": "3rd_party/extract-lex",
+      "commit": "42fa605b53f32eaf6c6e0b5677255c21c91b3d49",
+      "native_build_role": "not_required"
+    },
+    {
+      "path": "3rd_party/fast_align",
+      "commit": "cab1e9aac8d3bb02ff5ae58218d8d225a039fa11",
+      "native_build_role": "not_required"
+    },
+    {
+      "path": "3rd_party/kenlm",
+      "commit": "bbf4fc511266c5d4515047055d7bdec659a6e158",
+      "native_build_role": "not_required"
+    },
+    {
+      "path": "3rd_party/marian-dev",
+      "commit": "e8a1a2530fb84cbff7383302ebca393e5875c441",
+      "native_build_role": "not_required"
+    },
+    {
+      "path": "3rd_party/preprocess",
+      "commit": "64307314b4d5a9a0bd529b5c1036b0710d995eec",
+      "native_build_role": "not_required"
+    },
+    {
+      "path": "inference/3rd_party/emsdk",
+      "commit": "2346baa7bb44a4a0571cc75f1986ab9aaa35aa03",
+      "native_build_role": "not_required"
+    },
+    {
+      "path": "inference/3rd_party/ssplit-cpp",
+      "commit": "a311f9865ade34db1e8e080e6cc146f55dafb067",
+      "native_build_role": "required"
+    },
+    {
+      "path": "inference/marian-fork/src/3rd_party/fbgemm",
+      "commit": "0e33146d3e7f070c7de9494efef49147a9d20558",
+      "native_build_role": "review_required"
+    },
+    {
+      "path": "inference/marian-fork/src/3rd_party/intgemm",
+      "commit": "f7401513da71758dacce52fed1c7855549abee59",
+      "native_build_role": "required"
+    },
+    {
+      "path": "inference/marian-fork/src/3rd_party/nccl",
+      "commit": "7d3486128ebc865b9f2cad63a5cfd3a8f6abcb5a",
+      "native_build_role": "review_required"
+    },
+    {
+      "path": "inference/marian-fork/src/3rd_party/onnxjs",
+      "commit": "924924b08e9596b41aeebada4a172f026be95f5a",
+      "native_build_role": "required"
+    },
+    {
+      "path": "inference/marian-fork/src/3rd_party/onnxjs/deps/eigen",
+      "commit": "fff37f4ca0397af9ed7e04f3bd6b893a1ea2b08e",
+      "native_build_role": "required"
+    },
+    {
+      "path": "inference/marian-fork/src/3rd_party/ruy",
+      "commit": "2d950b3bfa7ebfbe7a97ecb44b1cc4da5ac1d6f0",
+      "native_build_role": "review_required"
+    },
+    {
+      "path": "inference/marian-fork/src/3rd_party/sentencepiece",
+      "commit": "ae41b7740d7006596bb9257e83340b2620db9d00",
+      "native_build_role": "required"
+    },
+    {
+      "path": "inference/marian-fork/src/3rd_party/simd_utils",
+      "commit": "d0793d86aea9036a5bc77b9ca7791dff024168ca",
+      "native_build_role": "review_required"
+    },
+    {
+      "path": "inference/marian-fork/src/3rd_party/simple-websocket-server",
+      "commit": "417a2a9e9dbd720b8d2dfa1dafe57cf1b37ca0d7",
+      "native_build_role": "not_required"
+    }
+  ],
+  "build_recipe_sha256": "38858e33fc2c671263d8e6faeb7062d1406d27c631fb395e47d314be3b3bdd99",
+  "container_image": "rust:1.96.1-bookworm@sha256:a339861ae23e9abb272cea45dfafde21760d2ce6577a70f8a926153677902663",
+  "container_recipe_sha256": "4a1f8b6483830dd341edf23f971403f3b87131a3ed6f3f2725e485d5c60d943d",
+  "compiler": "c++ (Debian 12.2.0-14+deb12u1) 12.2.0",
+  "cmake": "3.25.1-1",
+  "ninja_build": "1.11.1-2~deb12u1",
+  "target": "linux-x86_64",
+  "cpu_baseline": "x86-64-sse4.1",
+  "binary_sha256": "d69ffa86ff42166afb9ffe59947dea727a9cd9856177a392d35091b97e8614ac",
+  "binary_size": 11898352,
+  "elf_dependency_allowlist": [
+    "libstdc++.so.6",
+    "libm.so.6",
+    "libgcc_s.so.1",
+    "libc.so.6",
+    "ld-linux-x86-64.so.2"
+  ],
+  "license_bundle_status": "verified",
+  "reproducible_clean_builds": 2,
+  "reproducible_build_status": "verified"
+}

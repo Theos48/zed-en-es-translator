@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Source acquisition verifies and materialises every required direct gitlink.
+# Bergamot's historical Marian CMake invokes a recursive update unconditionally;
+# make that configure-time mutation a no-op in the network-disabled build.
+if [[ "${1-}" == "submodule" && "${2-}" == "update" ]]; then
+  exit 0
+fi
+
+exec /usr/bin/git "$@"

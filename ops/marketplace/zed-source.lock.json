@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/zed-industries/zed",
+  "commit": "bf14327c27885b8c52588c2bf84cb2bd4f2dd72e",
+  "path": "crates/extension_host/src/extension_host.rs",
+  "size": 73532,
+  "sha256": "023d7c681e15151a34b001cbcaccfee9f979b574b1e5d371462a945f64e70cad",
+  "verified_at": "2026-07-16",
+  "required_behavior": {
+    "installed_directory_removed": true,
+    "extension_work_directory_removed": true,
+    "work_removal_retries": 3
+  }
+}

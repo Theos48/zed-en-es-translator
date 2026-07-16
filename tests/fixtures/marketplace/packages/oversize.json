@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "package_id": "oversize",
+  "package_version": "0.1.0",
+  "platform": "linux-x86_64",
+  "source_language": "en",
+  "target_language": "es",
+  "artifacts": [
+    {
+      "role": "model",
+      "path": "models/model.bin",
+      "installed_size": 134217729,
+      "installed_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "executable": false
+    }
+  ]
+}
