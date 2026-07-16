@@ -10,8 +10,10 @@ Gallery, open Markdown/plain text and invoke the translation action.
 - Persistent checkout storage accepted by the workspace guard.
 - Network only for the explicit source/model acquisition and Gallery test.
 - A supported Linux `x86_64` machine for real package evidence.
-- Zed only for the final interactive gates; Rust/C++ toolchains are not
-  installed on the host.
+- Zed for the pre-submission smoke and final interactive gates; project builds
+  do not install Rust/C++ toolchains on the host. The dev-extension smoke uses
+  an existing `rustup` toolchain or an isolated development environment as
+  described in `docs/deployment.md`.
 
 No real secret, API key, `.env`, source document or private fixture is used.
 
@@ -123,7 +125,14 @@ extracted identities, package lock, notices and repository commit agree. No
 user documentation contains a terminal, Docker, runtime or binary-path setup
 step.
 
-## 7. Clean Gallery Acceptance
+## 7. Submit to the Central Registry
+
+After all project-controlled release gates pass, submit the exact HTTPS
+submodule/path/version entry to `zed-industries/extensions` and record the PR
+and check state. A dev-extension smoke can reduce submission risk, but cannot
+be reported as clean-install acceptance.
+
+## 8. Clean Gallery Acceptance
 
 Only after the `zed-industries/extensions` submission is available through the
 normal registry:

@@ -4,9 +4,11 @@ Extensión de Zed que traduce inglés → español de forma local para Markdown 
 texto plano. Muestra la traducción como un preview de solo lectura: el buffer y
 el archivo originales nunca se modifican.
 
-> **Estado de publicación:** la implementación y el paquete local están
-> validados, pero la extensión todavía no está disponible en la Extension
-> Gallery. El tag y el asset público `v0.1.0` siguen pendientes.
+> **Estado de publicación:** el release público `v0.1.0` está publicado y su
+> paquete exacto está verificado. La extensión todavía no está disponible en
+> la Extension Gallery. El [PR upstream #6843](https://github.com/zed-industries/extensions/pull/6843)
+> ya fue enviado y todos sus checks pasan; faltan el merge de Zed y la
+> aceptación interactiva posterior.
 
 ## Qué ofrece
 
@@ -121,11 +123,9 @@ Ya están completas y validadas:
 
 Quedan únicamente gates externos:
 
-1. publicar el tag y asset exactos;
-2. ejecutar la aceptación interactiva contra ese asset;
-3. enviar la extensión al registro oficial de Zed;
-4. después del merge upstream, completar 3/3 instalaciones limpias desde la
-   Gallery.
+1. obtener el merge del PR upstream;
+2. después del merge, completar la aceptación interactiva contra el
+   asset público exacto y 3/3 instalaciones limpias desde la Gallery.
 
 Una dev extension o un binario del checkout no sustituye esos gates.
 

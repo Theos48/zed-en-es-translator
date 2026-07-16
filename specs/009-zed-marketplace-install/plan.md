@@ -201,10 +201,13 @@ lifecycle or manual preparation journey.
 3. failing adjacent-runtime/process/timeout/redaction tests;
 4. native reproducible-build, CPU, ELF, notice and package-budget checks;
 5. direct LSP read-only regression and 20-case real offline benchmark;
-6. marketplace-shaped clean Zed profile install/retry/disable/uninstall test;
+6. pre-submission dev-extension smoke against the exact public package;
 7. format, lint, dependency/license audit and release contract;
-8. submit the extension-registry PR only after every automated and interactive
-   supported-platform gate passes.
+8. submit the extension-registry PR after every project-controlled release gate
+   passes;
+9. after registry merge, run 3/3 marketplace clean-profile
+   install/retry/disable/uninstall acceptances without a dev extension.
 
 No controlled fixture may substitute for the real package in the final
-clean-install or offline acceptance evidence.
+clean-install or offline acceptance evidence. A pre-submission dev-extension
+smoke is useful evidence but cannot close the post-merge Gallery gate.
