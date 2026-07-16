@@ -26,8 +26,11 @@ supported LibreTranslate path remain unchanged.
 | Native source identity | Exact source commit and 15 direct dependency gitlinks verified |
 | Offline native build | Passed with project container networking disabled |
 | Reproducibility | Two clean builds produced SHA-256 `9743b4a8efbe9471145c08fcc75a42fdc3d85e6035e797023b3a623d91e886fe` and size `12000008` |
+| Actual-binary SBOM | 28 linked/runtime components inventoried with exact hashed evidence; excluded ONNX, optional ssplit data and unused submodules are recorded separately |
 | CPU baseline | Passed for `x86-64` plus SSE4.1; no `-march=native` |
 | ELF closure | Passed exact allowlist; no dynamic socket/HTTP/TLS symbols detected |
+| Official attachment provenance | The three locked compressed identities match the exact Git LFS pointers introduced together by official Remote Settings data commit `2cf7ff66844260317726822990a7f47a4730ec8a`; no model body was downloaded |
+| Approval binding | Passed canonical, domain-separated manifest digest verification; changing an approved URL, hash, size, license/delivery conclusion, budget or publication state invalidates the manifest |
 | Blocked preparation | Passed: invalid/unavailable consent creates no provider state |
 | Official resource metadata | Three records re-read by exact ID; all locked identity, role, language, architecture, version, URL location, dual hashes and sizes match |
 | Prepare interruption matrix | Passed five durable boundaries; no interrupted first preparation creates a current reference and retry recovers stale candidate |
@@ -58,7 +61,9 @@ defined and enforced as repeated one-shot launches after five warmups with only
 the operating-system page cache warm; it does not claim a persistent provider,
 daemon or FFI lifetime. The six remaining tasks are the two human
 license/approval records and the four real/manual evidence runs that those
-records gate.
+records gate. The current native SBOM remains
+`review_status=blocked_human_conclusion` with five explicit blocking review
+items; none was converted into an automated legal or licensing conclusion.
 
 ## Final command record
 
@@ -74,11 +79,14 @@ records gate.
 | `make clippy` | PASS with warnings denied |
 | `make deny` | PASS: advisories, bans, licenses and sources; informational duplicate-version warnings remain |
 | `make worktree-audit` | PASS: one registered checkout on persistent storage |
+| `.specify/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks` | PASS: feature artifacts and `tasks.md` are available |
 
 ## Redaction and mutation audit
 
 - `git diff --check` passes.
 - The pinned source checkout is clean after the offline native build.
+- `native-sbom.json` parses successfully and the supply-chain gate rehashes
+  every locked-source license input before accepting the inventory.
 - Blocked preparation, lifecycle and evidence tests remove their isolated
   provider roots; the normal user-scoped embedded root remains absent.
 - The evidence contract accepts exactly 20 public cases, rejects a blocked

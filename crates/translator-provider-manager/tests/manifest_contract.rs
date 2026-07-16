@@ -15,6 +15,14 @@ fn manifest_should_accept_complete_local_review_when_publication_is_blocked() {
 }
 
 #[test]
+fn updated_fixture_manifest_should_have_stable_derived_digest() {
+    assert_eq!(
+        common::updated_manifest_digest(),
+        "cf070c7f3f5517e98aacdb86d54e1583702781b30990164e0c2a558169839bce"
+    );
+}
+
+#[test]
 fn manifest_should_reject_unknown_fields() {
     let json = valid_manifest_json().replace(
         "\"schema_version\":1,",
@@ -37,15 +45,33 @@ fn manifest_should_reject_automated_local_approval() {
 
 #[test]
 fn manifest_should_reject_mismatched_approval_digest() {
+    let approved_scope = format!(
+        "\"scope\":\"local_activation\",\"artifact_set_digest\":\"{}\"",
+        common::MANIFEST_DIGEST
+    );
     let json = valid_manifest_json().replacen(
-        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        &approved_scope,
+        "\"scope\":\"local_activation\",\"artifact_set_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\"",
         1,
     );
 
     let error = ProviderManifest::from_json(&json).expect_err("digest mismatch must fail");
 
     assert_eq!(error.code(), "APPROVAL_REQUIRED");
+}
+
+#[test]
+fn manifest_should_reject_artifact_identity_changed_after_approval() {
+    let json = valid_manifest_json().replacen(
+        "https://example.invalid/0.zst",
+        "https://example.invalid/tampered.zst",
+        1,
+    );
+
+    let error =
+        ProviderManifest::from_json(&json).expect_err("approval must bind artifact identity");
+
+    assert_eq!(error.code(), "MANIFEST_INVALID");
 }
 
 #[test]

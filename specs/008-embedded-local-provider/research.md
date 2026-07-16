@@ -199,6 +199,14 @@ or mismatched digest, rejection or cancellation produces no activation and no
 change to `current`. Every reviewed update has a new digest and requires new
 consent.
 
+The digest is not a caller-selected label. The manager computes SHA-256 over
+the domain `translator-provider-manifest-v1\0` and a fixed-order typed JSON
+payload covering schema/profile/languages/platform, review/publication states,
+runner, ordered artifacts and budgets. It excludes only the digest and approval
+records to avoid self-reference, then rejects any recorded mismatch. Changing
+an artifact URL/hash/size, license/delivery conclusion, budget or publication
+state therefore invalidates the prior digest and approval.
+
 Downloads use only exact allowlisted HTTPS URLs, require status 200, disable
 redirects, inherited proxies and retries, enforce byte limits, and validate
 both compressed and expanded hashes. Each Zstandard attachment expands to one

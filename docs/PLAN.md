@@ -133,9 +133,10 @@ Direccion actual:
   como candidato unico provisional, runner nativo one-shot y recursos exactos
   adquiridos con consentimiento a un store XDG user-scoped;
 - F012 tiene prototipo y lifecycle controlado implementados, incluido build
-  nativo reproducible y portable; permanece `BLOCKED_LICENSE_APPROVAL` sin
-  adquisicion/activacion real porque falta la revision humana de licencia y
-  alcance del conjunto exacto;
+  nativo reproducible y portable, SBOM del cierre real y validacion de digest
+  canonico ligado a identidades/conclusiones; permanece
+  `BLOCKED_LICENSE_APPROVAL` sin adquisicion/activacion real porque falta la
+  revision humana de licencia y alcance del conjunto exacto;
 - recursos, latencia, red cero y evidencia real CLI/Zed siguen siendo gates
   obligatorios posteriores a esa aprobacion y no se infieren del build;
 - F009/publicacion queda pospuesta hasta cerrar F012 y revisar por separado la

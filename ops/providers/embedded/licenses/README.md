@@ -27,32 +27,52 @@ attachment location, compressed size/hash and decompressed size/hash in the
 lock. Their record schemas contain neither a `license` nor an `spdx` field.
 No attachment body was downloaded during this metadata review.
 
+The exact compressed hashes and sizes also match three Git LFS pointers in the
+official `mozilla/remote-settings-data` repository. All three pointers were
+introduced together by `remote-settings-data-bot` in commit
+`2cf7ff66844260317726822990a7f47a4730ec8a` on 2026-06-25:
+
+| Role | Remote Settings attachment path | Locked LFS object |
+|---|---|---|
+| Model | `1d705201-9be0-40c4-a0b4-18d1e3973777.zst` | `ce7ba731…`, 22,085,725 bytes |
+| Vocabulary | `b2b5907b-8759-4cc8-a721-89c283e6e45b.zst` | `76b9ef22…`, 348,996 bytes |
+| Lexical shortlist | `51318160-1249-451f-80fb-12e61f8c1def.zst` | `0dd2945d…`, 1,687,731 bytes |
+
+This closes the official-download provenance gap. It does not close the
+license gap: `mozilla/remote-settings-data` has no repository license and its
+LFS pointers do not carry an artifact license field.
+
 ## Native evidence inventory
 
-The release link closure names Bergamot, Marian, SentencePiece, intgemm,
-ssplit-cpp and static PCRE2 directly. Marian's static archive also builds
-vendored yaml-cpp, pathie-cpp, zlib, Faiss, cnpy, generated ONNX/protobuf and
-phf objects. Exact license texts exist in the locked tree for most components:
+The machine-readable actual-binary inventory is
+[`native-sbom.json`](native-sbom.json). The native supply-chain gate binds its
+runner hash/size and source commit to both lock files, requires unique component
+IDs, and rehashes every license notice taken from the locked source tree.
+
+A network-disabled diagnostic rebuild added a linker map and reproduced the
+release size (12,000,008 bytes). Its extra linker option changed the diagnostic
+binary hash, so the map is used only to enumerate archive members; the release
+hash, release `build.ninja` link manifest and release-symbol scan remain the
+identity evidence. Together they establish the following closure:
 
 | Component/evidence | Repository-level text observed | Review state |
 |---|---|---|
-| Project runner wrapper | Workspace `MIT` | Final binary conclusion pending complete closure review |
-| Mozilla Translations/Bergamot | Root `MPL-2.0` text at the exact commit | MPL notice/source obligations pending human acceptance |
-| Marian fork | `MIT` text | Candidate conclusion only |
-| intgemm | `MIT` text | Candidate conclusion only |
-| SentencePiece | `Apache-2.0` text plus vendored Abseil, darts-clone, esaxx and protobuf-lite texts | Recursive conclusion/notice set incomplete |
-| ssplit-cpp | `Apache-2.0` for C++/CMake; `LGPL-2.1` for optional nonbreaking-prefix data | Reviewer must confirm the delivered/used data subset |
-| yaml-cpp, Faiss, cnpy, phf | Permissive texts in the locked tree | Candidate conclusions only |
-| pathie-cpp | BSD-style text in the locked tree | SPDX conclusion pending |
-| vendored zlib | License notice in its locked `README` | SPDX conclusion pending |
-| static PCRE2 from the build image | Build input and link presence verified | Exact source/license notice and delivery treatment pending |
-| generated ONNX/protobuf objects | Built by the locked Marian recipe; no adjacent ONNX license file found | Origin and applicable notice unresolved |
-| Dynamic ELF allowlist | glibc/libstdc++/libgcc/libm/loader only | System-library treatment must be recorded by reviewer |
+| Project wrapper, Marian, CLI11, yaml-cpp, pathie-cpp, spdlog/fmt, cnpy, Faiss, half-float, mio, PHF and zstr | MIT/BSD candidate texts or header notices, all individually hashed in the SBOM | Human conclusions and notice retention pending |
+| Mozilla Translations/Bergamot | Root `MPL-2.0` text at exact commit `f31423c…` | Covered-source/notice handling pending human acceptance |
+| intgemm | Exact submodule `f740151…`; runtime candidate `MIT` | Human conclusion pending; Catch test notice is outside the runtime closure |
+| SentencePiece closure | Exact submodule `ae41b77…`; Apache-2.0 plus hashed Abseil, darts-clone, esaxx and protobuf-lite texts | Recursive human conclusions/notice set pending |
+| ssplit-cpp | Exact submodule `a311f98…`; only `ssplit.cpp.o` and `regex.cpp.o` link under candidate `Apache-2.0` | Optional LGPL nonbreaking-prefix data is neither linked nor packaged |
+| zlib, sse_mathfun and threadpool | Hashed zlib-style notices | Human conclusions/notice retention pending |
+| Microsoft CNTK call-stack helper | Source header declares MIT | Referenced upstream root notice is not adjacent to the vendored file |
+| Marian `any_type.h` | The final release contains its symbols; header cites external inspiration but has no explicit notice | `NOASSERTION`; attribution/conclusion is a blocking human item |
+| static PCRE2 | Exact Debian package `libpcre2-dev:amd64=10.42-1`; package copyright hash recorded | Composite PCRE2/sljit/binary-exception conclusion pending |
+| Dynamic ELF allowlist | Exact bookworm glibc/libstdc++/libgcc/libm/loader package versions and notice hashes recorded | System-library delivery treatment pending |
 
-This inventory is evidence, not a complete SBOM or an SPDX conclusion. In
-particular, the static archive contains more compiled object groups than the
-small direct-library list alone reveals; a reviewer must bind the actual final
-binary closure to the retained notices and source offer.
+The build compiles generated ONNX/protobuf objects into `libmarian.a`, but the
+linker map and release symbols show that no ONNX member enters the runner.
+SentencePiece's protobuf-lite implementation does enter and is inventoried.
+The source pins for fbgemm, nccl, ruy and simd-related repositories likewise do
+not imply that those projects are shipped.
 
 ## Model evidence and unresolved attribution
 
@@ -73,6 +93,10 @@ Primary evidence:
 
 - <https://github.com/mozilla/translations/tree/f31423c7c2c6ed8ae57d71a3d19a9db6f156060e>
 - <https://github.com/mozilla/firefox-translations-models>
+- <https://github.com/mozilla/remote-settings-data/commit/2cf7ff66844260317726822990a7f47a4730ec8a>
+- <https://github.com/mozilla/remote-settings-data/blob/2cf7ff66844260317726822990a7f47a4730ec8a/attachments/main-workspace/translations-models-v2/1d705201-9be0-40c4-a0b4-18d1e3973777.zst>
+- <https://github.com/mozilla/remote-settings-data/blob/2cf7ff66844260317726822990a7f47a4730ec8a/attachments/main-workspace/translations-models-v2/b2b5907b-8759-4cc8-a721-89c283e6e45b.zst>
+- <https://github.com/mozilla/remote-settings-data/blob/2cf7ff66844260317726822990a7f47a4730ec8a/attachments/main-workspace/translations-models-v2/51318160-1249-451f-80fb-12e61f8c1def.zst>
 - <https://firefox.settings.services.mozilla.com/v1/buckets/main/collections/translations-models-v2/records>
 - <https://www.mozilla.org/en-US/MPL/2.0/FAQ/>
 
@@ -89,17 +113,29 @@ obligations, records an evidence digest, and signs the exact final manifest for
 local activation. F009 must later review the actual delivery artifact before
 any bundling, redistribution or publication claim.
 
+The manager derives `artifact_set_digest` from a domain-separated, canonical
+typed payload containing the complete artifact identities, license and
+delivery conclusions, resource budgets and publication status. It rejects a
+manifest when the recorded digest differs. Approval records and their digest
+fields are excluded only to avoid self-reference. Therefore any later change
+to a URL, hash, size, conclusion, budget or publication state requires a new
+digest and fresh matching approvals.
+
 ## Required completion package
 
-1. Complete an actual-binary native SBOM, including static/vendor/generated
-   code and exact license texts.
-2. Record accepted SPDX conclusions and notice/source-offer handling for the
-   runner and every model/config artifact.
-3. Obtain authoritative artifact-level attribution for the three exact Remote
-   Settings attachments, or choose another reviewed artifact set.
-4. Compute the final manifest digest only after those conclusions are fixed.
-5. Record the human F012 local-activation approval bound to that digest.
-6. Keep F009 publication blocked until its independent human decision.
+1. Human reviewer accepts or rejects the SBOM candidates, including an explicit
+   conclusion for Marian `any_type.h`, PCRE2's composite terms, system-library
+   treatment, retained notices and MPL covered-source handling.
+2. Human reviewer accepts authoritative artifact-level attribution for the
+   three exact Remote Settings attachments, or chooses another reviewed set.
+3. If accepted, record the reviewed SPDX/license source and
+   `local_acquisition_approved` conclusion for the runner and each resource.
+4. Compute the canonical final manifest and evidence digests only after those
+   conclusions are fixed.
+5. Human `project_maintainer` approves or rejects F012 local activation bound
+   to those exact digests and the `local_activation` scope.
+6. Human `f009_human_reviewer` explicitly keeps publication blocked or records
+   a separate approval; local activation never implies publication.
 
 Until all F012 items pass, the only valid product outcome is
 `BLOCKED_LICENSE_APPROVAL`; Mock and LibreTranslate remain unchanged.

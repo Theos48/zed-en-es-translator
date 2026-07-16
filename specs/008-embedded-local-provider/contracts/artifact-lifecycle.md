@@ -53,6 +53,12 @@ Missing, malformed or mismatched consent performs no acquisition and no
 activation. Consent to one digest never authorizes another. Update requires a
 fresh digest even when some content-addressed objects already exist.
 
+The manager must recompute the consent digest from the domain-separated,
+fixed-order typed manifest payload and reject a recorded digest mismatch before
+approval or acquisition. The payload covers schema/profile/languages/platform,
+review/publication states, runner, ordered artifacts and budgets; it excludes
+only the digest and approval records to avoid self-reference.
+
 ## Acquisition rules
 
 - exact manifest-pinned HTTPS URLs only;

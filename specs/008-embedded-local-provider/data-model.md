@@ -30,7 +30,13 @@ Invariants:
 
 - one profile contains one language direction and one platform;
 - every referenced artifact belongs to the same reviewed compatibility set;
-- the profile digest covers all fields and artifact references;
+- the profile digest is SHA-256 over the domain
+  `translator-provider-manifest-v1\0` followed by the fixed-order typed JSON
+  payload containing schema/profile/languages/platform, review/publication
+  states, runner, ordered artifacts and budgets;
+- `artifact_set_digest`, `local_approval` and `publication_approval` are
+  excluded from that payload only to avoid self-reference; the manager
+  recomputes the digest and rejects any mismatch;
 - production selection cannot supply or override the profile ID.
 
 ## 2. RunnerManifest

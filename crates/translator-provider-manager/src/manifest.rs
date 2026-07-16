@@ -1,9 +1,11 @@
 use serde::{Deserialize, Serialize};
+use sha2::{Digest as _, Sha256};
 
 use crate::error::ManagerError;
 
 const SCHEMA_VERSION: u32 = 1;
 const PROFILE_ID: &str = "bergamot-en-es-linux-x86_64-v1";
+const DIGEST_DOMAIN: &[u8] = b"translator-provider-manifest-v1\0";
 
 /// Complete reviewed identity for one embedded provider artifact set.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
@@ -90,6 +92,20 @@ pub struct ResourceBudgets {
     provider_deadline_ms: u64,
 }
 
+#[derive(Serialize)]
+struct ManifestDigestPayload<'a> {
+    schema_version: u32,
+    profile_id: &'a str,
+    source_language: &'a str,
+    target_language: &'a str,
+    platform: &'a str,
+    review_status: &'a str,
+    publication_status: &'a str,
+    runner: &'a RunnerArtifact,
+    artifacts: &'a [ModelArtifact],
+    resource_budgets: ResourceBudgets,
+}
+
 impl ProviderManifest {
     /// Parse and validate a strict manifest without exposing parser internals.
     ///
@@ -102,6 +118,23 @@ impl ProviderManifest {
             serde_json::from_str(input).map_err(|_| ManagerError::ManifestInvalid)?;
         manifest.validate()?;
         Ok(manifest)
+    }
+
+    /// Compute the digest a human approval must bind for a strict manifest.
+    ///
+    /// The input must contain the complete final artifact, license, delivery,
+    /// budget and publication fields. Approval records and their digest fields
+    /// are deliberately excluded to avoid a self-reference.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ManagerError::ManifestInvalid`] when the JSON does not match
+    /// the supported manifest schema or its canonical payload cannot be
+    /// serialized.
+    pub fn artifact_set_digest_for_review(input: &str) -> Result<String, ManagerError> {
+        let manifest: Self =
+            serde_json::from_str(input).map_err(|_| ManagerError::ManifestInvalid)?;
+        manifest.compute_artifact_set_digest()
     }
 
     /// Return the exact reviewed artifact-set digest.
@@ -148,6 +181,9 @@ impl ProviderManifest {
         {
             return Err(ManagerError::ManifestInvalid);
         }
+        if self.artifact_set_digest != self.compute_artifact_set_digest()? {
+            return Err(ManagerError::ManifestInvalid);
+        }
 
         let local = self
             .local_approval
@@ -181,6 +217,30 @@ impl ProviderManifest {
 
         self.runner.validate()?;
         self.artifacts.iter().try_for_each(ModelArtifact::validate)
+    }
+
+    fn compute_artifact_set_digest(&self) -> Result<String, ManagerError> {
+        let payload = ManifestDigestPayload {
+            schema_version: self.schema_version,
+            profile_id: &self.profile_id,
+            source_language: &self.source_language,
+            target_language: &self.target_language,
+            platform: &self.platform,
+            review_status: &self.review_status,
+            publication_status: &self.publication_status,
+            runner: &self.runner,
+            artifacts: &self.artifacts,
+            resource_budgets: self.resource_budgets,
+        };
+        let encoded = serde_json::to_vec(&payload).map_err(|_| ManagerError::ManifestInvalid)?;
+        let mut digest = Sha256::new();
+        digest.update(DIGEST_DOMAIN);
+        digest.update(encoded);
+        Ok(digest
+            .finalize()
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect())
     }
 
     fn artifact_totals_fit_budgets(&self) -> bool {

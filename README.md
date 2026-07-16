@@ -100,7 +100,9 @@ sin servicio Docker: runner nativo one-shot aislado, recursos oficiales
 `en -> es` fijados por hash y preparacion consentida en storage XDG
 user-scoped. Ya existen la seleccion/configuracion, el limite de proceso, el
 manager de lifecycle controlado y un runner Bergamot reproducible con CPU/ELF
-verificados. El resultado sigue siendo `BLOCKED_LICENSE_APPROVAL`: faltan la
+verificados. El manager recalcula el digest canonico del manifiesto y rechaza
+cualquier aprobacion que ya no corresponda a sus URLs, hashes, conclusiones o
+presupuestos. El resultado sigue siendo `BLOCKED_LICENSE_APPROVAL`: faltan la
 revision y aprobacion humanas del conjunto exacto, por lo que no se descargan
 ni activan modelos reales y no se afirma soporte. Benchmark, cero red y
 aceptacion real CLI/Zed quedan bloqueados por el mismo gate. Mock y

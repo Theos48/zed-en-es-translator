@@ -85,6 +85,14 @@ make provider-embedded-disclose
 make provider-embedded-prepare CONSENT=<manifest-sha256>
 ```
 
+El manager deriva ese SHA-256 usando el dominio
+`translator-provider-manifest-v1\0` y un payload JSON tipado de orden fijo que
+cubre identidad, runner, artefactos ordenados, conclusiones, presupuestos y
+estado de publicacion. Solo omite el propio digest y los registros de
+aprobacion para evitar autorreferencia. Una URL, hash, licencia, permiso,
+presupuesto o estado modificado invalida el digest y exige consentimiento y
+aprobaciones nuevos.
+
 Update requiere consentimiento nuevo. Status, verify y rollback son offline.
 La limpieza completa requiere token exacto, lease exclusivo y enumeracion
 probada de propiedad; `make clean` no toca los artefactos.

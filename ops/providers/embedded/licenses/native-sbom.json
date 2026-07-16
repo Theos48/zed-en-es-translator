@@ -1,0 +1,501 @@
+{
+  "schema_version": 1,
+  "review_status": "blocked_human_conclusion",
+  "artifact": {
+    "name": "translator-embedded-runtime",
+    "sha256": "9743b4a8efbe9471145c08fcc75a42fdc3d85e6035e797023b3a623d91e886fe",
+    "size": 12000008,
+    "platform": "linux-x86_64"
+  },
+  "source": {
+    "repository": "https://github.com/mozilla/translations",
+    "source_commit": "f31423c7c2c6ed8ae57d71a3d19a9db6f156060e",
+    "source_lock": "ops/providers/embedded/source.lock.json"
+  },
+  "link_evidence": {
+    "release_link_manifest": "target/embedded-native-release/build.ninja",
+    "release_symbol_scan": "nm -C --defined-only target/embedded-native-release/translator-embedded-runtime",
+    "diagnostic_map": "target/embedded-sbom-map/runner.map",
+    "diagnostic_binary_sha256": "1bd1d677e2fe7806818844f619c4240897fa84554726c3f135bb0a48c20a058d",
+    "diagnostic_binary_size": 12000008,
+    "diagnostic_only": true,
+    "limitation": "The network-disabled diagnostic rebuild added a linker-map flag and is not the release artifact. Its map enumerates archive members for review; only the release binary hash, release link manifest and release symbol scan establish the shipped identity."
+  },
+  "components": [
+    {
+      "id": "project-runner-wrapper",
+      "name": "translator-embedded-runtime wrapper",
+      "version": "workspace",
+      "scope": "linked_source",
+      "candidate_spdx": "MIT",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "workspace_manifest",
+          "path": "Cargo.toml",
+          "statement": "workspace.package.license = MIT"
+        }
+      ]
+    },
+    {
+      "id": "mozilla-translations-bergamot",
+      "name": "Mozilla Translations / Bergamot inference",
+      "version": "v0.6.0+f31423c7",
+      "scope": "static_link",
+      "candidate_spdx": "MPL-2.0",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "LICENSE",
+          "sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5"
+        }
+      ]
+    },
+    {
+      "id": "marian-fork",
+      "name": "Marian fork",
+      "version": "v1.9.56+f31423c7",
+      "scope": "static_link",
+      "candidate_spdx": "MIT",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/LICENSE.md",
+          "sha256": "fb3e48be2f3c9c85f3acf32d4ff115a803208e51ecab694000415c8bf1dd712b"
+        }
+      ]
+    },
+    {
+      "id": "cli11",
+      "name": "CLI11",
+      "version": "1.6",
+      "scope": "inlined_headers",
+      "candidate_spdx": "BSD-3-Clause",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/CLI/LICENSE",
+          "sha256": "82b1de8bd2cbd894dc9ef05854e9d8c010d0ae9f6f2dc41370bac498f9bebc7d"
+        }
+      ]
+    },
+    {
+      "id": "cnpy",
+      "name": "cnpy",
+      "version": "vendored",
+      "scope": "static_link",
+      "candidate_spdx": "MIT",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/cnpy/LICENSE",
+          "sha256": "1ff6fa94ad29d941ceb3bdd5ebfb260ddba4c3e962c50fb7a66c899e769de1ff"
+        }
+      ]
+    },
+    {
+      "id": "faiss",
+      "name": "Faiss header subset",
+      "version": "vendored",
+      "scope": "inlined_headers",
+      "candidate_spdx": "MIT",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/faiss/LICENSE",
+          "sha256": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85"
+        }
+      ]
+    },
+    {
+      "id": "half-float",
+      "name": "half_float",
+      "version": "vendored",
+      "scope": "inlined_headers",
+      "candidate_spdx": "BSD-3-Clause",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/half_float/Readme.md",
+          "sha256": "949c87cebc66e205969385852142ed218311cbff36956599b99caef3414c60dc"
+        }
+      ]
+    },
+    {
+      "id": "intgemm",
+      "name": "intgemm",
+      "version": "f7401513da71758dacce52fed1c7855549abee59",
+      "scope": "static_link_and_inlined_headers",
+      "candidate_spdx": "MIT",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/intgemm/LICENSE",
+          "sha256": "887bd367b44f548d743864cb4322d0895a36b1794c6ad5b5e3a0fac53ccd117b",
+          "note": "The additional Catch test notice in this file is outside the runtime link closure."
+        }
+      ]
+    },
+    {
+      "id": "mio",
+      "name": "mio",
+      "version": "vendored",
+      "scope": "inlined_headers",
+      "candidate_spdx": "MIT",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/mio/LICENSE",
+          "sha256": "1a0fe0714e5fc17741dd880bddf445c4b3c579868df1f198f652129a9fa7c3cc"
+        }
+      ]
+    },
+    {
+      "id": "pathie-cpp",
+      "name": "pathie-cpp",
+      "version": "vendored",
+      "scope": "static_link",
+      "candidate_spdx": "BSD-2-Clause",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/pathie-cpp/LICENSE",
+          "sha256": "8515fc938185ff3edb2c38b60b3a2f4a92b93644502de2b73fc32d54077e2a61"
+        }
+      ]
+    },
+    {
+      "id": "phf",
+      "name": "PHF",
+      "version": "vendored",
+      "scope": "static_link",
+      "candidate_spdx": "MIT",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/phf/LICENSE",
+          "sha256": "3f9e948dcc51aab1299dc37a53f9218bf0414c7ea24ee38e310269f74e2eef72"
+        }
+      ]
+    },
+    {
+      "id": "sentencepiece",
+      "name": "SentencePiece",
+      "version": "ae41b7740d7006596bb9257e83340b2620db9d00",
+      "scope": "static_link",
+      "candidate_spdx": "Apache-2.0",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/sentencepiece/LICENSE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ]
+    },
+    {
+      "id": "sentencepiece-abseil",
+      "name": "SentencePiece vendored Abseil subset",
+      "version": "vendored",
+      "scope": "static_link",
+      "candidate_spdx": "Apache-2.0",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/sentencepiece/third_party/absl/LICENSE",
+          "sha256": "d3e2f59e1d71176dfdb555ece6a41f7a5aa0f52ff21211010ace314f57695f6b"
+        }
+      ]
+    },
+    {
+      "id": "sentencepiece-darts-clone",
+      "name": "SentencePiece vendored darts-clone",
+      "version": "vendored",
+      "scope": "inlined_headers",
+      "candidate_spdx": "BSD-3-Clause",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/sentencepiece/third_party/darts_clone/LICENSE",
+          "sha256": "155f59997298ee336602c49f9c1110f268ac394ca2197eb02647a3555935ad52"
+        }
+      ]
+    },
+    {
+      "id": "sentencepiece-esaxx",
+      "name": "SentencePiece vendored esaxx",
+      "version": "vendored",
+      "scope": "inlined_headers",
+      "candidate_spdx": "MIT",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/sentencepiece/third_party/esaxx/LICENSE",
+          "sha256": "7c28553d1d3312d65fe309f76a22ebaf33a3d76c8c1e3b98a88ee4654ecb53db"
+        }
+      ]
+    },
+    {
+      "id": "sentencepiece-protobuf-lite",
+      "name": "SentencePiece vendored protobuf-lite",
+      "version": "vendored",
+      "scope": "static_link",
+      "candidate_spdx": "BSD-3-Clause",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/sentencepiece/third_party/protobuf-lite/LICENSE",
+          "sha256": "6e5e117324afd944dcf67f36cf329843bc1a92229a8cd9bb573d7a83130fea7d"
+        }
+      ]
+    },
+    {
+      "id": "spdlog",
+      "name": "spdlog",
+      "version": "vendored",
+      "scope": "inlined_headers",
+      "candidate_spdx": "MIT",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/spdlog/LICENSE",
+          "sha256": "9eb46fbd9cbdb0793e496ab744aa2e290b4e39825a2da5cba3ba6fa36bb25683"
+        }
+      ]
+    },
+    {
+      "id": "fmt-bundled",
+      "name": "fmt bundled by spdlog",
+      "version": "vendored",
+      "scope": "inlined_headers",
+      "candidate_spdx": "MIT",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/spdlog/include/spdlog/fmt/bundled/format.h",
+          "sha256": "fd85a7e0f02ead692757ff89de16055cef55232f96f247a0802ff468acd5ef3a",
+          "note": "The vendored header carries the fmt copyright and license notice."
+        }
+      ]
+    },
+    {
+      "id": "yaml-cpp",
+      "name": "yaml-cpp",
+      "version": "vendored",
+      "scope": "static_link",
+      "candidate_spdx": "MIT",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/yaml-cpp/LICENSE",
+          "sha256": "aa6fcc27be034e41e21dd832f9175bfe694a48491d9e14ff0fa278e19ad14f1b"
+        }
+      ]
+    },
+    {
+      "id": "zlib",
+      "name": "zlib",
+      "version": "1.2.11",
+      "scope": "static_link",
+      "candidate_spdx": "Zlib",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/zlib/README",
+          "sha256": "7960b6b1cc63e619abb77acaea5427159605afee8c8b362664f4effc7d7f7d15"
+        }
+      ]
+    },
+    {
+      "id": "zstr",
+      "name": "zstr",
+      "version": "vendored",
+      "scope": "inlined_headers",
+      "candidate_spdx": "MIT",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/zstr/LICENSE",
+          "sha256": "f2b4ae40b0311262960b46f697497994fe35706110ac04f04b3768d9ea7df460"
+        }
+      ]
+    },
+    {
+      "id": "sse-mathfun",
+      "name": "sse_mathfun",
+      "version": "vendored",
+      "scope": "inlined_headers",
+      "candidate_spdx": "Zlib",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/sse_mathfun.h",
+          "sha256": "3edb75c4a7d11a6762a93536afc15d544edfa2f2eed6ec1e35e5fec69cf2afcd"
+        }
+      ]
+    },
+    {
+      "id": "threadpool",
+      "name": "Jakob Progsch / Vaclav Zeman thread pool",
+      "version": "vendored-modified",
+      "scope": "inlined_headers",
+      "candidate_spdx": "Zlib",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/threadpool.h",
+          "sha256": "e3ef935a8288643a29b38633be470a77041463af3a0bc19626b8dac2359c499b"
+        }
+      ]
+    },
+    {
+      "id": "cntk-callstack",
+      "name": "Microsoft CNTK call-stack utility",
+      "version": "vendored",
+      "scope": "static_link",
+      "candidate_spdx": "MIT",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/ExceptionWithCallStack.cpp",
+          "sha256": "877ec359d494772b41f412e6e45760cd4a420636b199ac52f4b888f2cb3dbe04",
+          "note": "The source header declares MIT; the referenced project-root LICENSE.md is not adjacent to this vendored file."
+        }
+      ]
+    },
+    {
+      "id": "marian-any-type",
+      "name": "Marian any_type helper",
+      "version": "vendored",
+      "scope": "inlined_headers",
+      "candidate_spdx": "NOASSERTION",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/marian-fork/src/3rd_party/any_type.h",
+          "sha256": "0d69a0fb6c01f94de70fb20f0da14c194f361985790fd1342d0e3a3c1d8e225f",
+          "note": "The header cites external inspiration URLs but contains no explicit license notice."
+        }
+      ]
+    },
+    {
+      "id": "ssplit-cpp",
+      "name": "ssplit-cpp code",
+      "version": "a311f9865ade34db1e8e080e6cc146f55dafb067",
+      "scope": "static_link",
+      "candidate_spdx": "Apache-2.0",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "locked_source_tree",
+          "path": "inference/3rd_party/ssplit-cpp/LICENSE.md",
+          "sha256": "4ced746a9cab1b6b6762bd6c1999c6d65e2d45de0bab19a3902514147bbff16a",
+          "note": "Only src/ssplit/ssplit.cpp and src/ssplit/regex.cpp enter libssplit.a."
+        }
+      ]
+    },
+    {
+      "id": "pcre2-static",
+      "name": "PCRE2 8-bit static library",
+      "version": "10.42-1",
+      "scope": "static_link_from_build_image",
+      "candidate_spdx": "NOASSERTION",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "pinned_build_image_package",
+          "path": "/usr/share/doc/libpcre2-dev/copyright",
+          "sha256": "030511beb4d9d620ad09914c369c36ec0528dcf301d1923cc643c948ee7c6a38",
+          "package": "libpcre2-dev:amd64=10.42-1",
+          "note": "The Debian copyright file records the PCRE2 BSD-style terms, the binary-library exception and separate sljit terms; a single SPDX expression is intentionally not inferred."
+        }
+      ]
+    },
+    {
+      "id": "debian-runtime-system-libraries",
+      "name": "glibc, libstdc++, libgcc and ELF loader",
+      "version": "bookworm image package set",
+      "scope": "dynamic_system_libraries",
+      "candidate_spdx": "NOASSERTION",
+      "review_status": "human_review_required",
+      "license_evidence": [
+        {
+          "source": "pinned_build_image_package",
+          "path": "/usr/share/doc/libc6/copyright",
+          "sha256": "40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987",
+          "package": "libc6:amd64=2.36-9+deb12u14"
+        },
+        {
+          "source": "pinned_build_image_package",
+          "path": "/usr/share/doc/gcc-12-base/copyright",
+          "sha256": "da8191658b3452ce9caf31638ba61dab31a38c619fa39df119812e050f592fd3",
+          "package": "libgcc-s1:amd64=12.2.0-14+deb12u1; libstdc++6:amd64=12.2.0-14+deb12u1"
+        }
+      ]
+    }
+  ],
+  "excluded_components": [
+    {
+      "id": "onnx-protobuf",
+      "reason": "The locked build compiles ONNX/protobuf objects into libmarian.a, but the diagnostic archive-member map and release symbol scan show no ONNX member or ONNX symbol selected into the runner. SentencePiece protobuf-lite remains included separately."
+    },
+    {
+      "id": "ssplit-nonbreaking-prefix-data",
+      "reason": "The LGPL-2.1 nonbreaking-prefix files are neither compiled into libssplit.a nor packaged with the runner; only the Apache-2.0 C++ source objects enter the link."
+    },
+    {
+      "id": "unused-native-submodules",
+      "reason": "fbgemm, nccl, ruy, simd_utils, simple-websocket-server and the non-inference training submodules are pinned for source integrity but do not enter the native runner link closure."
+    }
+  ],
+  "unresolved_items": [
+    {
+      "id": "marian-any-type-attribution",
+      "blocking": true,
+      "required_action": "A human reviewer must determine the applicable license/attribution for any_type.h or replace it with reviewed code before activation."
+    },
+    {
+      "id": "pcre2-composite-conclusion",
+      "blocking": true,
+      "required_action": "A human reviewer must record the exact PCRE2/sljit/binary-exception conclusion and notice handling."
+    },
+    {
+      "id": "native-notice-and-source-handling",
+      "blocking": true,
+      "required_action": "A human reviewer must approve the retained notice set and MPL covered-source handling for the exact runner delivery mode."
+    },
+    {
+      "id": "remote-settings-artifact-attribution",
+      "blocking": true,
+      "required_action": "A human reviewer must accept authoritative artifact-level attribution for the three exact Mozilla Remote Settings attachments or choose a different reviewed set."
+    },
+    {
+      "id": "activation-and-publication-decisions",
+      "blocking": true,
+      "required_action": "F012 local activation and F009 publication require separate human decisions bound to the final manifest digest."
+    }
+  ]
+}

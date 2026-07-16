@@ -10,8 +10,6 @@ use translator_provider_manager::locking::{
 };
 use translator_provider_manager::manifest::ProviderManifest;
 
-const UPDATED_DIGEST: &str = "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc";
-
 #[test]
 fn lifecycle_operations_are_serialized_and_cleanup_lease_detects_busy_readers() {
     let root = test_root("locks");
@@ -53,11 +51,9 @@ fn inference_lease_remains_available_while_an_update_is_promoted() {
         .collect::<Vec<_>>();
     let first = ProviderManifest::from_json(&common::approved_manifest(runner, &artifacts))
         .expect("first manifest");
-    let updated = ProviderManifest::from_json(
-        &common::approved_manifest(runner, &artifacts)
-            .replace(common::MANIFEST_DIGEST, UPDATED_DIGEST),
-    )
-    .expect("updated manifest");
+    let updated = ProviderManifest::from_json(&common::updated_manifest(runner, &artifacts))
+        .expect("updated manifest");
+    let updated_digest = common::updated_manifest_digest();
     let lifecycle = Lifecycle::new(root.clone());
     lifecycle
         .prepare(&first, common::MANIFEST_DIGEST, runner, &sources)
@@ -65,7 +61,7 @@ fn inference_lease_remains_available_while_an_update_is_promoted() {
     let inference = SharedInferenceLease::try_acquire(&root).expect("active inference");
 
     lifecycle
-        .update(&updated, UPDATED_DIGEST, runner, &sources)
+        .update(&updated, &updated_digest, runner, &sources)
         .expect("update while immutable current is leased");
 
     assert!(inference.try_exclusive_peer().is_err());

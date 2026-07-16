@@ -178,7 +178,12 @@ fn failed_offline_smoke_never_creates_an_active_reference() {
         .collect::<Vec<_>>();
 
     let error = Lifecycle::new(root.clone())
-        .prepare_with_offline_smoke(&manifest, common::MANIFEST_DIGEST, runner, &controlled)
+        .prepare_with_offline_smoke(
+            &manifest,
+            manifest.artifact_set_digest(),
+            runner,
+            &controlled,
+        )
         .expect_err("unchanged smoke output must fail quality gate");
 
     assert_eq!(error.code(), "INTEGRITY_FAILED");
