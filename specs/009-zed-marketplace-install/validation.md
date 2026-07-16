@@ -42,6 +42,27 @@ runner identity and regenerated the archive from the reduced LSP.
 - The published checksum sidecar is 136 bytes. GitHub reports its SHA-256 as
   `2009ef4b469514642fe7cb15379eacee3416eace8535fccf7902be55130ed898`.
 
+## Pre-Submission Dev-Extension Smoke
+
+This supporting smoke passed on 2026-07-16 with Zed 1.11.3 on Linux `x86_64`:
+
+- Zed used an isolated, workspace-ignored user-data directory and compiled the
+  extension WASM successfully through the existing `rustup` toolchain.
+- The extension acquired and activated verified package
+  `en-es-translator-0.1.0-linux-x86_64` in its Zed-owned work directory.
+- Zed started `translator-lsp` from that work directory. The installed LSP and
+  runner SHA-256 values were respectively
+  `45218fd230fb2d072ae5528be09e583c2eaf671785a29dad327d7566507491ec`
+  and
+  `d69ffa86ff42166afb9ffe59947dea727a9cd9856177a392d35091b97e8614ac`,
+  matching the post-convergence package identities above.
+- The direct offline action produced the Spanish hover preview for the public
+  Markdown fixture. Its Git blob identity remained
+  `a9d9dd6344c28eeb72b64073853cb388442727a5` before and after the action.
+
+This smoke reduces submission risk but does not close T057, FR-026 or the 3/3
+clean Gallery acceptance because it intentionally used a development extension.
+
 ## Automated Gate Matrix
 
 | Gate | Result | Evidence |
@@ -114,11 +135,10 @@ The interactive and Gallery gates remain intentionally open:
 |---|---|---|
 | T057 exact-package interactive Zed acceptance | BLOCKED | After the upstream registry entry is available, install from Gallery in a clean supported Zed profile and record only public fixture/version/outcome evidence. A dev extension or repository binary cannot replace this gate. |
 | T058 public tag and release asset | PASS | The reviewed `v0.1.0` release workflow published the exact locked archive and checksum; `make marketplace-release-check` passed against them. |
-| T060 central registry and Gallery acceptance | READY / EXTERNAL | Run the pre-submission dev-extension smoke against the exact public package, then submit the HTTPS submodule/version change to `zed-industries/extensions`. Maintainer merge and the subsequent T057 plus two additional clean Gallery installations remain external. |
+| T060 central registry and Gallery acceptance | PARTIAL / EXTERNAL | The pre-submission dev-extension smoke passed against the exact public package. Submit the HTTPS submodule/version change to `zed-industries/extensions`; maintainer merge and the subsequent T057 plus two additional clean Gallery installations remain external. |
 
-No product decision is needed to proceed. Run the dev-extension smoke, submit
-upstream, wait for registry merge, then perform T057 and record 3/3 clean
-Gallery runs. Until those steps pass,
+No product decision is needed to proceed. Submit upstream, wait for registry
+merge, then perform T057 and record 3/3 clean Gallery runs. Until those steps pass,
 FR-001, FR-026, FR-027, SC-001, SC-009 and SC-010 remain publication-level
 open gates even though their local contracts are implemented.
 
