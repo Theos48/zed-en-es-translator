@@ -39,14 +39,20 @@ linguistic perfection. A reviewer records any explicit human quality gate.
 2. Run five warmups.
 3. Run every case five times in deterministic order for three independent
    rounds.
-4. Separate new-process/cold-model, warm-provider, CLI end-to-end and LSP
-   end-to-end measurements; add one real Zed smoke per acceptance scenario.
+4. Record one pre-warmup `new_process` model-load probe, then run five warmups
+   and record the complete matrix as `warm_provider`; add separate CLI and LSP
+   end-to-end measurements and one real Zed smoke per acceptance scenario.
 5. Use monotonic time and process-only CPU/RSS/thread observations through
    project/container tools; do not install host tools.
 6. Do not clear page cache; define cold as a new runner process/model load and
    record that method.
 7. Execute post-preparation translation in a network-disabled environment and
    require zero IP socket/connect attempts.
+
+`warm_provider` means repeated one-shot processes after the fixed warmups with
+a warm operating-system page cache only; it does not mean a persistent
+provider, retained model process, daemon or FFI lifetime. The harness does not
+clear page cache and never labels persistence as measured evidence.
 
 ## Mandatory budgets
 

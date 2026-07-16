@@ -236,6 +236,12 @@ segment limit and two multi-segment Markdown cases. Run five warmups, five
 repetitions per case and three deterministic rounds. Separate one-shot cold
 start, warm provider, CLI end-to-end and LSP end-to-end; add a real Zed smoke.
 
+The approved `warm_provider` class retains the one-shot architecture. It means
+repeated one-shot launches after five warmups with a warm operating-system page
+cache only; it does not mean a persistent provider, live model process, daemon
+or FFI lifetime. The single `new_process` probe runs before those warmups and
+the harness never clears the host page cache.
+
 Record only case IDs, normalized outcomes and metrics. Never record input,
 output, content-derived hashes, user/host identifiers or sensitive paths.
 

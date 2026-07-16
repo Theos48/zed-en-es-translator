@@ -224,7 +224,7 @@ Redacted evidence for one deterministic fixture and execution class.
 | `fixture_set_version` | string | Public synthetic corpus version |
 | `case_id` | fixed ID | Not derived from content |
 | `surface` | enum | `runner`, `cli`, `lsp`, `zed_manual` |
-| `temperature` | enum | `new_process`, `warm_provider` |
+| `temperature` | enum | `new_process`, `warm_provider`; `warm_provider` means repeated one-shot launches after five warmups with a warm operating-system page cache only and does not mean a persistent provider |
 | `round` / `repetition` | integers | Deterministic schedule |
 | `elapsed_ms` | integer | Monotonic duration |
 | `process_cpu_ms` | integer | Process CPU time |
@@ -235,6 +235,12 @@ Redacted evidence for one deterministic fixture and execution class.
 
 Prohibited fields include text, translation, content length combinations that
 identify user data, content hashes, raw stderr, hostnames, usernames and paths.
+
+`new_process` records the single pre-warmup process/model-load probe without
+clearing page cache. Every matrix sample is `warm_provider`: it still launches
+and reaps one process per request, but runs after the fixed warmups so the
+operating-system page cache may be warm. No execution class keeps a provider
+or model process alive between requests.
 
 ## 10. ValidationRecord
 

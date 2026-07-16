@@ -64,6 +64,12 @@ runner <=128 MiB, lifecycle storage <=384 MiB, peak RSS <=1 GiB, <=4 inference
 threads, cold readiness <=10 s, warm short p95 <=2 s, warm mixed p95 <=5 s,
 and every provider request under the existing 15-second deadline
 
+**Warm execution class**: `warm_provider` runs the same verified one-shot
+process boundary after five deterministic warmups and means a warm
+operating-system page cache only; it does not mean a persistent provider,
+retained model process, daemon or FFI lifetime. `new_process` remains one
+separate pre-warmup model-load probe, and no test clears the host page cache.
+
 **Constraints**: Existing 20 KiB input, 4 KiB segment, 256-segment, 40 KiB
 semantic output and 15-second timeout limits; Mock default; `en -> es` only;
 no shell/arbitrary path/URL/args/env, inherited proxy, redirects, retries,
@@ -107,8 +113,13 @@ The optional `after_plan` agent-context hook updated the managed Spec Kit block
 in `AGENTS.md`. The checklist prerequisite reported `research.md`,
 `data-model.md`, `contracts/` and `quickstart.md` as available design inputs;
 the generated checklist reviews artifact lifecycle/supply chain and the
-embedded offline/privacy boundary. The final downstream-gate prerequisite
-failed as expected because this requested cycle stops before `tasks.md`.
+embedded offline/privacy boundary. The original planning-only pass stopped
+before task generation. The subsequent continuation created `tasks.md`, ran
+analysis, implemented every autonomous controlled task with the required Rust
+practice/TDD workflow, and ran two convergence audits. Those audits identified
+and closed the `warm_provider` definition and this stale gate record. Six tasks
+remain intentionally open because they require human artifact/license approval
+and the real/manual evidence that approval gates.
 
 ## Spec Kit Gate Status
 
@@ -118,10 +129,10 @@ failed as expected because this requested cycle stops before `tasks.md`.
 | `speckit-clarify` | Complete, 0 questions | Prerequisite executed once; structured scan found no critical ambiguity |
 | `speckit-plan` | Complete | Research, data model, four contracts, quickstart, pre/post constitution PASS and agent context updated |
 | `speckit-checklist` | Complete/generated | 48-item artifact-safety requirements checklist with traceability on every item |
-| `speckit-tasks` | Not applicable to this requested gate | Plan awaits review/approval; no `tasks.md` created |
-| `speckit-analyze` | Blocked by prerequisite | `check-prerequisites.sh --require-tasks --include-tasks` reports missing `tasks.md` |
-| `speckit-implement` | Blocked | Tasks/analyze have not occurred; no product code or runtime state changed |
-| `speckit-converge` | Blocked | No task list or implementation pass exists to assess |
+| `speckit-tasks` | Complete | Dependency-ordered `tasks.md` exists; 83 total tasks after append-only convergence |
+| `speckit-analyze` | Complete | Post-task cross-artifact analysis passed; a final read-only rerun is part of closeout evidence after T083 |
+| `speckit-implement` | Complete to external gates | 77/83 tasks complete; the six open US4 tasks are the human license/approval and gated real/manual evidence tasks |
+| `speckit-converge` | Complete | Prerequisite passed; append-only passes produced T082/T083 and both findings were implemented |
 
 ## Constitution Check
 
@@ -173,6 +184,11 @@ Complete in [research.md](./research.md):
 All planning unknowns are resolved. Real native measurements and
 artifact-level review are explicit implementation promotion gates, not missing
 planning decisions.
+
+The implementation convergence review later clarified decision 9 without
+changing the one-shot architecture: warm measurements reuse only the
+operating-system page cache after five warmups. They never reuse a live
+provider/model process.
 
 ## Phase 1: Design and Contracts
 

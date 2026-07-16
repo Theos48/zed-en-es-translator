@@ -65,7 +65,7 @@ fn inference_lease_remains_available_while_an_update_is_promoted() {
     let inference = SharedInferenceLease::try_acquire(&root).expect("active inference");
 
     lifecycle
-        .prepare(&updated, UPDATED_DIGEST, runner, &sources)
+        .update(&updated, UPDATED_DIGEST, runner, &sources)
         .expect("update while immutable current is leased");
 
     assert!(inference.try_exclusive_peer().is_err());

@@ -1,6 +1,5 @@
 use std::fs::{self, File};
 use std::io::Read;
-use std::os::unix::fs::{MetadataExt, PermissionsExt};
 use std::path::{Path, PathBuf};
 
 use serde::Deserialize;
@@ -10,7 +9,7 @@ use translator_core::{EmbeddedProcessRunner, Language, ProviderRequest, Tone};
 use crate::error::ManagerError;
 use crate::locking::SharedStateLock;
 use crate::state::InstallationState;
-use crate::storage::StorageRoot;
+use crate::storage::{validate_private_directory, validate_private_file, StorageRoot};
 
 /// Safe bounded readiness metadata.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -144,8 +143,9 @@ fn offline_smoke(root: &Path, set: &InstalledSet) -> Result<(), ManagerError> {
 }
 
 fn read_state(root: &Path) -> Result<InstallationState, ManagerError> {
-    let input =
-        fs::read_to_string(root.join("state.json")).map_err(|_| ManagerError::StateInvalid)?;
+    let path = root.join("state.json");
+    validate_private_file(&path)?;
+    let input = fs::read_to_string(path).map_err(|_| ManagerError::StateInvalid)?;
     InstallationState::from_json(&input)
 }
 
@@ -185,8 +185,9 @@ struct InstalledObject {
 }
 
 fn read_json<T: for<'de> Deserialize<'de>>(path: &Path, limit: u64) -> Result<T, ManagerError> {
-    let metadata = fs::symlink_metadata(path).map_err(|_| ManagerError::StateInvalid)?;
-    if metadata.file_type().is_symlink() || !metadata.is_file() || metadata.len() > limit {
+    validate_private_directory(path.parent().ok_or(ManagerError::StateInvalid)?)?;
+    let metadata = validate_private_file(path)?;
+    if metadata.len() > limit {
         return Err(ManagerError::StateInvalid);
     }
     let input = fs::read(path).map_err(|_| ManagerError::StateInvalid)?;
@@ -198,17 +199,10 @@ fn verify_object(root: &Path, object: &InstalledObject) -> Result<(), ManagerErr
         return Err(ManagerError::StateInvalid);
     }
     let path = object_path(root, object);
-    let metadata = fs::symlink_metadata(&path).map_err(|_| ManagerError::IntegrityFailed)?;
-    // SAFETY: `geteuid` has no arguments and no safety preconditions.
-    let effective_uid = unsafe { libc::geteuid() };
-    if metadata.file_type().is_symlink()
-        || !metadata.is_file()
-        || metadata.uid() != effective_uid
-        || metadata.nlink() != 1
-        || metadata.permissions().mode() & 0o077 != 0
-        || metadata.len() != object.installed_size
-        || sha256_file(&path)? != object.object_digest
-    {
+    validate_private_directory(&root.join("objects"))?;
+    validate_private_directory(&root.join("objects").join(&object.object_digest))?;
+    let metadata = validate_private_file(&path)?;
+    if metadata.len() != object.installed_size || sha256_file(&path)? != object.object_digest {
         return Err(ManagerError::IntegrityFailed);
     }
     Ok(())

@@ -4,8 +4,10 @@ use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 
-use translator_provider_manager::lifecycle::{ControlledArtifact, Lifecycle};
+use translator_provider_manager::error::ManagerError;
+use translator_provider_manager::lifecycle::{ControlledArtifact, Lifecycle, LifecycleCheckpoint};
 use translator_provider_manager::manifest::ProviderManifest;
+use translator_provider_manager::state::InstallationState;
 
 #[test]
 fn mismatched_consent_has_zero_mutation_and_exact_consent_promotes_atomically() {
@@ -44,6 +46,57 @@ fn mismatched_consent_has_zero_mutation_and_exact_consent_promotes_atomically() 
             & 0o777,
         0o700
     );
+}
+
+#[test]
+fn interrupted_prepare_boundaries_never_create_a_current_reference() {
+    for checkpoint in [
+        LifecycleCheckpoint::StagingCreated,
+        LifecycleCheckpoint::ObjectsStaged,
+        LifecycleCheckpoint::ObjectsFinalized,
+        LifecycleCheckpoint::SetFinalized,
+        LifecycleCheckpoint::CandidatePersisted,
+    ] {
+        let root = test_root(&format!("interrupted-{checkpoint:?}"));
+        let _ = fs::remove_dir_all(&root);
+        let runner = common::RUNNER;
+        let artifacts = common::fixture_artifacts();
+        let manifest = ProviderManifest::from_json(&common::approved_manifest(runner, &artifacts))
+            .expect("approved manifest");
+        let controlled = artifacts
+            .iter()
+            .map(|artifact| ControlledArtifact {
+                role: artifact.role.to_string(),
+                compressed: artifact.compressed.clone(),
+            })
+            .collect::<Vec<_>>();
+        let lifecycle = Lifecycle::new(root.clone());
+
+        let error = lifecycle
+            .prepare_with_checkpoint(
+                &manifest,
+                common::MANIFEST_DIGEST,
+                runner,
+                &controlled,
+                |observed, _| {
+                    if observed == checkpoint {
+                        Err(ManagerError::StorageFailed)
+                    } else {
+                        Ok(())
+                    }
+                },
+            )
+            .expect_err("injected interruption must fail");
+
+        assert_eq!(error.code(), "STORAGE_FAILED");
+        if root.join("state.json").exists() {
+            assert_eq!(state(&root).references().0, None);
+        }
+        lifecycle
+            .prepare(&manifest, common::MANIFEST_DIGEST, runner, &controlled)
+            .expect("retry should reject any stale candidate and promote");
+        assert_eq!(state(&root).references().0, Some(common::MANIFEST_DIGEST));
+    }
 }
 
 #[test]
@@ -137,4 +190,9 @@ fn test_root(case: &str) -> PathBuf {
         .expect("current directory")
         .join("target/embedded-lifecycle-tests")
         .join(format!("{}-{case}", std::process::id()))
+}
+
+fn state(root: &std::path::Path) -> InstallationState {
+    InstallationState::from_json(&fs::read_to_string(root.join("state.json")).expect("state file"))
+        .expect("valid state")
 }

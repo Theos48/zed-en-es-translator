@@ -41,7 +41,8 @@ fn run() -> Result<(), ManagerError> {
     match command {
         Command::Disclose => disclose(),
         Command::Status => status(),
-        Command::Prepare { consent } | Command::Update { consent } => prepare(&consent),
+        Command::Prepare { consent } => prepare_or_update(&consent, false),
+        Command::Update { consent } => prepare_or_update(&consent, true),
         Command::Verify => verify_state(),
         Command::Rollback => {
             let root = StorageRoot::fixed_path()?;
@@ -88,7 +89,7 @@ fn status() -> Result<(), ManagerError> {
     Ok(())
 }
 
-fn prepare(consent: &str) -> Result<(), ManagerError> {
+fn prepare_or_update(consent: &str, update: bool) -> Result<(), ManagerError> {
     let input = fs::read_to_string(MANIFEST_PATH).map_err(|_| ManagerError::ManifestInvalid)?;
     let manifest = ProviderManifest::from_json(&input).map_err(|error| {
         let raw: Option<Value> = serde_json::from_str(&input).ok();
@@ -103,6 +104,11 @@ fn prepare(consent: &str) -> Result<(), ManagerError> {
     })?;
     if consent != manifest.artifact_set_digest() {
         return Err(ManagerError::ConsentRequired);
+    }
+    let root = StorageRoot::fixed_path()?;
+    let lifecycle = Lifecycle::new(root);
+    if update {
+        lifecycle.validate_update_preconditions(manifest.artifact_set_digest())?;
     }
     let runner = read_runner(
         Path::new("target/embedded-native-release/translator-embedded-runtime"),
@@ -125,8 +131,11 @@ fn prepare(consent: &str) -> Result<(), ManagerError> {
             })
         })
         .collect::<Result<Vec<_>, ManagerError>>()?;
-    let root = StorageRoot::fixed_path()?;
-    Lifecycle::new(root).prepare_with_offline_smoke(&manifest, consent, &runner, &sources)?;
+    if update {
+        lifecycle.update_with_offline_smoke(&manifest, consent, &runner, &sources)?;
+    } else {
+        lifecycle.prepare_with_offline_smoke(&manifest, consent, &runner, &sources)?;
+    }
     println!("provider_status=ready");
     Ok(())
 }

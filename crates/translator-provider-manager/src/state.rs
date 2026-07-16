@@ -110,7 +110,7 @@ impl InstallationState {
             || !self.previous.as_deref().is_none_or(is_sha256)
             || !self.candidate.as_deref().is_none_or(is_sha256)
             || self.current == self.candidate
-            || self.current == self.previous
+            || (self.current.is_some() && self.current == self.previous)
         {
             return Err(ManagerError::StateInvalid);
         }

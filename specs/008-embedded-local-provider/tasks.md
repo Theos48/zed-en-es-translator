@@ -117,7 +117,7 @@ compatibility, license and offline-smoke gates pass.
 - [x] T039 [P] [US2] Write failing disclosure tests for purpose, source, license role, sizes, scope, network, publication block and exact consent digest in `crates/translator-provider-manager/tests/disclosure.rs`
 - [x] T040 [P] [US2] Write failing acquisition-policy tests for exact HTTPS, status 200, no redirects/proxy/retry, byte caps and cancellation in `crates/translator-provider-manager/tests/acquisition_policy.rs`
 - [x] T041 [P] [US2] Write failing integrity tests for compressed/installed hash, size, language, platform, compatibility and approval failures in `crates/translator-provider-manager/tests/artifact_integrity.rs`
-- [ ] T042 [P] [US2] Write failing integration tests for rejection, interrupted stages, idempotent reuse and atomic first promotion in `tests/integration/embedded_provider_prepare.sh`
+- [x] T042 [P] [US2] Write failing integration tests for rejection, interrupted stages, idempotent reuse and atomic first promotion in `tests/integration/embedded_provider_prepare.sh`
 
 ### Implementation for User Story 2
 
@@ -127,16 +127,19 @@ compatibility, license and offline-smoke gates pass.
 - [x] T046 [US2] Implement consent validation, staging, offline smoke gate, fsync and atomic first promotion in `crates/translator-provider-manager/src/lifecycle.rs`
 - [x] T047 [US2] Add thin no-privilege disclose/prepare orchestration in `scripts/providers/embedded.sh`
 - [x] T048 [US2] Wire `provider-embedded-disclose` and consented `provider-embedded-prepare` targets in `Makefile`
-- [ ] T049 [US2] Pass the complete US2 controlled acquisition matrix and record zero-mutation rejection evidence in `specs/008-embedded-local-provider/tasks.md`
+- [x] T049 [US2] Pass the complete US2 controlled acquisition matrix and record zero-mutation rejection evidence in `specs/008-embedded-local-provider/tasks.md`
 
 **Checkpoint**: First preparation is explicit, verified and atomic; normal
 translation remains separate from downloader code.
 
-US2 controlled checkpoint (2026-07-15): approved fixture manifests exercise
-exact consent, dual identities, real process smoke, idempotent reuse and atomic
-promotion. The committed production manifest rejects before network/root
-mutation. T042/T049 remain open because crash injection at every staging
-boundary has not been encoded in the shell matrix.
+US2 controlled checkpoint (2026-07-15):
+`./tests/integration/embedded_provider_prepare.sh` passed through the project
+Make/Docker path. Approved fixture manifests exercise exact consent, dual
+identities, real process smoke, idempotent reuse and atomic promotion. Injected
+failures at staging creation, staged objects, finalized objects, finalized set
+and persisted candidate never create a current reference; a retry rejects any
+stale candidate and promotes cleanly. The blocked production manifest and
+mismatched consent both reject before network/root mutation.
 
 ---
 
@@ -156,25 +159,30 @@ token.
 - [x] T051 [P] [US3] Write failing safe status/verify tests for bounded metadata, offline hashing/smoke and redaction in `crates/translator-provider-manager/tests/status_verify.rs`
 - [x] T052 [P] [US3] Write failing update/rollback tests for invalid candidate, post-promotion failure, missing previous and offline recovery in `crates/translator-provider-manager/tests/update_rollback.rs`
 - [x] T053 [P] [US3] Write failing cleanup tests for exact token, unknown entries, unsafe links, active lease and generic-clean preservation in `crates/translator-provider-manager/tests/cleanup.rs`
-- [ ] T054 [P] [US3] Write failing end-to-end lifecycle shell tests for status, verify, update, rollback and clean in `tests/integration/embedded_provider_lifecycle.sh`
+- [x] T054 [P] [US3] Write failing end-to-end lifecycle shell tests for status, verify, update, rollback and clean in `tests/integration/embedded_provider_lifecycle.sh`
 
 ### Implementation for User Story 3
 
 - [x] T055 [US3] Implement exclusive lifecycle locks, short state locks and shared inference leases within the provider deadline in `crates/translator-provider-manager/src/locking.rs` and `crates/translator-core/src/embedded_provider.rs`
 - [x] T056 [US3] Implement bounded status and offline verify with no acquisition fallback in `crates/translator-provider-manager/src/status.rs`
-- [ ] T057 [US3] Implement separately staged update, post-promotion verification and current/previous preservation in `crates/translator-provider-manager/src/lifecycle.rs`
+- [x] T057 [US3] Implement separately staged update, post-promotion verification and current/previous preservation in `crates/translator-provider-manager/src/lifecycle.rs`
 - [x] T058 [US3] Implement offline previous revalidation and atomic rollback without destructive failure recovery in `crates/translator-provider-manager/src/lifecycle.rs`
 - [x] T059 [US3] Implement manifest-enumerated cleanup with exact token, exclusive lease, unknown-entry refusal and root preservation in `crates/translator-provider-manager/src/cleanup.rs`
 - [x] T060 [US3] Wire status, verify, update, rollback and clean subcommands/Make targets in `crates/translator-provider-manager/src/main.rs`, `scripts/providers/embedded.sh`, and `Makefile`
-- [ ] T061 [US3] Pass the complete US3 controlled lifecycle matrix and record the independent checkpoint in `specs/008-embedded-local-provider/tasks.md`
+- [x] T061 [US3] Pass the complete US3 controlled lifecycle matrix and record the independent checkpoint in `specs/008-embedded-local-provider/tasks.md`
 
 **Checkpoint**: All lifecycle commands are reversible, offline where required
 and independently tested with controlled artifacts.
 
-US3 controlled checkpoint (2026-07-15): Rust tests pass state/lifecycle locks,
-inference during update, busy/unsafe cleanup, offline verify/smoke, invalid
-candidate, post-promotion restoration and rollback. T054/T057/T061 remain open
-pending the complete shell-level staged-update matrix.
+US3 controlled checkpoint (2026-07-15):
+`./tests/integration/embedded_provider_lifecycle.sh` passed through the project
+Make/Docker path. The CLI routes prepare and update separately; update preflight
+rejects an absent/current-equal set before acquisition. The controlled matrix
+passes private physical staging, durable candidate recovery, current/previous
+preservation, post-promotion restoration, offline verify/rollback, concurrent
+inference, busy/unsafe cleanup and exact owned-root removal. Interruptions
+before candidate persistence preserve byte-identical current state; an
+interrupted durable candidate is rejected before a successful retry.
 
 ---
 
@@ -194,7 +202,7 @@ result solely from recorded gates.
 - [x] T062 [P] [US4] Write failing source-lock tests for exact commit/submodules, offline build, portable CPU flags, ELF allowlist and reproducible runner hash in `tests/integration/embedded_native_supply_chain.sh`
 - [x] T063 [P] [US4] Write failing evidence-schema/redaction tests for allowed metrics and prohibited content/host identity in `tests/integration/embedded_evidence_contract.sh`
 - [x] T064 [P] [US4] Create the versioned 20-case public synthetic corpus and structural quality expectations in `tests/fixtures/embedded/synthetic-corpus.json`
-- [ ] T065 [P] [US4] Write the release benchmark harness with fixed warmups/repetitions/rounds and hard budgets in `tests/integration/embedded_benchmark.sh`
+- [x] T065 [P] [US4] Write the release benchmark harness with fixed warmups/repetitions/rounds and hard budgets in `tests/integration/embedded_benchmark.sh`
 
 ### Implementation and Evidence for User Story 4
 
@@ -210,6 +218,17 @@ result solely from recorded gates.
 
 **Checkpoint**: The provider has an honest evidence-derived promotion/no-go
 state; F009 remains a separate publication decision.
+
+US4 blocked checkpoint (2026-07-15): the three official Mozilla Remote
+Settings records were re-read by exact ID. All locked names, roles, `en-es`
+language, `base-memory` architecture, version, attachment locations, compressed
+and decompressed hashes/sizes match. The record schema exposes neither a
+`license` nor an `spdx` field. The reproducible runner's native link/license
+inventory and exact unresolved items are recorded in
+`ops/providers/embedded/licenses/README.md`. T066/T068 remain open because
+artifact-level conclusions, the complete actual-binary SBOM/notice package and
+both human approval records are absent; T070-T073 therefore remain correctly
+blocked and were not simulated.
 
 ---
 
@@ -308,10 +327,23 @@ configuration/dispatch changes T031-T036 remain ordered by their shared types.
 **Purpose**: Record work discovered by the post-implementation audit without
 rewriting the original execution history.
 
-- [ ] T082 Resolve and encode the `warm_provider` benchmark execution class in
+- [x] T082 Resolve and encode the `warm_provider` benchmark execution class in
   `specs/008-embedded-local-provider/plan.md`,
   `specs/008-embedded-local-provider/data-model.md`, and
   `specs/008-embedded-local-provider/contracts/validation-evidence.md`: either
   define it as repeated one-shot processes with a warm operating-system page
   cache, or approve a persistent-process architecture change before collecting
   promotion evidence.
+
+T082 decision (2026-07-15): `warm_provider` preserves the verified one-shot
+boundary and means only repeated launches after five warmups with a warm
+operating-system page cache. T065 records one pre-warmup `new_process` probe,
+300 warm-provider matrix samples, and fails closed on every applicable hard
+budget. Real-model measurements remain exclusively T071 evidence.
+
+## Phase 9: Convergence
+
+- [x] T083 Update the Spec Kit execution/gate record in
+  `specs/008-embedded-local-provider/plan.md` to reflect the completed
+  tasks/analyze/implement/converge passes and their exact remaining blockers
+  in the `Spec Kit Gate Status` table

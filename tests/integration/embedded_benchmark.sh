@@ -8,9 +8,23 @@ corpus="$root/tests/fixtures/embedded/synthetic-corpus.json"
 warmups=5
 rounds=3
 repetitions=5
+max_transfer_bytes=$((64 * 1024 * 1024))
+max_active_installed_bytes=$((128 * 1024 * 1024))
+max_lifecycle_bytes=$((384 * 1024 * 1024))
+max_peak_rss_bytes=$((1024 * 1024 * 1024))
+max_inference_threads=4
+max_cold_readiness_ms=10000
+max_warm_short_p95_ms=2000
+max_warm_mixed_p95_ms=5000
+max_provider_request_ms=14999
 
 blocked() {
   printf 'provider_status=BLOCKED_LICENSE_APPROVAL\n' >&2
+  exit 1
+}
+
+resource_blocked() {
+  printf 'provider_status=BLOCKED_RESOURCE_BUDGET\n' >&2
   exit 1
 }
 
@@ -161,18 +175,73 @@ run_case() {
   fi
 }
 
+percentile_95() {
+  local values rank
+  mapfile -t values
+  ((${#values[@]} > 0)) || {
+    printf 'provider_status=EVIDENCE_INCOMPLETE\n' >&2
+    exit 1
+  }
+  rank=$((((${#values[@]} * 95) + 99) / 100))
+  printf '%s\n' "${values[@]}" | sort -n | sed -n "${rank}p"
+}
+
+enforce_budgets() {
+  local transfer_bytes active_installed_bytes lifecycle_bytes peak_rss_bytes
+  local thread_peak cold_readiness_ms warm_short_p95_ms warm_mixed_p95_ms
+  local request_peak_ms
+
+  transfer_bytes=$(jq '[.artifacts[].compressed_size] | add' "$manifest")
+  active_installed_bytes=$(jq '
+    .runner.installed_size + ([.artifacts[].installed_size] | add)
+  ' "$set_record")
+  lifecycle_bytes=$(du -sb --apparent-size "$provider_root" | awk '{print $1}')
+  peak_rss_bytes=$(jq -s 'map(.peak_rss_bytes) | max' "$evidence")
+  thread_peak=$(jq -s 'map(.thread_peak) | max' "$evidence")
+  cold_readiness_ms=$(jq -s '
+    map(select(.execution_class == "new_process") | .elapsed_ms) | max
+  ' "$evidence")
+  warm_short_p95_ms=$(jq -r --slurpfile corpus "$corpus" '
+    ($corpus[0].cases
+      | map(select(.class == "short_technical") | .case_id)) as $short_ids |
+    select(.execution_class == "warm_provider") |
+    select(.case_id as $case_id | $short_ids | index($case_id)) |
+    .elapsed_ms
+  ' "$evidence" | percentile_95)
+  warm_mixed_p95_ms=$(jq -r '
+    select(.execution_class == "warm_provider") | .elapsed_ms
+  ' "$evidence" | percentile_95)
+  request_peak_ms=$(jq -s 'map(.elapsed_ms) | max' "$evidence")
+
+  (( transfer_bytes <= max_transfer_bytes )) || resource_blocked
+  (( active_installed_bytes <= max_active_installed_bytes )) || resource_blocked
+  (( lifecycle_bytes <= max_lifecycle_bytes )) || resource_blocked
+  (( peak_rss_bytes <= max_peak_rss_bytes )) || resource_blocked
+  (( thread_peak <= max_inference_threads )) || resource_blocked
+  (( cold_readiness_ms <= max_cold_readiness_ms )) || resource_blocked
+  (( warm_short_p95_ms <= max_warm_short_p95_ms )) || resource_blocked
+  (( warm_mixed_p95_ms <= max_warm_mixed_p95_ms )) || resource_blocked
+  (( request_peak_ms <= max_provider_request_ms )) || resource_blocked
+  jq -e -s 'all(.[]; .network_attempts == 0)' "$evidence" >/dev/null \
+    || resource_blocked
+}
+
 mapfile -t case_ids < <(jq -r '.cases[].case_id' "$corpus")
+run_case "${case_ids[0]}" 0 1 new_process 1
 for ((warmup = 1; warmup <= warmups; warmup++)); do
-  run_case "${case_ids[0]}" 0 "$warmup" new_process 0
+  run_case "${case_ids[0]}" 0 "$warmup" warm_provider 0
 done
 
 for ((round = 1; round <= rounds; round++)); do
   for case_id in "${case_ids[@]}"; do
     for ((repetition = 1; repetition <= repetitions; repetition++)); do
-      run_case "$case_id" "$round" "$repetition" new_process 1
+      run_case "$case_id" "$round" "$repetition" warm_provider 1
     done
   done
 done
 
-[[ "$(wc -l <"$evidence")" -eq 300 ]]
+[[ "$(wc -l <"$evidence")" -eq 301 ]]
+[[ "$(jq -s 'map(select(.execution_class == "new_process")) | length' "$evidence")" -eq 1 ]]
+[[ "$(jq -s 'map(select(.execution_class == "warm_provider")) | length' "$evidence")" -eq 300 ]]
+enforce_budgets
 printf 'provider_status=benchmark_complete\n'

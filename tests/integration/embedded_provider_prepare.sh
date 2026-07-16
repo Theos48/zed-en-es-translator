@@ -11,3 +11,7 @@ if XDG_DATA_HOME="$data_home" make -C "$root" provider-embedded-prepare CONSENT=
 fi
 
 test ! -e "$data_home/zed-en-es-translator/embedded"
+
+make -s -C "$root" test-embedded-provider-prepare-contract >/dev/null
+
+printf 'provider_status=prepare_contract_verified zero_mutation=true interruption_recovery=true\n'

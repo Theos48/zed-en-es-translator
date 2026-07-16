@@ -69,6 +69,31 @@ impl fmt::Debug for StorageRoot {
     }
 }
 
+pub(crate) fn validate_private_directory(path: &Path) -> Result<fs::Metadata, ManagerError> {
+    let metadata = fs::symlink_metadata(path).map_err(|_| ManagerError::StorageFailed)?;
+    if metadata.file_type().is_symlink()
+        || !metadata.is_dir()
+        || metadata.uid() != current_uid()
+        || metadata.permissions().mode() & 0o077 != 0
+    {
+        return Err(ManagerError::StorageUnsafe);
+    }
+    Ok(metadata)
+}
+
+pub(crate) fn validate_private_file(path: &Path) -> Result<fs::Metadata, ManagerError> {
+    let metadata = fs::symlink_metadata(path).map_err(|_| ManagerError::StorageFailed)?;
+    if metadata.file_type().is_symlink()
+        || !metadata.is_file()
+        || metadata.uid() != current_uid()
+        || metadata.nlink() != 1
+        || metadata.permissions().mode() & 0o077 != 0
+    {
+        return Err(ManagerError::StorageUnsafe);
+    }
+    Ok(metadata)
+}
+
 fn current_uid() -> u32 {
     // SAFETY: `geteuid` has no arguments and no safety preconditions.
     unsafe { libc::geteuid() }

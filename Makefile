@@ -68,7 +68,7 @@ HELP_LINES := \
 	'  make shell         Open a shell inside the Rust container' \
 	'  make clean         Remove local Rust build/cache output'
 
-.PHONY: all help install pull-rust-base rust-image workspace-storage-check worktree-audit test-worktree-storage rust-version test test-core test-mcp test-operational-providers test-real-provider-config translator-cli-release provider-local-prepare provider-local-start provider-local-status provider-local-verify provider-local-stop provider-local-update provider-local-rollback provider-local-clean provider-embedded-manager-release provider-embedded-disclose provider-embedded-prepare provider-embedded-status provider-embedded-verify provider-embedded-update provider-embedded-rollback provider-embedded-clean embedded-source-fetch embedded-runner-build embedded-runner-contract-build test-embedded-native-supply-chain test-embedded-provider-us1 test-embedded-provider zed-direct-lock zed-direct-server-release zed-direct-prepare test-direct-zed-translation zed-extension-build zed-extension-server-release zed-extension-prepare test-zed-extension test-zed-ux-flow format fmt clippy deny shell clean
+.PHONY: all help install pull-rust-base rust-image workspace-storage-check worktree-audit test-worktree-storage rust-version test test-core test-mcp test-operational-providers test-real-provider-config translator-cli-release provider-local-prepare provider-local-start provider-local-status provider-local-verify provider-local-stop provider-local-update provider-local-rollback provider-local-clean provider-embedded-manager-release provider-embedded-disclose provider-embedded-prepare provider-embedded-status provider-embedded-verify provider-embedded-update provider-embedded-rollback provider-embedded-clean embedded-source-fetch embedded-runner-build embedded-runner-contract-build test-embedded-native-supply-chain test-embedded-provider-us1 test-embedded-provider-prepare-contract test-embedded-provider-lifecycle-contract test-embedded-provider zed-direct-lock zed-direct-server-release zed-direct-prepare test-direct-zed-translation zed-extension-build zed-extension-server-release zed-extension-prepare test-zed-extension test-zed-ux-flow format fmt clippy deny shell clean
 
 all: test
 
@@ -195,6 +195,12 @@ test-embedded-provider-us1: embedded-runner-contract-build
 	$(RUST_RUN) cargo test -p translator-lsp --test embedded_provider_locality --locked
 	$(RUST_RUN) cargo test --manifest-path zed-extension/Cargo.toml --test embedded_provider_settings --locked
 	EMBEDDED_RUNNER=target/embedded-native-test/translator-embedded-runtime native/translator-embedded-runtime/tests/runner_contract.sh
+
+test-embedded-provider-prepare-contract: rust-image
+	$(RUST_RUN) cargo test -p translator-provider-manager --test acquisition_policy --test artifact_integrity --test prepare_lifecycle --locked
+
+test-embedded-provider-lifecycle-contract: rust-image
+	$(RUST_RUN) cargo test -p translator-provider-manager --test cleanup --test concurrency --test status_verify --test update_rollback --locked
 
 test-embedded-provider: test-embedded-provider-us1 test-embedded-native-supply-chain
 	$(RUST_RUN) cargo test -p translator-provider-manager --tests --locked

@@ -5,6 +5,9 @@ root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 corpus="$root/tests/fixtures/embedded/synthetic-corpus.json"
 benchmark="$root/tests/integration/embedded_benchmark.sh"
 manual="$root/specs/008-embedded-local-provider/manual-validation.md"
+plan="$root/specs/008-embedded-local-provider/plan.md"
+data_model="$root/specs/008-embedded-local-provider/data-model.md"
+evidence_contract="$root/specs/008-embedded-local-provider/contracts/validation-evidence.md"
 data_home="$root/target/embedded-evidence-contract-$$"
 trap 'rm -rf "$data_home"' EXIT
 
@@ -61,6 +64,15 @@ done < <(jq -r '
 rg -q '^warmups=5$' "$benchmark" || fail 'warmup count is not fixed'
 rg -q '^rounds=3$' "$benchmark" || fail 'round count is not fixed'
 rg -q '^repetitions=5$' "$benchmark" || fail 'repetition count is not fixed'
+rg -q '^enforce_budgets\(\)' "$benchmark" || fail 'hard-budget enforcement is missing'
+rg -q 'run_case .* new_process 1' "$benchmark" || fail 'new-process measurement is missing'
+rg -q 'run_case .* warm_provider 1' "$benchmark" || fail 'warm-provider measurements are missing'
+for document in "$plan" "$data_model" "$evidence_contract"; do
+  rg -U -q 'warm\s+operating-system page cache' "$document" \
+    || fail "warm-provider page-cache definition missing from $document"
+  rg -U -q 'does not mean a persistent\s+provider' "$document" \
+    || fail "warm-provider persistence exclusion missing from $document"
+done
 rg -q "BLOCKED_LICENSE_APPROVAL" "$manual" || fail 'manual no-go outcome missing'
 
 set +e
