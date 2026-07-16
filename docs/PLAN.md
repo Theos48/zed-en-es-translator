@@ -99,8 +99,10 @@ package lock. El check contra el tag, la URL y el asset públicos también pasa.
 
 ### 4. Publicación en Gallery
 
-- enviar el cambio al registro oficial de extensiones de Zed;
-- esperar sus checks y merge;
+- cambio enviado como
+  [zed-industries/extensions#6843](https://github.com/zed-industries/extensions/pull/6843);
+- checks técnicos `package` y Danger completados;
+- firmar el CLA de Zed y esperar revisión/merge;
 - realizar 3/3 instalaciones limpias desde la Gallery;
 - completar en la primera instalación la aceptación interactiva con el asset
   exacto;

@@ -22,7 +22,8 @@ demostrado y revisión constitucional.
 ### F009 + F012: paquete automático y publicación
 
 **Estado**: implementado en `specs/009-zed-marketplace-install/`; release de
-proyecto `v0.1.0` publicada y verificada, publicación en Gallery pendiente.
+proyecto `v0.1.0` publicada y verificada; PR upstream #6843 enviado con checks
+técnicos aprobados, pendiente de CLA, revisión y publicación en Gallery.
 
 Entrega:
 
@@ -35,8 +36,8 @@ Entrega:
 
 Pendiente:
 
-1. enviar al registro oficial;
-2. después del merge upstream, validar interactivamente el paquete público
+1. firmar el CLA y obtener el merge del PR upstream;
+2. después del merge, validar interactivamente el paquete público
    exacto y completar 3/3 instalaciones limpias.
 
 ### Ciclo 010: convergencia del repositorio
