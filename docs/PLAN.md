@@ -129,10 +129,17 @@ Direccion actual:
 - Azure AI Translator Text v3 permanece como adaptador avanzado opcional bajo
   target fijo, consentimiento por solicitud y pruebas controladas; no requiere
   evidencia real ni bloquea F011;
-- el modelo Argos `en-es` se aprovisionara localmente, pero no se redistribuira
-  mientras upstream no declare su licencia;
-- F009/publicacion queda pospuesta mientras se decide la secuencia con F012 y
-  se resuelve el gate independiente de licencia/redistribucion.
+- F012 esta activa en `specs/008-embedded-local-provider/` con Bergamot/Mozilla
+  como candidato unico provisional, runner nativo one-shot y recursos exactos
+  adquiridos con consentimiento a un store XDG user-scoped;
+- F012 tiene prototipo y lifecycle controlado implementados, incluido build
+  nativo reproducible y portable; permanece `BLOCKED_LICENSE_APPROVAL` sin
+  adquisicion/activacion real porque falta la revision humana de licencia y
+  alcance del conjunto exacto;
+- recursos, latencia, red cero y evidencia real CLI/Zed siguen siendo gates
+  obligatorios posteriores a esa aprobacion y no se infieren del build;
+- F009/publicacion queda pospuesta hasta cerrar F012 y revisar por separado la
+  licencia/redistribucion del conjunto exacto que se proponga entregar.
 
 ## Flujo por feature
 
@@ -292,10 +299,41 @@ specs/007-operational-providers/
 - no redistribuir el modelo Argos `en-es` mientras su licencia siga sin
   declarar en upstream; este gate debe resolverse antes de publicar un bundle.
 
-### 8. Empaquetado y publicacion
+### 8. Proveedor local embebido sin Docker
 
-Solo despues de tener la base segura, el flujo directo de extension y F011
-validada:
+Activa como octava feature formal en fase de prototipo bloqueado:
+
+```text
+specs/008-embedded-local-provider/
+```
+
+- prototipar Mozilla Translations/Bergamot con el set oficial Firefox
+  Translations `en -> es`, todo fijado por fuente, version, tamano y hash;
+- construir un runner nativo minimo en el entorno reproducible del proyecto y
+  ejecutarlo como hijo one-shot acotado, terminable y sin red;
+- mantener `MockProvider` como default y agregar `embedded_local` sin rutas,
+  URLs, argumentos o entorno arbitrario en la configuracion Zed;
+- preparar recursos solo tras disclosure y consentimiento ligado al digest del
+  manifiesto, en storage XDG user-scoped content-addressed;
+- hacer candidate/current/previous atomicos, verify/rollback offline y cleanup
+  exacto separado de `make clean`;
+- medir build, CPU portable, hashes/licencias/procedencia, disco, RAM, CPU,
+  latencia y cero conexiones sobre 20 casos publicos;
+- validar traduccion no-mock y no-mutacion desde CLI y Zed directo con red
+  deshabilitada;
+- no promover el provider si falla un gate y no afirmar bundle, redistribucion
+  o publicacion dentro de F012.
+
+Estado actual: `BLOCKED_LICENSE_APPROVAL`. La fuente y el runner nativo se
+reproducen offline con CPU/ELF verificados, pero el manifiesto conserva
+`review_status=blocked` y no habilita consentimiento ni adquisicion hasta una
+revision humana del conjunto exacto. Las pruebas reales de modelo, benchmark,
+CLI y Zed no se marcan como ejecutadas.
+
+### 9. Empaquetado y publicacion
+
+Solo despues de tener la base segura, el flujo directo de extension, F011
+validada y una conclusion F012 con evidencia:
 
 - mantener remoto default deny;
 - confirmar cada envio fuera del equipo;

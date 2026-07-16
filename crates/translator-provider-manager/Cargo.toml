@@ -1,0 +1,27 @@
+[package]
+name = "translator-provider-manager"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "translator-provider-manager"
+path = "src/main.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+fs4 = "1.1"
+libc = "0.2.186"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.11"
+thiserror = "2.0"
+translator-core = { path = "../translator-core" }
+ureq = "3.3"
+zstd = "0.13"

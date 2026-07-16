@@ -31,13 +31,14 @@ Estado actual:
   Zed.
 - Completado formal: F011 mediante `specs/007-operational-providers/`, incluido
   el camino local real, ciclo de vida, limpieza y evidencia redaccionada.
-- Siguiente gate: preparar F012 para el modelo local embebido/no-Docker antes
-  de decidir el alcance de publicacion.
+- Prototipo implementado: F012 mediante
+  `specs/008-embedded-local-provider/`; Bergamot/Mozilla es el candidato unico
+  provisional y todavia debe superar los gates reales de promocion.
 
-Prioridad actual: preparar F012 sobre la base local/offline real y sin cuenta
-cerrada por F011. El remoto permanece opcional y controlado; la siguiente
-mejora de UX de proveedor debe estudiar un modelo local embebido/no-Docker con
-licencia, tamano, actualizacion y empaquetado revisados.
+Prioridad actual: resolver la aprobacion humana del conjunto exacto y completar
+la evidencia real de F012 sobre el prototipo TDD local/offline. El remoto
+permanece opcional y controlado; F009/publicacion espera la conclusion tecnica
+y legal del conjunto embebido exacto.
 
 Regla de direccion desde F006: las features que toquen Zed deben ser
 extension-first. El Agent Panel puede usarse para validar integracion o cubrir
@@ -283,7 +284,14 @@ Objetivo: ofrecer la experiencia normal de traduccion sin cuenta, API key,
 servicio remoto ni ciclo Docker visible para el usuario, manteniendo ejecucion
 local, privacidad y actualizaciones verificables.
 
-Estado: futuro; requiere un ciclo Spec Kit propio despues de cerrar F011.
+Estado: prototipo implementado mediante
+`specs/008-embedded-local-provider/`. El plan selecciona provisionalmente
+Mozilla Translations/Bergamot con recursos oficiales Firefox `en -> es`, un
+runner nativo one-shot aislado y adquisicion consentida a storage XDG
+user-scoped. El build reproducible, la CPU/ELF, el lifecycle y las pruebas
+controladas pasan, pero el provider no esta promovido ni es publicable: faltan
+la aprobacion humana de licencia y la evidencia real de recursos, latencia,
+cero red, modelo, CLI y Zed.
 
 Criterios iniciales para `speckit-specify`:
 

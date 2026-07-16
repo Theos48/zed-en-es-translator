@@ -12,6 +12,8 @@ temp/
 .env
 .env.*
 provider-cache/
+native/translator-embedded-runtime/build/
+embedded-artifacts/
 *.wasm
 Dockerfile*
 .dockerignore

@@ -1,9 +1,10 @@
 RUST_VERSION ?= 1.96.1
-RUST_IMAGE ?= rust:$(RUST_VERSION)-bookworm
+RUST_IMAGE ?= rust:$(RUST_VERSION)-bookworm@sha256:a339861ae23e9abb272cea45dfafde21760d2ce6577a70f8a926153677902663
 RUST_DEV_IMAGE ?= zed-en-es-translator-rust:$(RUST_VERSION)
 CARGO_DENY_VERSION ?= 0.20.2
 DOCKER ?= docker
 PROVIDER_LOCAL_SCRIPT := ./scripts/providers/libretranslate.sh
+PROVIDER_EMBEDDED_SCRIPT := ./scripts/providers/embedded.sh
 
 USER_ID := $(shell id -u)
 GROUP_ID := $(shell id -g)
@@ -40,6 +41,18 @@ HELP_LINES := \
 	'  make provider-local-update Prepare and promote a reviewed provider lock update' \
 	'  make provider-local-rollback Restore the previously verified provider slot offline' \
 	'  make provider-local-clean CONFIRM=remove-provider-data Remove only project provider data' \
+	'  make provider-embedded-disclose Show the reviewed embedded artifact disclosure' \
+	'  make provider-embedded-prepare CONSENT=sha256 Prepare the exact embedded artifact set' \
+	'  make provider-embedded-status Show safe embedded-provider lifecycle state' \
+	'  make provider-embedded-verify Verify the active embedded artifact set offline' \
+	'  make provider-embedded-update CONSENT=sha256 Stage and promote a reviewed embedded update' \
+	'  make provider-embedded-rollback Restore the previous embedded set offline' \
+	'  make provider-embedded-clean CONFIRM=remove-embedded-provider-data Remove only embedded provider data' \
+	'  make embedded-runner-build Build the locked native embedded runner' \
+	'  make embedded-source-fetch Fetch the exact reviewed native source revisions' \
+	'  make test-embedded-native-supply-chain Rebuild and verify the pinned native runner offline' \
+	'  make test-embedded-provider-us1 Run controlled embedded runtime integration tests' \
+	'  make test-embedded-provider Run embedded Rust/native/lifecycle/evidence gates' \
 	'  make zed-direct-lock Resolve direct workflow dependencies in Cargo.lock' \
 	'  make zed-direct-server-release Build the direct translator-lsp artifact' \
 	'  make zed-direct-prepare Prepare the local translator-lsp artifact path' \
@@ -55,7 +68,7 @@ HELP_LINES := \
 	'  make shell         Open a shell inside the Rust container' \
 	'  make clean         Remove local Rust build/cache output'
 
-.PHONY: all help install pull-rust-base rust-image workspace-storage-check worktree-audit test-worktree-storage rust-version test test-core test-mcp test-operational-providers test-real-provider-config translator-cli-release provider-local-prepare provider-local-start provider-local-status provider-local-verify provider-local-stop provider-local-update provider-local-rollback provider-local-clean zed-direct-lock zed-direct-server-release zed-direct-prepare test-direct-zed-translation zed-extension-build zed-extension-server-release zed-extension-prepare test-zed-extension test-zed-ux-flow format fmt clippy deny shell clean
+.PHONY: all help install pull-rust-base rust-image workspace-storage-check worktree-audit test-worktree-storage rust-version test test-core test-mcp test-operational-providers test-real-provider-config translator-cli-release provider-local-prepare provider-local-start provider-local-status provider-local-verify provider-local-stop provider-local-update provider-local-rollback provider-local-clean provider-embedded-manager-release provider-embedded-disclose provider-embedded-prepare provider-embedded-status provider-embedded-verify provider-embedded-update provider-embedded-rollback provider-embedded-clean embedded-source-fetch embedded-runner-build embedded-runner-contract-build test-embedded-native-supply-chain test-embedded-provider-us1 test-embedded-provider zed-direct-lock zed-direct-server-release zed-direct-prepare test-direct-zed-translation zed-extension-build zed-extension-server-release zed-extension-prepare test-zed-extension test-zed-ux-flow format fmt clippy deny shell clean
 
 all: test
 
@@ -77,7 +90,7 @@ test-worktree-storage:
 	@./tests/integration/worktree_storage_guard.sh
 
 rust-image: workspace-storage-check
-	$(DOCKER) build --build-arg RUST_IMAGE=$(RUST_IMAGE) --build-arg CARGO_DENY_VERSION=$(CARGO_DENY_VERSION) -t $(RUST_DEV_IMAGE) -f docker/rust-toolchain.Dockerfile .
+	$(DOCKER) build --provenance=false --build-arg RUST_IMAGE=$(RUST_IMAGE) --build-arg CARGO_DENY_VERSION=$(CARGO_DENY_VERSION) -t $(RUST_DEV_IMAGE) -f docker/rust-toolchain.Dockerfile .
 
 rust-version: rust-image
 	$(RUST_RUN) rustc --version
@@ -136,6 +149,59 @@ provider-local-rollback:
 
 provider-local-clean:
 	@$(PROVIDER_LOCAL_SCRIPT) clean "$(CONFIRM)"
+
+provider-embedded-manager-release: rust-image
+	$(RUST_RUN) cargo build -p translator-provider-manager --release --locked
+
+provider-embedded-disclose: provider-embedded-manager-release
+	@$(PROVIDER_EMBEDDED_SCRIPT) disclose
+
+provider-embedded-prepare: provider-embedded-manager-release
+	@$(PROVIDER_EMBEDDED_SCRIPT) prepare "$(CONSENT)"
+
+provider-embedded-status: provider-embedded-manager-release
+	@$(PROVIDER_EMBEDDED_SCRIPT) status
+
+provider-embedded-verify: provider-embedded-manager-release
+	@$(PROVIDER_EMBEDDED_SCRIPT) verify
+
+provider-embedded-update: provider-embedded-manager-release
+	@$(PROVIDER_EMBEDDED_SCRIPT) update "$(CONSENT)"
+
+provider-embedded-rollback: provider-embedded-manager-release
+	@$(PROVIDER_EMBEDDED_SCRIPT) rollback
+
+provider-embedded-clean: provider-embedded-manager-release
+	@$(PROVIDER_EMBEDDED_SCRIPT) clean "$(CONFIRM)"
+
+embedded-source-fetch:
+	@./scripts/providers/fetch-embedded-source.sh
+
+embedded-runner-build: rust-image embedded-source-fetch
+	rm -rf target/embedded-native-release
+	$(DOCKER) run --rm --network none $(RUST_USER) $(RUST_ENV) -e PATH=/workspace/scripts/providers/offline-bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin $(RUST_MOUNTS) $(RUST_DEV_IMAGE) cmake -S native/translator-embedded-runtime -B target/embedded-native-release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=/workspace/scripts/providers/embedded-cxx -DTRANSLATOR_BERGAMOT_SOURCE_DIR=/workspace/.cache/embedded-source/mozilla-translations
+	$(DOCKER) run --rm --network none $(RUST_USER) $(RUST_ENV) -e PATH=/workspace/scripts/providers/offline-bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin $(RUST_MOUNTS) $(RUST_DEV_IMAGE) cmake --build target/embedded-native-release --target translator-embedded-runtime --parallel 4
+
+embedded-runner-contract-build: rust-image
+	mkdir -p target/embedded-native-test
+	$(RUST_RUN) g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror -O2 -march=x86-64 -mtune=generic -DTRANSLATOR_EMBEDDED_CONTROLLED_FIXTURE=1 native/translator-embedded-runtime/src/main.cpp -o target/embedded-native-test/translator-embedded-runtime
+
+test-embedded-native-supply-chain: embedded-runner-build
+	@./tests/integration/embedded_native_supply_chain.sh
+
+test-embedded-provider-us1: embedded-runner-contract-build
+	$(RUST_RUN) cargo test -p translator-core --test embedded_provider_configuration --test embedded_provider --test embedded_runner_boundary --locked
+	$(RUST_RUN) cargo test -p translator-cli --test cli_embedded_provider --locked
+	$(RUST_RUN) cargo test -p translator-lsp --test embedded_provider_locality --locked
+	$(RUST_RUN) cargo test --manifest-path zed-extension/Cargo.toml --test embedded_provider_settings --locked
+	EMBEDDED_RUNNER=target/embedded-native-test/translator-embedded-runtime native/translator-embedded-runtime/tests/runner_contract.sh
+
+test-embedded-provider: test-embedded-provider-us1 test-embedded-native-supply-chain
+	$(RUST_RUN) cargo test -p translator-provider-manager --tests --locked
+	@./tests/integration/embedded_provider_make_targets.sh
+	@./tests/integration/embedded_provider_prepare.sh
+	@./tests/integration/embedded_provider_lifecycle.sh
+	@./tests/integration/embedded_evidence_contract.sh
 
 zed-direct-lock: rust-image
 	$(RUST_RUN) cargo check -p translator-lsp

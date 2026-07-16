@@ -12,5 +12,9 @@ path = "src/main.rs"
 [dependencies]
 translator-core = { path = "../translator-core" }
 
+[dev-dependencies]
+fs4 = "1.1"
+sha2 = "0.11"
+
 [lints]
 workspace = true

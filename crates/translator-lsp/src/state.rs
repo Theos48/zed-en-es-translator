@@ -253,6 +253,7 @@ impl ProviderDescriptor {
     pub fn from_configuration(configuration: &ProviderConfiguration) -> Self {
         match configuration.mode {
             ProviderMode::Mock => Self::offline(),
+            ProviderMode::EmbeddedLocal => Self::offline(),
             ProviderMode::LibreTranslate => Self::local(),
             ProviderMode::AzureTranslator => Self::remote(true),
         }

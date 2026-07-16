@@ -9,6 +9,7 @@ pub const LIBRETRANSLATE_OPERATIONAL_URL: &str = "http://127.0.0.1:5000";
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ProviderMode {
     Mock,
+    EmbeddedLocal,
     LibreTranslate,
     AzureTranslator,
 }
@@ -18,6 +19,7 @@ impl ProviderMode {
         match value.map(str::trim) {
             None => Ok(Self::Mock),
             Some("mock") => Ok(Self::Mock),
+            Some("embedded_local") => Ok(Self::EmbeddedLocal),
             Some("libretranslate") => Ok(Self::LibreTranslate),
             Some("azure_translator") => Ok(Self::AzureTranslator),
             Some(_) => Err(provider_not_configured("Unsupported provider mode.")),
@@ -128,6 +130,19 @@ impl ProviderConfiguration {
                 if parse_remote_allowance(allow_remote)? {
                     return Err(provider_not_configured(
                         "Remote allowance is not valid for mock mode.",
+                    ));
+                }
+                (None, None)
+            }
+            ProviderMode::EmbeddedLocal => {
+                reject_present(url, "Provider URL is not valid for embedded local mode.")?;
+                reject_present(
+                    api_key_env,
+                    "Provider API key reference is not valid for embedded local mode.",
+                )?;
+                if allow_remote.is_some() {
+                    return Err(provider_not_configured(
+                        "Remote allowance is not valid for embedded local mode.",
                     ));
                 }
                 (None, None)

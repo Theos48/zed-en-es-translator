@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "fixture_set_version": "embedded-en-es-public-v1",
+  "cases": [
+    {
+      "case_id": "short-01",
+      "class": "short_technical",
+      "unit": "The local parser validates one bounded request before processing it.",
+      "repeat": 1,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "short-02",
+      "class": "short_technical",
+      "unit": "A verified cache entry is reused without contacting a remote service.",
+      "repeat": 1,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "short-03",
+      "class": "short_technical",
+      "unit": "The command returns a stable error when the provider is unavailable.",
+      "repeat": 1,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "short-04",
+      "class": "short_technical",
+      "unit": "The worker preserves segment order in every successful response.",
+      "repeat": 1,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "short-05",
+      "class": "short_technical",
+      "unit": "An atomic state update keeps the previous verified version available.",
+      "repeat": 1,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "short-06",
+      "class": "short_technical",
+      "unit": "The offline runner accepts English input and produces Spanish output.",
+      "repeat": 1,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "short-07",
+      "class": "short_technical",
+      "unit": "Resource limits apply to both startup and translation work.",
+      "repeat": 1,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "short-08",
+      "class": "short_technical",
+      "unit": "Cleanup refuses unknown files and preserves unrelated user data.",
+      "repeat": 1,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "unicode-01",
+      "class": "unicode_punctuation",
+      "unit": "Unicode remains valid: café, naïve, jalapeño, résumé, and piñata.",
+      "repeat": 1,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "unicode-02",
+      "class": "unicode_punctuation",
+      "unit": "Punctuation is deliberate — parentheses (like these), quotes “like these,” and an ellipsis…",
+      "repeat": 1,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "unicode-03",
+      "class": "unicode_punctuation",
+      "unit": "The public sample includes symbols: 5 °C, 20 %, €12.50, and x ≤ y.",
+      "repeat": 1,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "unicode-04",
+      "class": "unicode_punctuation",
+      "unit": "A multilingual label may contain Ελληνικά or 日本語 while the sentence remains English.",
+      "repeat": 1,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "mixed-01",
+      "class": "mixed_0_5_to_2_kib",
+      "unit": "A release check opens a controlled fixture, validates its declared identity, measures one bounded operation, and records only a normalized result for later review.",
+      "repeat": 6,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "mixed-02",
+      "class": "mixed_0_5_to_2_kib",
+      "unit": "The lifecycle stages immutable objects beneath a private root, verifies their sizes and hashes, synchronizes durable files, and promotes one complete candidate atomically.",
+      "repeat": 8,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "mixed-03",
+      "class": "mixed_0_5_to_2_kib",
+      "unit": "During an update, readers continue using the current verified set while a separate candidate is checked for compatibility, resource use, and offline behavior.",
+      "repeat": 10,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "mixed-04",
+      "class": "mixed_0_5_to_2_kib",
+      "unit": "A diagnostic reports a fixed failure class and omits request content, translated content, environment values, host identity, local paths, and raw child-process output.",
+      "repeat": 12,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "limit-01",
+      "class": "near_4_kib",
+      "unit": "The bounded translation request carries public synthetic technical prose and repeats this neutral sentence only to exercise the documented segment-size limit safely.",
+      "repeat": 23,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "limit-02",
+      "class": "near_4_kib",
+      "unit": "Every repeated phrase in this public fixture is intentionally generic, contains no user information, and exists solely to test deterministic processing near four kibibytes.",
+      "repeat": 23,
+      "expect": { "non_empty": true, "changed": true }
+    },
+    {
+      "case_id": "markdown-01",
+      "class": "markdown_multi_segment",
+      "segments": [
+        "## Offline check\n\nTranslate this public explanation while preserving `cargo test` exactly.",
+        "See [the public guide](https://docs.example/guide) and keep the link target unchanged."
+      ],
+      "expect": {
+        "non_empty": true,
+        "changed": true,
+        "preserve_tokens": ["##", "`cargo test`", "https://docs.example/guide"]
+      }
+    },
+    {
+      "case_id": "markdown-02",
+      "class": "markdown_multi_segment",
+      "segments": [
+        "1. Validate the fixture.\n2. Run `make test`.\n3. Record only safe metrics.",
+        "The value `TRANSLATOR_PROVIDER=embedded_local` is configuration, not prose."
+      ],
+      "expect": {
+        "non_empty": true,
+        "changed": true,
+        "preserve_tokens": ["1.", "2.", "3.", "`make test`", "`TRANSLATOR_PROVIDER=embedded_local`"]
+      }
+    }
+  ]
+}

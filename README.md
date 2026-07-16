@@ -27,6 +27,7 @@ specs/004-zed-ux-flow/                completada formal
 specs/005-real-provider-config/        completada formal
 specs/006-direct-zed-translation/      completada formal
 specs/007-operational-providers/       completada formal
+specs/008-embedded-local-provider/     prototipo implementado; promocion bloqueada
 ```
 
 La primera feature entrega un MVP tecnico offline: core Rust, `MockProvider`,
@@ -91,6 +92,19 @@ Panel conserva solo cobertura de compatibilidad y no
 es una superficie de aceptacion F011. El modelo Argos `en-es` no se
 redistribuira mientras upstream no declare su licencia; ese gate legal sigue
 siendo independiente para F009/empaquetado y publicacion.
+
+La octava feature implementa el prototipo de F012 en
+`specs/008-embedded-local-provider/`. Selecciona Mozilla
+Translations/Bergamot como candidato unico provisional para un camino local
+sin servicio Docker: runner nativo one-shot aislado, recursos oficiales
+`en -> es` fijados por hash y preparacion consentida en storage XDG
+user-scoped. Ya existen la seleccion/configuracion, el limite de proceso, el
+manager de lifecycle controlado y un runner Bergamot reproducible con CPU/ELF
+verificados. El resultado sigue siendo `BLOCKED_LICENSE_APPROVAL`: faltan la
+revision y aprobacion humanas del conjunto exacto, por lo que no se descargan
+ni activan modelos reales y no se afirma soporte. Benchmark, cero red y
+aceptacion real CLI/Zed quedan bloqueados por el mismo gate. Mock y
+LibreTranslate siguen disponibles; F009/publicacion permanece separada.
 
 El proveedor local se administra solo mediante la interfaz versionada del
 proyecto:
@@ -200,6 +214,7 @@ del proveedor; la evidencia redactada vive en
 - [ADR 0003: servidor MCP Rust con rmcp](docs/adr/0003-mcp-server-rust-rmcp.md)
 - [ADR 0004: flujo directo Zed mediante LSP](docs/adr/0004-direct-zed-lsp-workflow.md)
 - [ADR 0005: pareja operativa de proveedores reales](docs/adr/0005-operational-provider-pair.md)
+- [ADR 0006: proveedor embebido Bergamot con runner aislado](docs/adr/0006-embedded-bergamot-provider.md)
 - [Investigacion: estructura Zed y Spec Kit](docs/research/zed-spec-kit-repo-structure.md)
 - [Investigacion: contrato de traduccion y Provider](docs/research/provider-contract.md)
 - [Investigacion: archivos y comentarios](docs/research/supported-files-and-comments.md)

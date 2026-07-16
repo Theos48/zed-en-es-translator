@@ -171,6 +171,8 @@ flamegraph.svg
 models/
 model-cache/
 provider-cache/
+native/translator-embedded-runtime/build/
+embedded-artifacts/
 
 ###############################################################################
 # Reportes y salidas locales de herramientas
@@ -198,6 +200,10 @@ benchmark-results/
 !zed-extension/**
 !crates/
 !crates/**
+
+# Las excepciones de fuente anteriores no deben reabrir outputs Cargo anidados.
+crates/**/target/
+crates/**/target/**
 
 # La extension Zed es un crate Rust/WASM aislado: su target/ y su .wasm
 # compilado son artefactos de build, no fuente versionable.

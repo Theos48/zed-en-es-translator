@@ -4,6 +4,7 @@ members = [
     "crates/translator-cli",
     "crates/translator-lsp",
     "crates/translator-mcp",
+    "crates/translator-provider-manager",
 ]
 resolver = "2"
 

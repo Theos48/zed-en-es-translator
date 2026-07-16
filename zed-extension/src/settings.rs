@@ -129,6 +129,7 @@ pub struct ProviderSettings {
     url: Option<String>,
     api_key_env: Option<String>,
     allow_remote: bool,
+    allow_remote_configured: bool,
 }
 
 impl Default for ProviderSettings {
@@ -138,6 +139,7 @@ impl Default for ProviderSettings {
             url: None,
             api_key_env: None,
             allow_remote: false,
+            allow_remote_configured: false,
         }
     }
 }
@@ -146,6 +148,7 @@ impl ProviderSettings {
     fn env(&self) -> Vec<(String, String)> {
         match self.mode.as_str() {
             "mock" => Vec::new(),
+            "embedded_local" => vec![(ENV_PROVIDER.to_string(), self.mode.clone())],
             "libretranslate" => vec![
                 (ENV_PROVIDER.to_string(), self.mode.clone()),
                 (
@@ -228,6 +231,7 @@ fn parse_provider_settings(value: &Value) -> Result<ProviderSettings, Diagnostic
                     return Err(unsafe_setting("provider.allow_remote"));
                 };
                 provider.allow_remote = allow_remote;
+                provider.allow_remote_configured = true;
             }
             _ => return Err(unsafe_setting(key)),
         }
@@ -253,6 +257,7 @@ fn parse_provider_environment(
             ENV_PROVIDER_API_KEY_ENV => provider.api_key_env = parse_api_key_env(&value)?,
             ENV_ALLOW_REMOTE_PROVIDER => {
                 provider.allow_remote = parse_allow_remote_environment(&value)?;
+                provider.allow_remote_configured = true;
             }
             _ => return Err(unsafe_setting("command.env")),
         }
@@ -271,6 +276,13 @@ fn validate_provider_settings(provider: &ProviderSettings) -> Result<(), Diagnos
             if provider.url.is_none()
                 && provider.api_key_env.is_none()
                 && !provider.allow_remote =>
+        {
+            Ok(())
+        }
+        "embedded_local"
+            if provider.url.is_none()
+                && provider.api_key_env.is_none()
+                && !provider.allow_remote_configured =>
         {
             Ok(())
         }
@@ -295,6 +307,7 @@ fn validate_provider_settings(provider: &ProviderSettings) -> Result<(), Diagnos
 fn parse_provider_mode(mode: &str) -> Result<String, DiagnosticEvent> {
     match mode.trim() {
         "mock" => Ok("mock".to_string()),
+        "embedded_local" => Ok("embedded_local".to_string()),
         "libretranslate" => Ok("libretranslate".to_string()),
         "azure_translator" => Ok("azure_translator".to_string()),
         _ => Err(unsafe_setting("provider.mode")),
