@@ -11,10 +11,12 @@ instalación limpia desde la Gallery.
 
 ## Estado actual
 
-La implementación y el candidato local están validados, pero `v0.1.0` todavía
-no está publicado. Por ello, el package lock apunta a una URL correcta pero aún
-inexistente. Una dev extension puede compilar y validar la integración, pero no
-completará la preparación real hasta que su release exacto sea accesible.
+La implementación y el candidato están validados. El release público `v0.1.0`
+contiene el archivo exacto de 5,548,286 bytes y SHA-256
+`9cddf1ede9a19e2e5ad6cdf1c3c775d218cdc455fc27462c8922e6ffd19108d3`;
+`make marketplace-release-check` confirma que tag, URL, versión, tamaño y hash
+coinciden con el package lock. Siguen pendientes la aceptación interactiva del
+paquete en Zed, el envío al registro oficial y la aceptación 3/3 desde Gallery.
 
 ## 1. Probar como dev extension
 

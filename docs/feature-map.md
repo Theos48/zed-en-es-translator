@@ -21,8 +21,8 @@ demostrado y revisión constitucional.
 
 ### F009 + F012: paquete automático y publicación
 
-**Estado**: implementado localmente en
-`specs/009-zed-marketplace-install/`; publicación pendiente.
+**Estado**: implementado en `specs/009-zed-marketplace-install/`; release de
+proyecto `v0.1.0` publicada y verificada, publicación en Gallery pendiente.
 
 Entrega:
 
@@ -35,7 +35,7 @@ Entrega:
 
 Pendiente:
 
-1. publicar tag/asset y validar el paquete interactivo;
+1. validar interactivamente el paquete público exacto;
 2. enviar al registro oficial;
 3. completar 3/3 instalaciones limpias después del merge upstream.
 
