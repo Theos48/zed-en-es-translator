@@ -91,18 +91,19 @@ package lock. El check contra el tag, la URL y el asset públicos también pasa.
 - ejecutar formato, Clippy, dependencias, adquisición, package, offline,
   privacidad, licencias, recursos y remoción.
 
-### 3. Release del proyecto — publicada; aceptación interactiva pendiente
+### 3. Release del proyecto — completada
 
 - convergencia revisada y fusionada;
 - tag y asset exactos publicados como `v0.1.0`;
-- check público de release completado;
-- completar la aceptación interactiva en Zed con ese asset exacto.
+- check público de release completado.
 
 ### 4. Publicación en Gallery
 
 - enviar el cambio al registro oficial de extensiones de Zed;
 - esperar sus checks y merge;
 - realizar 3/3 instalaciones limpias desde la Gallery;
+- completar en la primera instalación la aceptación interactiva con el asset
+  exacto;
 - verificar preparación visible, traducción offline, no-mutación, disable y
   uninstall sin pasos externos.
 

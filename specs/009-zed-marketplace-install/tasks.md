@@ -190,10 +190,10 @@ repository and move from a project package to an actual Gallery submission.
 - [x] T054 After feature 010 regenerates the candidate, run `marketplace-release-check` against the public tag/asset/version/lock in `Makefile` and `tests/integration/marketplace_release_check.sh`; the public check passes against `v0.1.0`
 - [x] T055 Run `make workspace-storage-check`, `make worktree-audit`, `make format`, `make fmt`, `make clippy`, `make deny` and `git diff --check`, fixing only feature-related findings
 - [x] T056 Run `make test` plus every marketplace-focused target and record the complete redacted gate matrix in `specs/009-zed-marketplace-install/validation.md`
-- [ ] T057 Run the pre-Gallery interactive Zed test with the exact public post-convergence release package (not a repository binary) and record redacted evidence in `specs/009-zed-marketplace-install/validation.md`
+- [ ] T057 After the upstream registry entry is available, run the first clean Gallery acceptance with the exact public post-convergence release package (not a development extension or repository binary) and record redacted evidence in `specs/009-zed-marketplace-install/validation.md`
 - [x] T058 Publish the exact post-convergence public project tag/release asset named by `ops/marketplace/package.lock.json` and rerun `make marketplace-release-check`
 - [x] T059 Commit and push the feature branch with Conventional Commits, open the project PR and derive every Spec Kit/test/manual/external gate in its body from `specs/009-zed-marketplace-install/validation.md`
-- [ ] T060 Submit the HTTPS submodule/version change to `zed-industries/extensions` only after feature 010 and T054-T058 pass, then after upstream merge run three independent clean Gallery acceptances and append the 3/3 result to `specs/009-zed-marketplace-install/validation.md`
+- [ ] T060 Run a pre-submission dev-extension smoke against the exact public package, then submit the HTTPS submodule/version change to `zed-industries/extensions` after feature 010 and T054-T056 plus T058-T059 pass; record the upstream PR/check state, then after merge complete T057 and two additional independent clean Gallery acceptances and append the 3/3 result to `specs/009-zed-marketplace-install/validation.md`
 
 ---
 
@@ -233,10 +233,12 @@ repository and move from a project package to an actual Gallery submission.
 
 ### External Dependency
 
-T060 has two parts. Creating the upstream submission is in project control;
-merging it and making the registry entry available are controlled by Zed
-maintainers. If review is pending, record the exact PR/check state and keep only
-the post-merge Gallery acceptance open. Do not substitute a dev extension.
+T060 has two parts. Creating the upstream submission is in project control and
+precedes T057 because a normal clean installation does not exist until the
+registry entry is available. Merging it and publishing the entry are controlled
+by Zed maintainers. If review is pending, record the exact PR/check state and
+keep T057 plus the post-merge 3/3 Gallery acceptance open. A pre-submission dev
+extension smoke is recommended but does not substitute either gate.
 
 ## Parallel Opportunities
 
@@ -299,5 +301,6 @@ T041: disable/uninstall ownership contract
 - Rust changes require the repository `rust-best-practices` skill and relevant
   ownership/error/performance/test references before editing.
 - Rust/native execution uses only Make/Docker; no host toolchain installation.
-- T060 may remain the sole externally blocked acceptance only after the actual
-  upstream PR exists and all project-controlled work passes.
+- After the upstream PR exists and all project-controlled work passes, T057 and
+  the post-merge portion of T060 may remain externally blocked on Zed
+  maintainers.

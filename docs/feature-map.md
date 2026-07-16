@@ -35,9 +35,9 @@ Entrega:
 
 Pendiente:
 
-1. validar interactivamente el paquete público exacto;
-2. enviar al registro oficial;
-3. completar 3/3 instalaciones limpias después del merge upstream.
+1. enviar al registro oficial;
+2. después del merge upstream, validar interactivamente el paquete público
+   exacto y completar 3/3 instalaciones limpias.
 
 ### Ciclo 010: convergencia del repositorio
 
