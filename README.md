@@ -6,8 +6,8 @@ el archivo originales nunca se modifican.
 
 > **Estado de publicación:** el release público `v0.1.0` está publicado y su
 > paquete exacto está verificado. La extensión todavía no está disponible en
-> la Extension Gallery: faltan la aceptación interactiva y el merge en el
-> registro oficial.
+> la Extension Gallery: faltan el merge en el registro oficial y la aceptación
+> interactiva posterior.
 
 ## Qué ofrece
 
@@ -122,10 +122,9 @@ Ya están completas y validadas:
 
 Quedan únicamente gates externos:
 
-1. ejecutar la aceptación interactiva contra el asset público exacto;
-2. enviar la extensión al registro oficial de Zed;
-3. después del merge upstream, completar 3/3 instalaciones limpias desde la
-   Gallery.
+1. enviar la extensión al registro oficial de Zed;
+2. después del merge upstream, completar la aceptación interactiva contra el
+   asset público exacto y 3/3 instalaciones limpias desde la Gallery.
 
 Una dev extension o un binario del checkout no sustituye esos gates.
 

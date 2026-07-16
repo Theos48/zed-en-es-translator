@@ -112,12 +112,12 @@ The interactive and Gallery gates remain intentionally open:
 
 | Task | State | Required action |
 |---|---|---|
-| T057 exact-package interactive Zed acceptance | READY | Use the now-public exact package with a clean supported Zed profile and record only public fixture/version/outcome evidence. UI interaction cannot be replaced by a repository binary test. |
+| T057 exact-package interactive Zed acceptance | BLOCKED | After the upstream registry entry is available, install from Gallery in a clean supported Zed profile and record only public fixture/version/outcome evidence. A dev extension or repository binary cannot replace this gate. |
 | T058 public tag and release asset | PASS | The reviewed `v0.1.0` release workflow published the exact locked archive and checksum; `make marketplace-release-check` passed against them. |
-| T060 central registry and Gallery acceptance | BLOCKED | Complete T057, submit the exact HTTPS submodule/version change to `zed-industries/extensions`, then after maintainer merge run 3/3 independent clean Gallery installations. |
+| T060 central registry and Gallery acceptance | READY / EXTERNAL | Run the pre-submission dev-extension smoke against the exact public package, then submit the HTTPS submodule/version change to `zed-industries/extensions`. Maintainer merge and the subsequent T057 plus two additional clean Gallery installations remain external. |
 
-No product decision is needed to proceed. Perform the exact-package Zed
-acceptance, submit upstream, wait for registry merge, then record 3/3 clean
+No product decision is needed to proceed. Run the dev-extension smoke, submit
+upstream, wait for registry merge, then perform T057 and record 3/3 clean
 Gallery runs. Until those steps pass,
 FR-001, FR-026, FR-027, SC-001, SC-009 and SC-010 remain publication-level
 open gates even though their local contracts are implemented.
