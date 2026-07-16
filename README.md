@@ -1,247 +1,199 @@
 # English to Spanish Translator for Zed
 
-Extension de traduccion local ingles -> espanol para Markdown y texto plano.
-La experiencia de producto es plug-and-play: instalar desde la Extension
-Gallery de Zed, abrir un documento, ejecutar la accion de traduccion y leer el
-preview de solo lectura. No requiere terminal, checkout del repositorio,
-Docker, servicio, cuenta, API key, ruta de binario ni ajuste de provider.
+Extensión de Zed que traduce inglés → español de forma local para Markdown y
+texto plano. Muestra la traducción como un preview de solo lectura: el buffer y
+el archivo originales nunca se modifican.
 
-## Instalacion y uso
+> **Estado de publicación:** la implementación y el paquete local están
+> validados, pero la extensión todavía no está disponible en la Extension
+> Gallery. El tag y el asset público `v0.1.0` siguen pendientes.
 
-La entrada en la Gallery esta pendiente de la publicacion y revision upstream
-descrita en `specs/009-zed-marketplace-install/`. Cuando esa entrada este
-disponible, el flujo de usuario sera:
+## Qué ofrece
 
-1. Abrir la Extension Gallery de Zed.
-2. Buscar **English to Spanish Translator** e instalarla.
-3. Abrir Markdown o texto plano y ejecutar **Translate English to Spanish**.
-4. Leer la traduccion en el preview de Zed; el archivo original no cambia.
+- Instalación plug-and-play desde la Gallery cuando concluya la publicación.
+- Preparación automática del runtime y de los modelos en el primer uso.
+- Traducción offline después de la adquisición pública inicial.
+- Preservación de estructura Markdown, enlaces, código y contenido ambiguo.
+- Preview mediante hover, sin `WorkspaceEdit`, inserciones ni reemplazos.
+- Paquete y modelos verificados por tamaño, SHA-256, layout y permisos.
+- Recuperación segura ante descarga interrumpida, corrupción o actualización
+  fallida.
+- Sin endpoints, credenciales, motores o rutas de binario configurables.
 
-La primera activacion descarga automaticamente un paquete fijo y los tres
-recursos publicos `en -> es`, comprueba tamano y SHA-256 antes de ejecutarlos y
-guarda todo dentro del directorio de trabajo de la extension. Despues funciona
-sin red. La primera publicacion soporta Linux `x86_64`; las demas plataformas
-muestran un mensaje dentro de Zed y no descargan nada.
+## Instalación y uso
 
-## Privacidad y desinstalacion
+Cuando la publicación en la Gallery esté disponible:
 
-El texto y la traduccion se procesan localmente y no forman parte de las
-descargas. El proceso de inferencia recibe un entorno limpio, limites de tiempo,
-memoria/salida e hilos, y no enlaza un cliente de red. Deshabilitar la extension
-impide nuevos arranques. Desinstalarla desde Zed elimina su directorio de
-trabajo, incluido runtime, modelos y estado; no existe una instalacion global o
-un segundo ciclo de vida que el usuario deba limpiar.
+1. Abre la **Extension Gallery** de Zed.
+2. Instala **English to Spanish Translator**.
+3. Abre un archivo Markdown o de texto plano.
+4. Ejecuta **Translate English to Spanish [offline]** sobre una selección o el
+   documento permitido.
+5. Coloca el cursor sobre el rango fuente para leer el preview traducido.
 
-## Estado
+En la primera activación, la extensión descarga un archivo de release y tres
+recursos públicos Mozilla `en → es`. Todo se valida y almacena dentro del
+directorio de trabajo que Zed administra para la extensión. Los siguientes usos
+no requieren red.
 
-Estado de las features formales:
+No existe un procedimiento de instalación manual para usuarios: no se necesita
+terminal, Docker, checkout, servicio, cuenta, API key ni configuración de LSP.
+
+## Soporte de la primera release
+
+| Área | Soporte |
+|---|---|
+| Editor | Zed |
+| Plataforma | Linux `x86_64` |
+| Dirección | Inglés → español |
+| Documentos | Markdown y texto plano |
+| Resultado | Hover de solo lectura |
+| Inferencia | Bergamot/Marian local |
+| Configuración de proveedor | Ninguna |
+
+Las plataformas no soportadas fallan antes de descargar o crear estado y
+muestran el límite dentro de Zed.
+
+Linux `x86_64` es el soporte de la primera release, no el límite final del
+producto. El roadmap prioriza completar Linux `aarch64`, macOS Intel/Apple
+Silicon y Windows x64/ARM64 sin cambiar la experiencia ni agregar
+configuración. Consulta [F013 en el mapa de features](docs/feature-map.md#f013-paridad-con-las-plataformas-oficiales-de-zed).
+
+## Cómo funciona
 
 ```text
-specs/001-translation-core-contract/  completada formal
-specs/002-mcp-server/                 completada formal
-specs/003-zed-wrapper/                completada formal
-specs/004-zed-ux-flow/                completada formal
-specs/005-real-provider-config/        completada formal
-specs/006-direct-zed-translation/      completada formal
-specs/007-operational-providers/       completada formal
-specs/009-zed-marketplace-install/     implementacion/publicacion en curso
+Zed Gallery
+  -> extensión Rust/WASM
+  -> paquete local verificado y propiedad de Zed
+  -> translator-lsp
+  -> translator-core
+  -> runtime Bergamot/Marian + modelos Mozilla en->es
+  -> preview de solo lectura en Zed
 ```
 
-La primera feature entrega un MVP tecnico offline: core Rust, `MockProvider`,
-contrato CLI JSON por stdin/stdout, limites explicitos, lectura segura de
-Markdown/texto y pruebas negativas de seguridad.
+La extensión es la única responsable de adquirir y activar el paquete. El LSP
+resuelve el runtime y los modelos adyacentes a su propio ejecutable; no acepta
+configuración del usuario. Core valida el documento, protege sus estructuras,
+envía únicamente segmentos traducibles al runtime y reconstruye el resultado.
 
-La segunda feature agrega un servidor MCP Rust en `crates/translator-mcp/` con
-transporte stdio y dos tools: `translate_text` y `translate_file`. Mantiene el
-modo offline/mock, no agrega proveedor real, no abre red, no modifica buffers y
-delega lectura/seguridad de archivos al core existente.
+Consulta [los diagramas de arquitectura](docs/diagrams.md) y la
+[guía de desarrollo](CONTRIBUTING.md) para el recorrido detallado.
 
-La tercera feature agrega una extension local de desarrollo para Zed en
-`zed-extension/`. La extension declara el context server `translator-en-es`,
-devuelve un comando controlado para arrancar el binario release
-`translator-mcp`, no agrega entorno arbitrario propio, rechaza configuracion de
-provider/remoto/args/env arbitrarios y emite diagnosticos redaccionados. La
-validacion de filesystem y el aislamiento total del entorno del proceso lanzado
-quedan acotados por limitaciones confirmadas del runtime de Zed; ver
-`specs/003-zed-wrapper/` y `docs/decisions.md` D063/D064. No agrega provider
-real, red, publicacion ni edicion automatica de buffers.
+## Privacidad y seguridad
 
-La cuarta feature documenta y valida el flujo de lectura dentro de Zed
-sobre la extension local ya fusionada. Cubre el uso del Agent Panel con
-`translate_text` y `translate_file`, los limites entre el modelo del Agent y el
-servidor MCP local, la evidencia manual redaccionada, la decision explicita de
-soporte de seleccion y la no-mutacion de archivos o buffers. La guia operativa
-vive en `docs/zed-ux-flow.md`. Este flujo Agent Panel es un puente de
-validacion, no la UX final del producto: la meta final es una accion propia de
-la extension de Zed para traducir desde menu contextual, comando o boton sin
-configurar Agent.
+- El contenido y la traducción se procesan localmente.
+- Las descargas públicas nunca incluyen texto, traducciones, rutas del
+  workspace, credenciales ni secretos.
+- El runtime se inicia sin shell y con entorno, argumentos, I/O, hilos y timeout
+  acotados.
+- Los paths inseguros, symlinks fuera del workspace, archivos sensibles,
+  binarios y contenido no UTF-8 se rechazan antes de traducir.
+- Los diagnósticos no incluyen contenido, tokens, headers, output crudo del
+  proceso ni rutas sensibles.
+- Un paquete inválido nunca se vuelve activo; una actualización fallida conserva
+  el último paquete verificado.
+- Deshabilitar evita nuevos arranques. Desinstalar desde Zed elimina el estado
+  propiedad de la extensión, sin instalación global paralela.
 
-La quinta feature implementa el primer proveedor real configurable en
-`specs/005-real-provider-config/`. Mantiene `MockProvider` como default,
-selecciona un proveedor local/self-hosted compatible con LibreTranslate como
-primer camino real, modela remoto como default-deny con confirmacion por
-solicitud, conserva no-mutacion, limites, redaccion y host limpio, y expone la
-configuracion controlada a CLI, MCP y la extension Zed. Esta entrega implementa
-el adaptador y sus controles; no instala, despliega ni deja configurado un
-servicio real, y su evidencia automatizada usa servicios loopback simulados.
+Límites vigentes:
 
-La sexta feature implementa F010 como flujo directo sin Agent. La extension
-registra el language server `en-es-translator` para Markdown y Plain Text; su
-code action usa la seleccion o el documento permitido, ejecuta
-`translator-lsp`, muestra un preview de solo lectura por hover y conserva la
-confirmacion remota por solicitud. No devuelve edits ni modifica archivos o
-buffers. La API de Zed 0.7.0 no permite clipboard o panel propio, por lo que
-copy/insert/apply quedan fuera. La configuracion de proveedor directa usa solo
-la allowlist `lsp.en-es-translator.binary.env` validada en Zed real; estas
-decisiones viven en D073-D075 y ADR 0004.
+| Límite | Valor |
+|---|---:|
+| Entrada | 20 KiB |
+| Segmento traducible | 4 KiB |
+| Segmentos por solicitud | 256 |
+| Salida reconstruida | 40 KiB |
+| Tiempo de traducción | 15 segundos |
+| Paquete activo instalado | 128 MiB |
+| Memoria máxima de inferencia | 1 GiB |
+| Hilos de inferencia | 4 |
 
-La septima feature implementa el camino automatico y operativo de F011 en
-`specs/007-operational-providers/`. Selecciona LibreTranslate 1.9.6 fijado
-por digest como camino soportado local/offline sin cuenta ni API key.
-`MockProvider` sigue siendo default. El adaptador Azure AI Translator Text v3
-permanece como opcion avanzada: usa host HTTPS fijo, key por referencia y
-confirmacion nueva por solicitud, pero no es requisito de uso ni aceptacion.
-Estan implementados la configuracion exacta, los adaptadores, las pruebas
-controladas y el ciclo local candidate/current/previous. La validacion real
-local por CLI y Zed directo, sin egress, con fallo de update aislado y rollback
-paso; la limpieza project-scoped y la evidencia final tambien pasan. MCP/Agent
-Panel conserva solo cobertura de compatibilidad y no
-es una superficie de aceptacion F011. El modelo Argos `en-es` no se
-redistribuira mientras upstream no declare su licencia; ese gate legal sigue
-siendo independiente para F009/empaquetado y publicacion.
+## Estado del proyecto
 
-El proveedor LibreTranslate historico es una superficie de desarrollo y
-compatibilidad; no forma parte del uso de la extension publicada. Para
-mantenimiento del camino anterior se administra mediante la interfaz
-versionada del proyecto:
+Ya están completas y validadas:
 
-```bash
-make provider-local-prepare
-make provider-local-start
-make provider-local-status
-make provider-local-verify
-make provider-local-stop
-make provider-local-update
-make provider-local-rollback
-make provider-local-clean CONFIRM=remove-provider-data
-```
+- adquisición automática, integridad y promoción atómica;
+- traducción Bergamot real con red deshabilitada;
+- previews, no-mutación, Markdown, límites y redacción;
+- recuperación, concurrencia y último paquete válido;
+- supply chain, licencias, presupuesto y remoción;
+- convergencia del repositorio a una sola arquitectura.
 
-Preparar/actualizar requiere red y al menos 4 GiB libres; el contenedor queda
-limitado a 4 CPU y 4 GiB RAM. Start, status, verify, stop y rollback usan el
-artefacto ya preparado sin descarga. Stop y `make clean` conservan sus datos;
-la eliminacion completa exige el token exacto y se limita al proyecto Compose.
-LibreTranslate permanece solo en la red interna y sin puerto publicado; un
-relay minimo del mismo proyecto expone `127.0.0.1:5000`, reenvia unicamente al
-destino interno fijo y no registra contenido. No se instala Python en Fedora:
-el relay se ejecuta dentro de la imagen fijada del proveedor.
-El camino soportado no requiere cuenta, suscripcion ni key. Si alguien opta de
-forma independiente por el adaptador remoto avanzado, sus credenciales siguen
-fuera de settings, archivos versionados y evidencia. La guia completa de
-privacidad, validacion, rollback, licencia y remocion esta en
-`specs/007-operational-providers/quickstart.md`.
+Quedan únicamente gates externos:
 
-Rust se ejecuta mediante la imagen Docker oficial fijada en `Makefile`; no se
-instala `rustc` ni `cargo` globalmente para este proyecto por defecto.
+1. publicar el tag y asset exactos;
+2. ejecutar la aceptación interactiva contra ese asset;
+3. enviar la extensión al registro oficial de Zed;
+4. después del merge upstream, completar 3/3 instalaciones limpias desde la
+   Gallery.
 
-Los worktrees y sus artefactos de compilacion deben vivir en almacenamiento
-persistente, nunca bajo `/tmp`, `/dev/shm` u otro `tmpfs`/`ramfs`. Para
-revisiones temporales se usa
-`~/dev/.worktrees/zed-en-es-translator/<nombre>`. `make
-workspace-storage-check` valida el checkout actual antes de cualquier build
-Rust y `make worktree-audit` revisa todos los worktrees registrados. La guarda
-se prueba sin compilar con `make test-worktree-storage`.
+Una dev extension o un binario del checkout no sustituye esos gates.
 
-La calidad obligatoria se valida localmente y en cada pull request con los
-mismos targets del `Makefile`: formato, Clippy, pruebas y `cargo-deny`. La
-auditoria cubre vulnerabilidades publicadas, licencias, dependencias prohibidas
-y fuentes no autorizadas. Dependabot revisa semanalmente las dependencias Cargo
-de ambos workspaces y las acciones de GitHub.
+## Desarrollo rápido
 
-Validacion principal:
+El proyecto usa GNU Make y Docker para no instalar toolchains Rust/C++ en el
+host. El checkout debe vivir en almacenamiento persistente, nunca en `/tmp` u
+otro `tmpfs`.
+
+Requisitos básicos: Git, GNU Make, Docker, Bash y utilidades GNU. Los gates del
+paquete real también usan `jq`, `curl` y `zstd`.
 
 ```bash
+git clone https://github.com/Theos48/zed-en-es-translator.git
+cd zed-en-es-translator
 make workspace-storage-check
-make worktree-audit
-make test-worktree-storage
-make zed-extension-prepare
-make zed-direct-prepare
-make test-direct-zed-translation
-make test-zed-extension
-make test-zed-ux-flow
-make test-core
-make test-mcp
-make test-operational-providers
-make test-real-provider-config
+make pull-rust-base
+make rust-image
 make test
+```
+
+Validación habitual antes de revisión:
+
+```bash
 make fmt
 make clippy
 make deny
+make test
+make test-repository-boundary
+git diff --check
 ```
 
-Resultado registrado para `specs/001-translation-core-contract/` y
-`specs/002-mcp-server/`: `make test`, `make test-mcp`, `make fmt` y
-`make clippy` pasan dentro del contenedor Rust fijado por el proyecto.
+Usa `make help` para consultar todos los targets. El build nativo completo puede
+usar decenas de GiB; `make clean-preview` y `make clean` eliminan salidas
+reproducibles sin borrar los caches fijados.
 
-Resultado registrado para `specs/003-zed-wrapper/`: `make
-zed-extension-prepare`, `make test-zed-extension`, `make test`, `make fmt` y
-`make clippy` pasan. El smoke manual interactivo en Zed pasa con la modal de
-configuracion de la extension. Los limites de diagnostico rapido y aislamiento
-de entorno quedaron documentados en el spec y en D063/D064.
+## Documentación
 
-Resultado registrado para `specs/004-zed-ux-flow/`: `make test-zed-ux-flow`
-pasa y la validacion manual interactiva en Zed quedo registrada con evidencia
-sintetica/redaccionada.
+### Para desarrollar y desplegar
 
-Resultado registrado para `specs/005-real-provider-config/`: `make test-core`,
-`make test-mcp`, `make test-zed-extension`, `make test-real-provider-config`,
-`make test`, `make fmt` y `make clippy` pasan dentro del contenedor Rust del
-proyecto. La evidencia automatizada usa stubs locales de loopback; la plantilla
-para smoke manual contra un proveedor local externo vive en
-`specs/005-real-provider-config/manual-validation.md`.
+- [Guía de desarrollo y contribución](CONTRIBUTING.md)
+- [Dev extension, release, forks y publicación en Zed](docs/deployment.md)
+- [Arquitectura y flujos](docs/diagrams.md)
+- [Mantenimiento del paquete marketplace](ops/marketplace/README.md)
 
-Resultado automatizado registrado para
-`specs/006-direct-zed-translation/`: `make test-direct-zed-translation`, `make
-test-zed-extension`, `make test-real-provider-config`, `make fmt` y `make
-clippy` pasan. Los tres escenarios interactivos en Zed tambien pasan con
-fuentes sin cambios, Agent Panel ausente y denegacion remota por secreto antes
-del proveedor; la evidencia redactada vive en
-`specs/006-direct-zed-translation/manual-validation.md`.
+### Producto, decisiones y roadmap
 
-## Documentos
-
-- [Plan de desarrollo](docs/PLAN.md)
-- [Producto y roadmap funcional](docs/product.md)
-- [Mapa detallado de features](docs/feature-map.md)
+- [Plan y secuencia de publicación](docs/PLAN.md)
+- [Mapa de features futuras](docs/feature-map.md)
 - [Matriz de decisiones](docs/decisions.md)
-- [Guia de flujo UX en Zed](docs/zed-ux-flow.md)
-- [Diagramas](docs/diagrams.md)
-- [ADR 0001: alcance tecnico inicial](docs/adr/0001-zed-extension-scope.md)
-- [ADR 0002: arquitectura y tecnologia inicial](docs/adr/0002-architecture-and-technology.md)
-- [ADR 0003: servidor MCP Rust con rmcp](docs/adr/0003-mcp-server-rust-rmcp.md)
-- [ADR 0004: flujo directo Zed mediante LSP](docs/adr/0004-direct-zed-lsp-workflow.md)
-- [ADR 0005: pareja operativa de proveedores reales](docs/adr/0005-operational-provider-pair.md)
-- [Investigacion: estructura Zed y Spec Kit](docs/research/zed-spec-kit-repo-structure.md)
-- [Investigacion: contrato de traduccion y Provider](docs/research/provider-contract.md)
-- [Investigacion: archivos y comentarios](docs/research/supported-files-and-comments.md)
-- [Investigacion: seguridad y runtime](docs/research/security-runtime-controls.md)
+- [ADR 0006: paquete automático para la Gallery](docs/adr/0006-zed-marketplace-package.md)
+- [ADR 0007: convergencia del repositorio](docs/adr/0007-repository-convergence.md)
 
-## Como usar la documentacion
+### Contratos y evidencia activa
 
-`docs/` es la planeacion estrategica. Sirve para decidir y preparar futuras
-features de Spec Kit.
+- [Feature 009: instalación y publicación](specs/009-zed-marketplace-install/spec.md)
+- [Feature 009: evidencia validada](specs/009-zed-marketplace-install/validation.md)
+- [Feature 010: convergencia y limpieza](specs/010-repository-convergence/spec.md)
+- [Feature 010: evidencia validada](specs/010-repository-convergence/validation.md)
 
-`specs/<feature>/` es la fuente operativa de la feature activa. Ahi viven el
-`spec.md`, `plan.md`, `tasks.md`, contratos, quickstart y checklists que se
-implementan.
+Las guías son la entrada operativa. Las specs conservan requisitos, contratos y
+evidencia; los ADRs registran decisiones estables y Git conserva la historia
+retirada.
 
-Para una nueva iteracion:
+## Licencias
 
-1. Elegir una entrada de `docs/feature-map.md`.
-2. Crear/refinar la feature con Spec Kit.
-3. Dejar el detalle operativo en `specs/<feature>/`.
-4. Actualizar `docs/decisions.md` o ADRs solo si cambia una decision estable.
-
-## Nota sobre ubicacion
-
-El proyecto vive en la raiz del repositorio. Usa rutas relativas al checkout en
-lugar de rutas absolutas del host.
+El código original del proyecto se distribuye bajo MIT; el texto de licencia de
+la extensión está en [`zed-extension/LICENSE`](zed-extension/LICENSE). El
+runtime Bergamot/Marian y los modelos Mozilla se distribuyen bajo sus términos
+MPL-2.0 y avisos correspondientes, registrados en
+[`ops/marketplace/licenses/`](ops/marketplace/licenses/).

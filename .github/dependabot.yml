@@ -9,6 +9,10 @@ updates:
       time: "06:00"
       timezone: America/Mexico_City
     open-pull-requests-limit: 3
+    groups:
+      runtime-rust:
+        patterns:
+          - "*"
     commit-message:
       prefix: deps
 
@@ -20,6 +24,10 @@ updates:
       time: "06:00"
       timezone: America/Mexico_City
     open-pull-requests-limit: 3
+    groups:
+      zed-extension-rust:
+        patterns:
+          - "*"
     commit-message:
       prefix: deps
 
@@ -31,5 +39,9 @@ updates:
       time: "06:00"
       timezone: America/Mexico_City
     open-pull-requests-limit: 3
+    groups:
+      github-actions:
+        patterns:
+          - "*"
     commit-message:
       prefix: ci

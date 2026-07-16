@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-16
 
-**Status**: Draft
+**Status**: Implemented locally; repository convergence and external publication gates pending
 
 **Input**: User description: "A user installs the translator from Zed's
 Extension Gallery and receives real English-to-Spanish translations without a
@@ -25,8 +25,8 @@ open a terminal, configure a path, run a container or start a service, the
 feature has failed even if the translation engine works technically.
 
 **Independent Test**: On a clean supported Zed profile with no project checkout,
-toolchain, container, configured provider or translation binary, install the
-published extension and translate one public English fixture using only Zed.
+toolchain, container or configured translation binary, install the published
+extension and translate one public English fixture using only Zed.
 
 **Acceptance Scenarios**:
 
@@ -42,7 +42,7 @@ published extension and translate one public English fixture using only Zed.
    preview and the source remains byte-for-byte unchanged.
 4. **Given** a supported user has never opened a terminal for this project,
    **When** the primary journey completes, **Then** no repository, command,
-   binary path, service, account, API key or provider setting was required.
+   binary path, service, account, API key or runtime setting was required.
 
 ---
 
@@ -158,7 +158,7 @@ platform result with zero acquisition and zero document mutation.
   translation on Linux `x86_64`.
 - **FR-003**: The primary user journey MUST require zero terminal commands,
   repository checkouts, developer builds, containers, locally started services,
-  accounts, API keys, arbitrary executable paths and manual provider settings.
+  accounts, API keys, arbitrary executable paths and manual runtime settings.
 - **FR-004**: Installing the extension MUST make the existing direct translation
   action available for Markdown and plain-text documents.
 - **FR-005**: The extension MUST automatically acquire any absent local package
@@ -172,8 +172,8 @@ platform result with zero acquisition and zero document mutation.
   secrets in a request.
 - **FR-009**: After first successful preparation, translation, readiness and
   normal restart MUST work with external networking unavailable.
-- **FR-010**: The local no-account translation path MUST be the usable default;
-  Mock, remote and developer-only providers MUST NOT be required for the primary
+- **FR-010**: The verified adjacent embedded runtime MUST be the only shipped
+  translation path. A deterministic test double MUST NOT be reachable from the
   marketplace journey.
 - **FR-011**: Incomplete, corrupt, incompatible, oversized or unlicensed
   packages MUST never be executed or become current.
@@ -208,9 +208,9 @@ platform result with zero acquisition and zero document mutation.
 - **FR-024**: Publication MUST NOT depend on an unresolved model or runtime
   license; a candidate without sufficient distribution evidence MUST be
   replaced rather than exposed as a user approval prompt.
-- **FR-025**: Existing MCP, Agent Panel, configurable local and remote provider
-  paths MAY remain compatible but MUST NOT appear in or block the primary
-  marketplace journey.
+- **FR-025**: Repository convergence defined by feature 010 MUST remove retired
+  compatibility and configurable runtime paths before the release candidate is
+  tagged; none may remain a supported, executable or documented interface.
 - **FR-026**: Feature completion MUST include a clean-install interactive test
   using the marketplace-shaped package, not a development extension or local
   repository binary.
@@ -222,8 +222,7 @@ platform result with zero acquisition and zero document mutation.
 - **FR-SEC-B**: The system MUST reject unsafe file paths, unsupported file types,
   non-UTF-8 input and binary content.
 - **FR-SEC-C**: Public package acquisition MUST be isolated from translation
-  content; any optional remote translation provider MUST remain explicitly
-  configured and confirmed per request.
+  content, and translation MUST remain local and offline after preparation.
 - **FR-SEC-D**: The system MUST NOT log source text, translated text, segments,
   secrets, headers, tokens or sensitive paths.
 - **FR-TEST-A**: Behavior changes MUST begin with failing acceptance, contract or
@@ -308,9 +307,9 @@ platform result with zero acquisition and zero document mutation.
 
 ### Out of Scope
 
-- Manual `make`, Docker, binary-path or provider configuration as user steps.
-- Agent Panel or MCP as the primary product experience.
-- Accounts, subscriptions, API keys and mandatory remote translation.
+- Manual `make`, Docker, binary-path or runtime configuration as user steps.
+- Retired compatibility protocols or intermediary workflows.
+- Accounts, subscriptions, API keys and network translation.
 - macOS, Windows, `aarch64`, additional languages and arbitrary model selection.
 - Automatic edits, clipboard writes, custom panels and source-file mutation.
 - Host-global packages, services, runtimes or privileged installation.

@@ -3,7 +3,6 @@ mod common;
 use std::fs;
 
 use serde_json::{json, Value};
-use translator_lsp::state::ProviderDescriptor;
 
 use common::{file_uri, range, ResponseExt as _, TestClient};
 
@@ -19,7 +18,7 @@ fn document_preview_preserves_all_protected_markdown_regions() {
         "<pre>Read the docs.</pre>\n",
         "```rust\nlet text = \"Read the docs.\";\n```\n"
     );
-    let mut client = TestClient::with_workspace(workspace, ProviderDescriptor::offline());
+    let mut client = TestClient::with_workspace(workspace);
     client.open(&uri, 1, "markdown", source);
 
     let execute = client.request(
@@ -52,7 +51,7 @@ fn protected_only_document_produces_no_preview() {
     let path = workspace.join("protected.md");
     fs::write(&path, "Disk content.").expect("disk file");
     let uri = file_uri(&path);
-    let mut client = TestClient::with_workspace(workspace, ProviderDescriptor::offline());
+    let mut client = TestClient::with_workspace(workspace);
     client.open(&uri, 1, "markdown", "```rust\nfn main() {}\n```\n");
 
     let execute = client.request(

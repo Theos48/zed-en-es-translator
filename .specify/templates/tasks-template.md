@@ -12,8 +12,8 @@ description: "Task list template for feature implementation"
 **Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
 
 **Constitution**: For this project, behavior-changing tasks MUST include tests/checks first.
-Include negative security tasks when the feature touches translation, file access, providers,
-logging, CLI boundaries, or configuration.
+Include negative security tasks when the feature touches translation, file access, embedded
+processes, package identity, logging or configuration.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -74,7 +74,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T008 Configure error handling and logging infrastructure
 - [ ] T009 Setup environment configuration management
 - [ ] T0XX Add contract tests before implementing behavior
-- [ ] T0XX Add negative security tests for unsafe paths, size limits, non-UTF-8/binary input, remote denial, secret detection, timeout, and log redaction
+- [ ] T0XX Add negative security tests for unsafe paths, size limits, non-UTF-8/binary input, package identity, bounded process failure, and log redaction
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

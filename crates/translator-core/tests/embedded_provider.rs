@@ -120,28 +120,25 @@ fn hex_sha256(contents: &[u8]) -> String {
         .collect()
 }
 
-fn request(remote_confirmed: bool) -> ProviderRequest {
-    ProviderRequest::with_remote_confirmation(
+fn request() -> ProviderRequest {
+    ProviderRequest::new(
         vec!["One.".to_string(), "Two.".to_string()],
         Language::English,
         Language::Spanish,
         Tone::TechnicalNeutral,
-        remote_confirmed,
     )
     .expect("provider request")
 }
 
 #[test]
-fn embedded_provider_returns_one_ordered_batch_without_remote_confirmation() {
+fn embedded_provider_returns_one_ordered_batch() {
     let (root, runner) = runner(
         "ordered",
         "while IFS= read -r _; do :; done; printf '%s' '{\"wire_version\":1,\"translations\":[\"Uno.\",\"Dos.\"]}'",
     );
     let provider = EmbeddedProcessProvider::from_verified_runner(runner);
 
-    let response = provider
-        .translate(&request(false))
-        .expect("offline translation");
+    let response = provider.translate(&request()).expect("offline translation");
 
     assert_eq!(response.translated_segments, ["Uno.", "Dos."]);
     fs::remove_dir_all(root).expect("remove runner root");
@@ -156,7 +153,7 @@ fn embedded_provider_does_not_fallback_after_invalid_response() {
     let provider = EmbeddedProcessProvider::from_verified_runner(runner);
 
     let failure = provider
-        .translate(&request(true))
+        .translate(&request())
         .expect_err("cardinality mismatch must fail");
 
     assert_eq!(failure.code, ErrorCode::ProviderFailed);
@@ -169,7 +166,7 @@ fn embedded_provider_preserves_the_existing_total_deadline() {
     let provider = EmbeddedProcessProvider::from_verified_runner(runner);
 
     let failure = provider
-        .translate(&request(false))
+        .translate(&request())
         .expect_err("timeout must fail");
 
     assert_eq!(failure.code, ErrorCode::ProviderTimeout);
@@ -183,7 +180,7 @@ fn adjacent_verified_package_resolves_the_fixed_runner_and_models() {
         .expect("adjacent package should verify");
 
     let response = provider
-        .translate(&request(false))
+        .translate(&request())
         .expect("verified package should translate");
 
     assert_eq!(response.translated_segments, ["Uno.", "Dos."]);

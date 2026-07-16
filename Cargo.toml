@@ -1,9 +1,7 @@
 [workspace]
 members = [
     "crates/translator-core",
-    "crates/translator-cli",
     "crates/translator-lsp",
-    "crates/translator-mcp",
 ]
 resolver = "2"
 

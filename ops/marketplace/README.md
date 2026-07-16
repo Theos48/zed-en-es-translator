@@ -42,3 +42,12 @@ completo construye el runner y paquete fijados, valida supply chain, descarga
 los recursos publicos, ejecuta el corpus con red deshabilitada y comprueba
 formato, lint, dependencias y pruebas. Esos comandos no son prerrequisitos del
 usuario de la Gallery.
+
+Las instrucciones ejecutables viven en:
+
+- [`CONTRIBUTING.md`](../../CONTRIBUTING.md), para preparar el entorno,
+  modificar componentes y elegir gates;
+- [`docs/deployment.md`](../../docs/deployment.md), para construir el candidato,
+  publicar el release, probar una dev extension o desplegar un fork;
+- [`specs/009-zed-marketplace-install/quickstart.md`](../../specs/009-zed-marketplace-install/quickstart.md),
+  para la evidencia de aceptación exacta de la feature.

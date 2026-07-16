@@ -29,8 +29,9 @@ binary path or project preparation command.
 - Ship the server in `zed-extension/`: rejected by the marketplace rules.
 - Require a system binary or configured path: rejected by the confirmed product
   requirement.
-- Use MCP/Agent Panel as the main flow: rejected because the direct LSP action
-  already exists and the user explicitly wants an ordinary extension.
+- Use an intermediary compatibility workflow as the main flow: rejected
+  because the direct LSP action already exists and the user explicitly wants
+  an ordinary extension.
 
 **Primary sources**:
 
@@ -50,7 +51,7 @@ directory and `work/<extension-id>` during uninstall, retrying removal to cover
 process shutdown races. This directly satisfies the no-terminal removal path
 and prevents the lifecycle from becoming a second application.
 
-**Alternative considered**: Reuse the F012 user-scoped provider manager. It was
+**Alternative considered**: Reuse the F012 user-scoped lifecycle manager. It was
 safe but wrong for this product: it introduced separate disclosure, consent,
 prepare, status, update, rollback and cleanup commands that a Gallery user
 should never need to know exist.
@@ -59,11 +60,11 @@ should never need to know exist.
 
 - <https://github.com/zed-industries/zed/blob/bf14327c27885b8c52588c2bf84cb2bd4f2dd72e/crates/extension_host/src/extension_host.rs#L953-L1015>
 
-## Decision 3: Reuse only the compact tested local inference pieces from 008
+## Decision 3: Reuse only compact tested local inference pieces from the prototype
 
 **Decision**: Retain the provisional Mozilla Translations/Bergamot runner,
 exact Firefox `en -> es` base-memory resources and Rust bounded child-process
-wire. Do not retain the F012 provider-manager crate or its manual lifecycle.
+wire. Do not retain the F012 manager or its manual lifecycle.
 
 The exact model set is:
 
@@ -87,7 +88,7 @@ than treating that expectation as evidence.
   environment-cleared, bounded one-shot child process.
 - ONNX OPUS-MT alternatives require separate encoder and decoder artifacts
   that exceed this feature's 128 MiB package budget even in common quantized
-  forms. Python/Argos and Docker/LibreTranslate would reintroduce a runtime or
+  forms. Other previously evaluated stacks would reintroduce a runtime or
   service that users must manage.
 
 **Alternatives considered**:
@@ -169,7 +170,7 @@ rollback without a user-facing updater or manual cleanup.
 **Decision**: The extension code is MIT and gets an accepted license file at
 the exact `zed-extension/` marketplace path. The native release contains the
 complete notice bundle and a corresponding-source document for the exact MPL,
-MIT, BSD, Apache and zlib-licensed components identified by the 008 native
+MIT, BSD, Apache and zlib-licensed components identified by the prototype native
 inventory. The three exact Mozilla resources are attributed to `MPL-2.0` using
 the official archived model repository and exact installed-identity bridge;
 the lock links that license and the upstream attachment records.
@@ -215,7 +216,7 @@ install alone does not prove the product requirement.
   `en -> es` resources.
 - **Acquisition**: fixed project release plus fixed Mozilla attachments, all
   size/hash verified before activation.
-- **Updates**: atomic current/previous package state; no user lifecycle CLI.
+- **Updates**: atomic current/previous package state; no separate user lifecycle.
 - **Publication**: exact-path MIT extension license, native notice/source
   bundle and official central-registry PR.
 

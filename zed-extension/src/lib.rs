@@ -69,10 +69,7 @@ impl zed::Extension for EnEsTranslatorExtension {
         Ok(zed::Command {
             command: command.to_string_lossy().into_owned(),
             args: Vec::new(),
-            env: vec![(
-                "TRANSLATOR_PROVIDER".to_string(),
-                "embedded_local".to_string(),
-            )],
+            env: Vec::new(),
         })
     }
 }

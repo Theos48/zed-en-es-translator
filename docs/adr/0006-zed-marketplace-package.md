@@ -8,11 +8,11 @@ la validacion de la feature.
 
 ## Contexto
 
-El flujo directo LSP ya permitia traducir dentro de Zed, pero exigia preparar
-un binario y configurar un provider. LibreTranslate demostro traduccion real y
-offline, aunque su ciclo Docker tampoco es una experiencia de extension. El
-producto confirmado debe funcionar al instalarlo desde la Gallery, sin
-terminal, checkout, servicio, cuenta, key, ruta o setting manual.
+El flujo directo LSP ya permitía traducir dentro de Zed, pero exigía preparar
+un binario y ajustes de desarrollo. Los prototipos locales demostraron
+traducción real y offline, aunque su ciclo separado tampoco era una experiencia
+de extensión. El producto confirmado debe funcionar al instalarlo desde la
+Gallery, sin terminal, checkout, servicio, cuenta, key, ruta o setting manual.
 
 ## Decision
 
@@ -25,8 +25,8 @@ administrado por Zed. En Linux `x86_64`, su primera activacion:
    `en -> es` fijos;
 3. prepara un staging no ejecutable, decodifica Zstandard con Rust puro y
    valida cada identidad instalada;
-4. promueve atomica e inmutablemente el paquete y devuelve `translator-lsp`
-   con `TRANSLATOR_PROVIDER=embedded_local`;
+4. promueve atómica e inmutablemente el paquete y devuelve `translator-lsp`
+   sin selección o configuración de runtime;
 5. ejecuta Bergamot mediante un proceso de un solo request, entorno limpio,
    cuatro hilos y limites de entrada, salida y tiempo.
 
@@ -54,8 +54,8 @@ administracion.
   pueda completar una instalacion limpia.
 - La aceptacion 3/3 desde Gallery depende de merge upstream y no puede
   sustituirse por una dev extension.
-- CLI, MCP, LibreTranslate y Azure pueden seguir como compatibilidad o
-  desarrollo, pero no aparecen en el camino principal publicado.
+- ADR 0007 retira las superficies de compatibilidad sin consumidor antes del
+  primer tag; el paquete publicado conserva una única ruta local.
 
 ## Criterio de revision
 

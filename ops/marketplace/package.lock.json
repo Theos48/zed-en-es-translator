@@ -12,8 +12,8 @@
       {
         "role": "language_server",
         "path": "bin/translator-lsp",
-        "installed_size": 4871592,
-        "installed_sha256": "1e76ce116cfe7873fd293c23ec3b0143a89df36b48ab8f7ddb71c6484be1779d",
+        "installed_size": 2018176,
+        "installed_sha256": "45218fd230fb2d072ae5528be09e583c2eaf671785a29dad327d7566507491ec",
         "executable": true,
         "spdx_conclusion": "MIT",
         "source_url": "https://github.com/Theos48/zed-en-es-translator"

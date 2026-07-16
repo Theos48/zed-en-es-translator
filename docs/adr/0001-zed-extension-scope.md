@@ -2,14 +2,11 @@
 
 ## Estado
 
-Aceptado, matizado por D065, D066, D071 y D072.
+Superseded by [ADR 0007](./0007-repository-convergence.md). Se conserva solo
+como historia del alcance técnico inicial y no como guía operativa vigente.
 
-Nota de vigencia: este ADR describe el alcance tecnico inicial. El Agent Panel
-fue aceptado como puente de validacion para las tools MCP, no como experiencia
-final de producto. La direccion vigente es F010: una accion propia de la
-extension de Zed sin configurar Agent. Desde F006, las features de Zed deben
-orientarse a esa extension directa y no acumular UX sobre Agent Panel para una
-migracion final.
+Todo el contenido siguiente describe una etapa retirada. La arquitectura
+vigente está definida por ADR 0006, ADR 0007 y la constitución 2.0.0.
 
 ## Contexto
 

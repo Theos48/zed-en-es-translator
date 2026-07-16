@@ -79,7 +79,7 @@
 - How does system handle [error scenario]?
 - How does the system preserve source content when translation safety is ambiguous?
 - How does the system prevent reading files outside the authorized workspace?
-- How does the system behave when remote translation is not configured or not confirmed?
+- How does the system prevent configuration from selecting another provider, endpoint or executable?
 - How does the system avoid exposing source text, translations, paths, or secrets in logs?
 
 ## Requirements *(mandatory)*
@@ -98,7 +98,7 @@
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
 - **FR-SEC-A**: System MUST NOT modify editor buffers unless a later constitution amendment allows it
 - **FR-SEC-B**: System MUST reject unsafe file paths, unsupported file types, non-UTF-8 input, and binary content
-- **FR-SEC-C**: System MUST deny remote provider use unless explicitly configured and confirmed per request
+- **FR-SEC-C**: System MUST keep translation local/offline and reject selectable providers, endpoints, credentials or arbitrary binaries
 - **FR-SEC-D**: System MUST NOT log source text, translated text, segments, secrets, headers, tokens, or sensitive paths
 - **FR-TEST-A**: System MUST define testable acceptance criteria and negative tests before implementation
 

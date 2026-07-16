@@ -1,19 +1,5 @@
-.git/
-.cache/
-target/
-**/target/
-node_modules/
-coverage/
-logs/
-log/
-tmp/
-temp/
-*.log
-.env
-.env.*
-provider-cache/
-native/translator-embedded-runtime/build/
-marketplace-artifacts/
-*.wasm
-Dockerfile*
-.dockerignore
+# La imagen de toolchain no copia archivos del proyecto. Su contexto queda
+# limitado al único Dockerfile que consume el build.
+**
+!docker/
+!docker/rust-toolchain.Dockerfile

@@ -26,12 +26,12 @@ make test-marketplace-contract
 Expected:
 
 - the package lock matches its JSON schema;
-- the manifest contains no binary-path/provider setting or mutable/latest URL;
+- the manifest contains no binary-path/runtime setting or mutable/latest URL;
 - every package source is fixed HTTPS and every resource has exact size/hash;
 - the extension-specific MIT license and required notice/source paths exist;
 - unsupported platforms are represented as zero-download failures.
 
-The bounded provider foundation can be exercised independently while the
+The bounded embedded-runtime foundation can be exercised independently while the
 release lock is still intentionally fail-closed:
 
 ```bash
@@ -86,7 +86,7 @@ make test-marketplace-offline
 
 This target uses the real locked native runner and exact public `en -> es`
 resource set. Acquisition is complete before the network-disabled test phase.
-It runs 20 public fixtures through the direct provider/LSP boundary and records
+It runs 20 public fixtures through the direct embedded-runtime/LSP boundary and records
 only case IDs, pass/fail and resource metrics.
 
 Expected:
@@ -108,9 +108,9 @@ make deny
 git diff --check
 ```
 
-Expected: every existing core, CLI, MCP, LSP and extension compatibility test
-still passes. MCP/remote/local developer providers may remain available in the
-repository but are neither configured nor required by the published extension.
+Expected: every retained core, LSP, extension and marketplace test passes. The
+repository-boundary gate confirms that no retired executable or configurable
+runtime surface remains.
 
 ## 6. Validate the Tagged Public Release
 
@@ -120,7 +120,7 @@ make marketplace-release-check
 
 Expected: the public tag, release asset URL, `extension.toml` version,
 extracted identities, package lock, notices and repository commit agree. No
-user documentation contains a terminal, Docker, provider or binary-path setup
+user documentation contains a terminal, Docker, runtime or binary-path setup
 step.
 
 ## 7. Clean Gallery Acceptance
@@ -129,7 +129,7 @@ Only after the `zed-industries/extensions` submission is available through the
 normal registry:
 
 1. use a clean supported Zed profile with no project checkout, configured LSP
-   binary, provider or development extension;
+   binary, runtime setting or development extension;
 2. install English to Spanish Translator from the Extension Gallery;
 3. open the public Markdown fixture and invoke the direct action;
 4. record visible checking/downloading behavior and the real Spanish read-only

@@ -8,16 +8,14 @@ pub enum ErrorCode {
     PathNotAllowed,
     NonUtf8Input,
     NoTranslatableSegments,
-    SecretDetected,
     ProviderNotConfigured,
-    RemoteConfirmationRequired,
     ProviderFailed,
     ProviderTimeout,
     InternalError,
 }
 
 impl ErrorCode {
-    pub const ALL: [ErrorCode; 14] = [
+    pub const ALL: [ErrorCode; 12] = [
         ErrorCode::InvalidInput,
         ErrorCode::UnsupportedLanguagePair,
         ErrorCode::UnsupportedFileType,
@@ -26,9 +24,7 @@ impl ErrorCode {
         ErrorCode::PathNotAllowed,
         ErrorCode::NonUtf8Input,
         ErrorCode::NoTranslatableSegments,
-        ErrorCode::SecretDetected,
         ErrorCode::ProviderNotConfigured,
-        ErrorCode::RemoteConfirmationRequired,
         ErrorCode::ProviderFailed,
         ErrorCode::ProviderTimeout,
         ErrorCode::InternalError,
@@ -44,9 +40,7 @@ impl ErrorCode {
             ErrorCode::PathNotAllowed => "PATH_NOT_ALLOWED",
             ErrorCode::NonUtf8Input => "NON_UTF8_INPUT",
             ErrorCode::NoTranslatableSegments => "NO_TRANSLATABLE_SEGMENTS",
-            ErrorCode::SecretDetected => "SECRET_DETECTED",
             ErrorCode::ProviderNotConfigured => "PROVIDER_NOT_CONFIGURED",
-            ErrorCode::RemoteConfirmationRequired => "REMOTE_CONFIRMATION_REQUIRED",
             ErrorCode::ProviderFailed => "PROVIDER_FAILED",
             ErrorCode::ProviderTimeout => "PROVIDER_TIMEOUT",
             ErrorCode::InternalError => "INTERNAL_ERROR",

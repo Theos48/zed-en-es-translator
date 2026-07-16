@@ -1,306 +1,142 @@
 # Mapa de features
 
-Este mapa es backlog estrategico para preparar futuros ciclos de Spec Kit. No
-es la especificacion operativa de la feature activa; cuando una feature se
-formaliza, su fuente de verdad pasa a `specs/<feature>/`.
+Este mapa conserva suficiente contexto para iniciar futuros ciclos de Spec Kit
+sin duplicar la feature activa. Los identificadores funcionales `F###` son
+históricos y no tienen que coincidir con el número del directorio `specs/`.
 
-## Uso con Spec Kit
-
-Cada entrada F### debe conservar suficiente detalle para iniciar `specify` sin
-volver a redescubrir alcance, restricciones y criterios. Al promover una entrada
-a feature formal:
+## Dirección de producto
 
-1. Copiar su objetivo, criterios y restricciones relevantes al prompt de
-   `speckit-specify`.
-2. Separar lo que pertenece a la feature actual de lo que queda para ciclos
-   futuros.
-3. Mantener en `docs/feature-map.md` el backlog estrategico, ajustando solo el
-   estado o aprendizaje que sirva para futuras features.
-4. Registrar en `docs/decisions.md` o un ADR cualquier cambio estable de
-   arquitectura, seguridad, tecnologia o proceso.
+La única arquitectura soportada es:
 
-Estado actual:
+```text
+Zed Gallery -> paquete local verificado -> LSP -> core -> runtime embebido
+```
 
-- Completado formal: F001, F002 parcial, F003 y F008 parcial mediante
-  `specs/001-translation-core-contract/`; F005 mediante
-  `specs/002-mcp-server/`; F006 mediante `specs/003-zed-wrapper/` tras merge
-  en `main`; F007 mediante `specs/004-zed-ux-flow/`; F004 mediante
-  `specs/005-real-provider-config/`.
-- Completado formal: F010 mediante
-  `specs/006-direct-zed-translation/`, incluidas tres validaciones manuales en
-  Zed.
-- Completado formal: F011 mediante `specs/007-operational-providers/`, incluido
-  el camino local real, ciclo de vida, limpieza y evidencia redaccionada.
-- Activo: F012 y F009 convergen en
-  `specs/009-zed-marketplace-install/`; el paquete local automatico completo
-  conserva como pendientes los gates externos de publicacion y Gallery.
+La extensión traduce inglés → español de forma local después de una adquisición
+pública inicial, muestra un preview de solo lectura y conserva el contenido
+original. No se agrega otra frontera ejecutable sin una feature, consumidor
+demostrado y revisión constitucional.
 
-Prioridad actual: cerrar la instalacion plug-and-play desde Gallery. El usuario
-no administra el provider: Zed prepara un paquete local verificado, traduce
-offline y elimina su estado al desinstalar. Tag/asset, submission upstream y
-aceptacion 3/3 desde la Gallery siguen siendo parte del cierre, no una feature
-posterior.
+## Estado de la release inicial
 
-Regla de direccion desde F006: las features que toquen Zed deben ser
-extension-first. El Agent Panel puede usarse para validar integracion o cubrir
-una limitacion concreta de la API, pero no debe ser el destino de producto ni
-una deuda acumulada para migrar al final.
+### F009 + F012: paquete automático y publicación
 
-## F001: contrato de traduccion
+**Estado**: implementado localmente en
+`specs/009-zed-marketplace-install/`; publicación pendiente.
 
-Objetivo: definir una interfaz independiente de Zed y del proveedor.
-
-Entradas:
+Entrega:
 
-- texto fuente;
-- idioma origen fijo: ingles;
-- idioma destino fijo: espanol;
-- opciones de tono;
-- preservacion de formato obligatoria en MVP;
-- tipo de entrada: texto, Markdown o codigo.
+- instalación desde la Gallery sin preparación externa;
+- paquete Linux `x86_64` de identidad fija bajo propiedad de Zed;
+- runtime Bergamot y tres recursos Mozilla `en → es` verificados;
+- traducción offline después de preparar el paquete;
+- estado de preparación, retry, concurrencia y último paquete válido;
+- no-mutación, límites, redacción, licencias y remoción por Zed.
 
-Salidas:
+Pendiente:
 
-- texto traducido;
-- error claro con codigo normalizado cuando algo impida traducir.
+1. publicar tag/asset y validar el paquete interactivo;
+2. enviar al registro oficial;
+3. completar 3/3 instalaciones limpias después del merge upstream.
 
-Restricciones:
+### Ciclo 010: convergencia del repositorio
 
-- sin metadata en la salida normal del MVP;
-- metadata y segmentos protegidos solo pueden existir internamente o para
-  pruebas.
+**Estado**: completado y validado en
+`specs/010-repository-convergence/`.
 
-## F002: preservacion de formato
+Resultado: quedaron únicamente superficies con consumidor en el producto
+Gallery, su supply chain, validación, gobierno o roadmap. Git conserva la
+historia completa; ADR 0007 registra la retirada de las arquitecturas
+experimentales.
 
-Objetivo: evitar traducciones destructivas en Markdown y codigo.
+## Fundamentos retenidos
 
-Criterios:
+| ID | Capacidad | Estado vigente |
+|---|---|---|
+| F001 | Contratos de traducción | Consolidado en core, constitución y features 009/010. |
+| F002 | Preservación de Markdown y código protegido | Obligatoria y cubierta por gates retenidos. |
+| F003 | Doble determinista de traducción | Retenido solo para pruebas inyectadas. |
+| F008 | Privacidad, límites y redacción | Consolidado en constitución 2.0.0 y 009. |
+| F010 | Acción directa y preview en Zed | Retenida mediante LSP; siempre de solo lectura. |
+| F012 | Runtime local embebido | Integrado en el paquete automático de F009. |
 
-- no traducir contenido dentro de bloques de codigo;
-- mantener listas, headings y enlaces;
-- traducir texto visible cuando sea seguro;
-- si no hay confianza para distinguir comentario/docstring de codigo, preservar
-  sin traducir;
-- archivo completo de codigo queda fuera del primer ciclo Spec Kit.
+Las iteraciones F004-F007 y F011 validaron alternativas que ya no tienen
+consumidor en la release. ADR 0001-0005 conservan su razón histórica y ADR 0007
+las supersede operacionalmente. Sus artefactos completos permanecen en Git, no
+como instrucciones o specs activas.
 
-## F003: proveedor mock
+## Backlog posterior a `v0.1.0`
 
-Objetivo: permitir TDD sin red ni API keys.
+### F013: paridad con las plataformas oficiales de Zed
 
-Criterios:
+**Prioridad**: primera feature de producto posterior a `v0.1.0`.
 
-- respuestas deterministas;
-- simulacion de errores;
-- simulacion de latencia opcional.
+**Objetivo**: llevar el mismo producto local y de solo lectura a todas las
+combinaciones de 64 bits soportadas oficialmente por Zed, sin debilitar el
+paquete exacto ni generalizar una identidad no probada.
 
-## F004: proveedor real configurable
+Matriz objetivo:
 
-Objetivo: conectar el contrato a un backend real sin acoplar el core.
+| Sistema | `x86_64` | `aarch64` |
+|---|---|---|
+| Linux | base de `v0.1.0` | pendiente |
+| macOS | pendiente | pendiente |
+| Windows | pendiente | pendiente |
 
-Estado actual: feature formal completada en
-`specs/005-real-provider-config/`. Implementa un proveedor local/self-hosted
-compatible con LibreTranslate como primer camino real, mantiene mock/offline
-como default, modela remoto como default-deny con confirmacion por solicitud y
-mantiene la configuracion fuera del texto traducido. Esta feature implemento el
-adaptador y sus fronteras de configuracion; sus pruebas usaron servicios
-loopback simulados y no desplego ni dejo configurada una instancia real para el
-uso cotidiano.
+Cada ciclo debe:
 
-Criterios:
+- seleccionar una sola combinación de sistema operativo y arquitectura;
+- construir LSP y runtime de forma reproducible para esa combinación;
+- registrar fuentes, tamaños, hashes, licencias y compatibilidad exactos;
+- medir adquisición, tamaño instalado, RAM, hilos y latencia;
+- probar preparación, retry, offline, disable y uninstall en Zed real;
+- conservar el fallo antes de red/estado para plataformas aún no soportadas.
 
-- proveedor elegido de forma explicita y configurable;
-- secretos fuera del repositorio y sin valores reales en ejemplos versionados;
-- errores normalizados compatibles con el contrato vigente;
-- remoto deshabilitado por defecto hasta que exista consentimiento verificable;
-- evaluacion de privacidad antes de habilitar cualquier backend externo;
-- no enviar contexto local innecesario al proveedor.
+La implementación avanza una combinación a la vez y puede ordenar entregas
+según la capacidad real de construcción y prueba. F013 solo se cierra cuando
+todas las celdas pendientes de la matriz tengan paquete publicado y evidencia
+real. Si Zed cambia su soporte oficial, la matriz se revisa sin prometer
+plataformas de 32 bits ni sistemas que Zed no soporte.
 
-## F005: servidor MCP
+Fuera de alcance: cambiar la experiencia, agregar proveedores, permitir
+configuración de ejecutables o crear otro ciclo de instalación.
 
-Objetivo: exponer la traduccion como herramienta invocable desde Zed.
+### F014: mejoras nativas de preview y estado
 
-Criterios:
+**Objetivo**: aprovechar nuevas APIs estables de Zed para mejorar lectura y
+progreso sin crear una segunda aplicación ni degradar seguridad.
 
-- tools basadas en los contratos de traduccion vigentes;
-- validacion de parametros en la frontera MCP;
-- salida limpia en caso exitoso y errores accionables en fallo;
-- lectura de archivos delegada al core/CLI sin duplicar reglas operativas;
-- mapeo de errores del core/CLI a resultados MCP compatibles con Zed.
-
-## F006: fundacion de extension Zed
-
-Objetivo: crear la base de extension Zed desde la que el producto pueda crecer
-hacia acciones propias, sin depender de Agent Panel como destino final.
-
-Estado actual: completada en `specs/003-zed-wrapper/`. La implementacion
-valida el arranque de `translator-mcp` como context server local porque era la
-capacidad documentada y verificable de Zed para esta etapa. Esa decision no
-convierte Agent Panel en la UX objetivo.
-
-Criterios:
-
-- manifest `extension.toml`;
-- build reproducible;
-- logs utiles y redaccionados conforme a la constitucion;
-- entorno agregado por el wrapper limitado por allowlist, con la limitacion de
-  herencia del proceso Zed documentada en D064;
-- arranque del servidor MCP con comando, argumentos y variables controladas por
-  el wrapper.
-- documentar limites reales de la API de Zed que impidan accion directa;
-- dejar preparada la estructura para evolucionar hacia comandos, menus,
-  botones o preview propios de la extension cuando sean viables.
-
-## F007: flujo UX dentro de Zed
-
-Objetivo: validar lectura dentro de Zed sin salir del editor, usando el puente
-disponible en ese momento.
-
-Criterios:
-
-- flujo documentado;
-- friccion baja;
-- resultado facil de leer en Agent Panel;
-- el buffer no se modifica automaticamente;
-- entradas permitidas definidas por el contrato activo;
-- validacion manual del flujo real de seleccion antes de ampliar alcance.
-
-Estado actual: feature formal completada en `specs/004-zed-ux-flow/`.
-
-Nota de producto: esta feature valida el camino Agent Panel como puente
-intermedio sobre las tools MCP existentes. No representa la experiencia final
-del producto; no debe repetirse como patron base para nuevas features de UX.
-Ver D065, D071, D072 y F010.
-
-## F008: privacidad y configuracion
-
-Objetivo: que el usuario entienda y controle que texto se envia.
-
-Criterios:
-
-- proveedor y modo local/remoto visibles para el usuario;
-- secretos fuera del repositorio;
-- remoto default deny;
-- controles de privacidad antes de cualquier llamada remota;
-- entorno heredado minimo entre Zed, MCP y CLI cuando la plataforma lo permita;
-  para el context server Zed actual, considerar la limitacion D064;
-- pruebas negativas de privacidad proporcionales al proveedor habilitado.
-
-## F009: empaquetado y publicacion
-
-Objetivo: preparar el proyecto para distribucion.
-
-Estado: activo junto con F012 en `specs/009-zed-marketplace-install/`. La
-experiencia directa y el camino local existen; la feature empaqueta el runtime,
-automatiza la adquisicion y lleva la misma entrega hasta release y registro.
-
-Criterios:
-
-- licencia compatible con Zed;
-- README final;
-- checklist de publicacion;
-- lockfiles y auditoria de dependencias antes de publicar.
-- guia de uso centrada en la accion propia de la extension, no en Agent Panel.
-
-## F010: flujo directo de extension Zed sin Agent
-
-Objetivo: ofrecer la experiencia final de producto dentro de Zed sin requerir
-que el usuario configure o use Agent Panel. Debe sentirse como una extension
-nativa de traduccion para Zed, disenada como producto propio con control fuerte
-para trabajo tecnico, privacidad y preservacion de formato.
-
-Estado: completada en `specs/006-direct-zed-translation/`, incluidas tres
-validaciones manuales en Zed. La integracion usa code action, execute command y
-hover LSP; las limitaciones de clipboard/panel propio en API 0.7.0 y el canal
-real de configuracion `binary.env` quedan registradas en D073-D075 y ADR 0004.
-
-Criterios iniciales para `speckit-specify`:
-
-- exponer una accion propia de la extension desde menu contextual, comando o
-  boton, segun lo que permita la API vigente de Zed;
-- no requerir Agent Panel, perfiles Agent, prompts manuales ni modelo
-  intermediario para ejecutar la traduccion;
-- aceptar texto seleccionado cuando Zed lo exponga de forma confiable;
-- aceptar contenido permitido del documento abierto solo con las mismas
-  validaciones de archivo, tamano, UTF-8, secretos y workspace ya existentes;
-- mostrar preview legible dentro de Zed antes de cualquier accion destructiva;
-- mantener no-mutacion automatica del buffer como default;
-- permitir copiar, insertar o aplicar la traduccion solo por accion explicita
-  del usuario, si la API de Zed permite esas salidas;
-- reutilizar `translator-core` y la configuracion de proveedor existente;
-- tratar `translator-mcp`/Agent Panel como compatibilidad o puente, no como
-  superficie primaria del producto;
-- conservar remoto default deny y confirmacion por solicitud antes de enviar
-  texto fuera del equipo;
-- documentar cualquier limitacion real de la API de Zed antes de recortar
-  alcance.
-
-## F011: configuracion operativa de proveedores reales
-
-Objetivo: pasar de un adaptador configurable probado con dobles de prueba a un
-camino de traduccion local/offline real y verificable desde la extension
-directa de Zed, conservando remoto como opcion avanzada default-deny.
-
-Estado: completado formal en `specs/007-operational-providers/` antes de
-F009/publicacion. La aclaracion vigente reemplazo el permiso inicial de cuenta:
-el camino soportado no exige cuenta, suscripcion ni API key. LibreTranslate
-1.9.6 fijado por digest paso CLI, Zed directo, offline, update fallido,
-rollback y limpieza project-scoped. Azure permanece opcional con
-pruebas de seguridad controladas. El modelo Argos `en-es` se aprovisiona
-localmente pero no se redistribuira mientras upstream no declare su licencia.
-
-Criterios iniciales para `speckit-specify`:
-
-- configurar un proveedor local real, ejecutado con aislamiento y alcance de
-  proyecto, que pueda traducir sin Internet despues de preparar sus artefactos;
-- documentar inicio, parada, actualizacion, datos persistentes, verificacion y
-  rollback del proveedor local sin instalar runtimes o servicios globales en
-  Fedora;
-- mantener cualquier adaptador remoto opcional mediante HTTPS y host
-  allowlisted, sin convertirlo en default ni enviar texto sin confirmacion por
-  solicitud;
-- mantener `MockProvider` como default determinista cuando no haya
-  configuracion explicita, conforme a la constitucion;
-- mantener secretos reales fuera del repositorio y documentar solo nombres de
-  variables o referencias seguras;
-- mostrar en Zed si la traduccion usara modo offline/local o remoto/online antes
-  de ejecutar la solicitud;
-- validar traduccion inglesa a espanola local real con contenido sintetico
-  tanto por CLI como por el flujo directo de Zed;
-- demostrar que no se modifican buffers o archivos y que logs, errores y
-  evidencias no contienen texto fuente, traducciones, URLs sensibles, tokens o
-  secretos;
-- comprobar indisponibilidad, timeout, respuesta invalida, rechazo remoto sin
-  confirmacion y bloqueo de secretos antes del contacto remoto;
-- conservar limites, segmentacion, preservacion Markdown y errores
-  normalizados existentes;
-- registrar evidencia manual redaccionada contra el servicio local real; los
-  stubs siguen siendo validos para automatizar controles remotos, pero no
-  cierran por si solos el camino local;
-- no incluir publicacion, proveedor de pago obligatorio, instalacion global en
-  el host ni mutacion automatica del buffer.
-
-## F012: proveedor local embebido sin Docker
-
-Objetivo: ofrecer la experiencia normal de traduccion sin cuenta, API key,
-servicio remoto ni ciclo Docker visible para el usuario, manteniendo ejecucion
-local, privacidad y actualizaciones verificables.
-
-Estado: activo e integrado con F009 en
-`specs/009-zed-marketplace-install/`. La decision vigente usa Bergamot/Marian y
-los tres recursos Mozilla `en -> es` exactos, sin conservar el manager manual
-del prototipo.
-
-Criterios iniciales para `speckit-specify`:
-
-- evaluar runtimes/modelos on-device con soporte real `en -> es`, licencia y
-  procedencia aptas para distribucion;
-- medir tamano de extension/modelo, RAM, CPU, latencia y tiempo de primera
-  preparacion en el host objetivo;
-- decidir si el modelo se empaqueta, se descarga con consentimiento o se
-  gestiona como artefacto project/user-scoped con integridad verificable;
-- conservar `MockProvider` como fallback determinista, no-mutacion, limites,
-  segmentacion, proteccion Markdown, redaccion y errores normalizados;
-- no instalar runtimes o servicios globales ni depender de endpoints web no
-  oficiales;
-- validar CLI y flujo directo Zed con red deshabilitada despues de cualquier
-  preparacion autorizada.
+Criterios iniciales:
+
+- conservar localidad de selección, versión del documento y cancelación;
+- mejorar estados de checking, download, ready y retry dentro de Zed;
+- mantener el preview legible y de solo lectura;
+- no crear almacenamiento fuera del directorio propiedad de la extensión;
+- documentar la versión de API y evidencia real antes de cambiar UX;
+- excluir insert, replace o apply hasta que una enmienda constitucional lo
+  permita expresamente.
+
+### F015: pares de idiomas adicionales
+
+**Objetivo**: agregar un par de idioma como paquete exacto independiente sin
+convertir la primera release en un selector arbitrario de modelos.
+
+Cada par debe:
+
+- tener demanda, dirección y alcance explícitos;
+- usar recursos con procedencia, licencia, tamaños y hashes revisados;
+- conservar segmentación, límites y estructuras protegidas;
+- demostrar calidad mínima con fixtures públicos y métricas reproducibles;
+- definir cómo convive con el presupuesto de descarga/almacenamiento;
+- mantener adquisición separada del contenido traducido y uso posterior
+  offline.
+
+## Regla de promoción
+
+Al promover una entrada futura:
+
+1. usar sus criterios como entrada de `speckit-specify`;
+2. separar con claridad lo incluido y lo diferido;
+3. mantener aquí solo estado y detalle útil para ciclos posteriores;
+4. registrar cambios estables en `docs/decisions.md` o un ADR;
+5. dejar contratos, tareas y evidencia operativa en `specs/<feature>/`.

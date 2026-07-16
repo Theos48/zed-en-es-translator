@@ -1,33 +1,25 @@
 //! LSP request and notification handling.
 
-use std::collections::HashMap;
-use std::sync::atomic::{AtomicU64, Ordering};
-use std::time::Duration;
-
-use lsp_server::{
-    Connection, ErrorCode as RpcErrorCode, Message, Notification, Request, Response, ResponseKind,
-};
+use lsp_server::{Connection, ErrorCode as RpcErrorCode, Message, Notification, Request, Response};
 use lsp_types::{
     CodeAction, CodeActionKind, CodeActionOptions, CodeActionOrCommand, CodeActionParams,
     CodeActionProviderCapability, Command, DidChangeTextDocumentParams, DidCloseTextDocumentParams,
     DidOpenTextDocumentParams, ExecuteCommandOptions, ExecuteCommandParams, Hover, HoverContents,
-    HoverParams, HoverProviderCapability, MarkupContent, MarkupKind, MessageActionItem,
-    MessageType, Position, ServerCapabilities, ShowMessageParams, ShowMessageRequestParams,
-    TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
+    HoverParams, HoverProviderCapability, MarkupContent, MarkupKind, MessageType, Position,
+    ServerCapabilities, ShowMessageParams, TextDocumentSyncCapability, TextDocumentSyncKind,
+    TextDocumentSyncOptions,
 };
 use translator_core::{
-    translate_document_snapshot_with_confirmation, translate_selection_with_confirmation,
-    ErrorCode, InputKind, Provider, TranslateFailure,
+    translate_document_snapshot, translate_selection, InputKind, Provider, TranslateFailure,
 };
 
 use crate::selection::{
     file_path_from_uri, full_document_range, range_to_offsets, TranslationTarget,
 };
-use crate::state::{DocumentStore, ProviderDescriptor, ProviderLocalityLabel, TranslationPreview};
+use crate::state::{DocumentStore, TranslationPreview};
 
 pub const TRANSLATE_COMMAND: &str = "en-es-translator.translate";
-const CONFIRM_ACTION: &str = "Send this request";
-static CONFIRMATION_ID: AtomicU64 = AtomicU64::new(1);
+const TRANSLATE_ACTION_TITLE: &str = "Translate English to Spanish [offline]";
 
 pub fn server_capabilities() -> ServerCapabilities {
     ServerCapabilities {
@@ -55,7 +47,6 @@ pub fn serve<P: Provider>(
     connection: Connection,
     workspace_root: std::path::PathBuf,
     provider: P,
-    provider_descriptor: ProviderDescriptor,
 ) -> Result<(), ServerError> {
     let capabilities = serde_json::to_value(server_capabilities()).map_err(|_| ServerError)?;
     connection
@@ -78,7 +69,6 @@ pub fn serve<P: Provider>(
                     &workspace_root,
                     &mut documents,
                     &provider,
-                    provider_descriptor,
                 );
             }
             Message::Notification(notification) => {
@@ -96,18 +86,12 @@ fn handle_request<P: Provider>(
     workspace_root: &std::path::Path,
     documents: &mut DocumentStore,
     provider: &P,
-    descriptor: ProviderDescriptor,
 ) {
     let response = match request.method.as_str() {
-        "textDocument/codeAction" => code_action_response(request, documents, descriptor),
-        "workspace/executeCommand" => execute_command_response(
-            connection,
-            request,
-            documents,
-            workspace_root,
-            provider,
-            descriptor,
-        ),
+        "textDocument/codeAction" => code_action_response(request, documents),
+        "workspace/executeCommand" => {
+            execute_command_response(connection, request, documents, workspace_root, provider)
+        }
         "textDocument/hover" => hover_response(request, documents),
         _ => Response::new_err(
             request.id,
@@ -118,11 +102,7 @@ fn handle_request<P: Provider>(
     let _ = connection.sender.send(Message::Response(response));
 }
 
-fn code_action_response(
-    request: Request,
-    documents: &DocumentStore,
-    descriptor: ProviderDescriptor,
-) -> Response {
+fn code_action_response(request: Request, documents: &DocumentStore) -> Response {
     let id = request.id;
     let Ok(params) = serde_json::from_value::<CodeActionParams>(request.params) else {
         return invalid_params(id);
@@ -134,7 +114,7 @@ fn code_action_response(
         return Response::new_ok(id, Vec::<CodeActionOrCommand>::new());
     }
 
-    let title = descriptor.action_title().to_string();
+    let title = TRANSLATE_ACTION_TITLE.to_string();
     let target = TranslationTarget::new(
         params.text_document.uri,
         snapshot.version(),
@@ -163,7 +143,6 @@ fn execute_command_response<P: Provider>(
     documents: &mut DocumentStore,
     workspace_root: &std::path::Path,
     provider: &P,
-    descriptor: ProviderDescriptor,
 ) -> Response {
     let id = request.id;
     let Ok(params) = serde_json::from_value::<ExecuteCommandParams>(request.params) else {
@@ -188,29 +167,6 @@ fn execute_command_response<P: Provider>(
     let Ok(selection) = range_to_offsets(snapshot.text(), target.range) else {
         return invalid_params(id);
     };
-    let remote_confirmed = if descriptor.locality() == ProviderLocalityLabel::Remote {
-        if !descriptor.allow_remote() {
-            return translation_error(
-                id,
-                TranslateFailure::new(
-                    ErrorCode::ProviderNotConfigured,
-                    "The provider is not configured for this request.",
-                ),
-            );
-        }
-        if let Err(failure) = confirm_remote_request(connection, documents, &target) {
-            return translation_error(id, failure);
-        }
-        let Some(current) = documents.get(&target.uri) else {
-            return invalid_params(id);
-        };
-        if current.version() != target.version {
-            return invalid_params(id);
-        }
-        true
-    } else {
-        false
-    };
     let translation = if selection.is_empty() {
         let Ok(file_path) = file_path_from_uri(&target.uri) else {
             return invalid_params(id);
@@ -219,21 +175,9 @@ fn execute_command_response<P: Provider>(
         else {
             return invalid_params(id);
         };
-        translate_document_snapshot_with_confirmation(
-            file_path,
-            workspace_root,
-            snapshot.text(),
-            provider,
-            remote_confirmed,
-        )
+        translate_document_snapshot(file_path, workspace_root, snapshot.text(), provider)
     } else {
-        translate_selection_with_confirmation(
-            snapshot.text(),
-            input_kind,
-            selection,
-            provider,
-            remote_confirmed,
-        )
+        translate_selection(snapshot.text(), input_kind, selection, provider)
     };
 
     match translation {
@@ -267,105 +211,6 @@ fn execute_command_response<P: Provider>(
             translation_error(id, failure)
         }
     }
-}
-
-fn confirm_remote_request(
-    connection: &Connection,
-    documents: &mut DocumentStore,
-    target: &TranslationTarget,
-) -> Result<(), TranslateFailure> {
-    let confirmation_id = lsp_server::RequestId::from(format!(
-        "en-es-translator-confirmation-{}",
-        CONFIRMATION_ID.fetch_add(1, Ordering::Relaxed)
-    ));
-    let params = ShowMessageRequestParams {
-        typ: MessageType::WARNING,
-        message: "Remote translation will send permitted selected or document content outside this machine. Continue for this request?".to_string(),
-        actions: Some(vec![MessageActionItem {
-            title: CONFIRM_ACTION.to_string(),
-            properties: HashMap::new(),
-        }]),
-    };
-    let params = serde_json::to_value(params).map_err(|_| internal_failure())?;
-    connection
-        .sender
-        .send(Message::Request(Request {
-            id: confirmation_id.clone(),
-            method: "window/showMessageRequest".to_string(),
-            params,
-        }))
-        .map_err(|_| internal_failure())?;
-
-    let mut target_changed = false;
-    loop {
-        let message = connection
-            .receiver
-            .recv_timeout(Duration::from_secs(15))
-            .map_err(|_| confirmation_required())?;
-        match message {
-            Message::Response(response) if response.id == confirmation_id => {
-                let confirmed = match response.response_kind {
-                    ResponseKind::Ok { result } => {
-                        serde_json::from_value::<MessageActionItem>(result)
-                            .is_ok_and(|action| action.title == CONFIRM_ACTION)
-                    }
-                    ResponseKind::Err { .. } => false,
-                };
-                if !confirmed {
-                    return Err(confirmation_required());
-                }
-                if target_changed {
-                    return Err(TranslateFailure::new(
-                        ErrorCode::InvalidInput,
-                        "The document changed during confirmation.",
-                    ));
-                }
-                return Ok(());
-            }
-            Message::Response(_) => {}
-            Message::Notification(notification) => {
-                if notification.method == "$/cancelRequest" {
-                    return Err(confirmation_required());
-                }
-                target_changed |= notification_targets_uri(&notification, &target.uri);
-                handle_notification(notification, documents);
-            }
-            Message::Request(request) => {
-                let response = Response::new_err(
-                    request.id,
-                    RpcErrorCode::RequestFailed as i32,
-                    "Request unavailable during remote confirmation.".to_string(),
-                );
-                let _ = connection.sender.send(Message::Response(response));
-            }
-        }
-    }
-}
-
-fn notification_targets_uri(notification: &Notification, uri: &lsp_types::Uri) -> bool {
-    if !matches!(
-        notification.method.as_str(),
-        "textDocument/didChange" | "textDocument/didClose"
-    ) {
-        return false;
-    }
-    notification
-        .params
-        .get("textDocument")
-        .and_then(|document| document.get("uri"))
-        .and_then(serde_json::Value::as_str)
-        .is_some_and(|candidate| candidate == uri.as_str())
-}
-
-fn confirmation_required() -> TranslateFailure {
-    TranslateFailure::new(
-        ErrorCode::RemoteConfirmationRequired,
-        "Remote provider confirmation is required for this request.",
-    )
-}
-
-fn internal_failure() -> TranslateFailure {
-    TranslateFailure::new(ErrorCode::InternalError, "An internal error occurred.")
 }
 
 fn hover_response(request: Request, documents: &DocumentStore) -> Response {

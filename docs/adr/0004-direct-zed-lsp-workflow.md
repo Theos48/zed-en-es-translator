@@ -2,8 +2,11 @@
 
 ## Estado
 
-Aceptado. Implementacion automatizada y validacion manual interactiva completas
-en `specs/006-direct-zed-translation/manual-validation.md`.
+Parcialmente superseded by [ADR 0006](./0006-zed-marketplace-package.md) y
+[ADR 0007](./0007-repository-convergence.md). Permanecen aceptados la acción
+LSP, localidad/versionado y preview de solo lectura. La preparación por ruta,
+configuración de traducción y compatibilidad histórica fueron retiradas. La
+evidencia original permanece en Git.
 
 ## Contexto
 

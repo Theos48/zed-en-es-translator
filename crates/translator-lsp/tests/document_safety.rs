@@ -7,7 +7,6 @@ use std::sync::Arc;
 
 use serde_json::json;
 use translator_core::{Provider, ProviderRequest, ProviderResponse, TranslateFailure};
-use translator_lsp::state::ProviderDescriptor;
 
 use common::{file_uri, range, ResponseExt as _, TestClient};
 
@@ -31,8 +30,7 @@ fn unsafe_document_targets_fail_before_provider_contact() {
         calls: Arc::clone(&calls),
         _not_sync: Cell::new(0),
     };
-    let mut client =
-        TestClient::with_provider(workspace.clone(), provider, ProviderDescriptor::local());
+    let mut client = TestClient::with_provider(workspace.clone(), provider);
 
     let mut paths = vec![
         outside,
