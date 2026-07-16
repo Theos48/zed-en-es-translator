@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "package_id": "en-es-translator-0.1.0-linux-x86_64",
+  "package_version": "0.1.0",
+  "platform": "linux-x86_64",
+  "source_language": "en",
+  "target_language": "es",
+  "server_archive": {
+    "url": "https://github.com/Theos48/zed-en-es-translator/releases/download/v0.1.0/en-es-translator-0.1.0-linux-x86_64.tar.gz",
+    "archive_type": "gzip_tar",
+    "files": [
+      {
+        "role": "language_server",
+        "path": "bin/translator-lsp",
+        "installed_size": 4871592,
+        "installed_sha256": "1e76ce116cfe7873fd293c23ec3b0143a89df36b48ab8f7ddb71c6484be1779d",
+        "executable": true,
+        "spdx_conclusion": "MIT",
+        "source_url": "https://github.com/Theos48/zed-en-es-translator"
+      },
+      {
+        "role": "native_runner",
+        "path": "bin/translator-embedded-runtime",
+        "installed_size": 11898352,
+        "installed_sha256": "d69ffa86ff42166afb9ffe59947dea727a9cd9856177a392d35091b97e8614ac",
+        "executable": true,
+        "spdx_conclusion": "MPL-2.0",
+        "source_url": "https://github.com/mozilla/translations/tree/f31423c7c2c6ed8ae57d71a3d19a9db6f156060e"
+      },
+      {
+        "role": "notice",
+        "path": "LICENSES/THIRD_PARTY_NOTICES.md",
+        "installed_size": 1117,
+        "installed_sha256": "e2065d74bbaba8396340e3a3339a64edf1eac34bb57140080d73f4b3f58536d3",
+        "executable": false,
+        "spdx_conclusion": "MPL-2.0",
+        "source_url": "https://github.com/Theos48/zed-en-es-translator"
+      },
+      {
+        "role": "license",
+        "path": "LICENSES/MPL-2.0.txt",
+        "installed_size": 16725,
+        "installed_sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5",
+        "executable": false,
+        "spdx_conclusion": "MPL-2.0",
+        "source_url": "https://www.mozilla.org/MPL/2.0/"
+      },
+      {
+        "role": "source_instructions",
+        "path": "LICENSES/SOURCE.md",
+        "installed_size": 652,
+        "installed_sha256": "7cb75d5afe19bed6fe01a93d8ab181163e368a59830cb7b00d47c6e1acb21ef5",
+        "executable": false,
+        "spdx_conclusion": "MPL-2.0",
+        "source_url": "https://github.com/Theos48/zed-en-es-translator"
+      }
+    ]
+  },
+  "model_resources": [
+    {
+      "role": "model",
+      "record_id": "4e0e076d-8784-4978-9d68-b3d8d8d4848c",
+      "record_version": "3.0",
+      "architecture": "base-memory",
+      "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models-v2/1d705201-9be0-40c4-a0b4-18d1e3973777.zst",
+      "compressed_name": "model.enes.intgemm.alphas.bin.zst",
+      "compressed_size": 22085725,
+      "compressed_sha256": "ce7ba731d3352d7e595d96ed4fac513744568eaf9a271daf90b5fa8fa33b195d",
+      "installed_name": "model.enes.intgemm.alphas.bin",
+      "installed_size": 31561787,
+      "installed_sha256": "3b1c399511c01c84c36fae5c0524df44096288efdc8236e182b5c97d7ad2244c",
+      "spdx_conclusion": "MPL-2.0",
+      "license_url": "https://github.com/mozilla/firefox-translations-models/blob/e7957fc407441a5e3e35bbcbf9d60d9b35764618/LICENSE"
+    },
+    {
+      "role": "vocabulary",
+      "record_id": "478bd95a-e9f5-4b98-9c41-e2140bfb2beb",
+      "record_version": "3.0",
+      "architecture": "base-memory",
+      "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models-v2/b2b5907b-8759-4cc8-a721-89c283e6e45b.zst",
+      "compressed_name": "vocab.enes.spm.zst",
+      "compressed_size": 348996,
+      "compressed_sha256": "76b9ef220b22cec379f097852ca6312cabf065d5ddfb05149d5af31aa050ec22",
+      "installed_name": "vocab.enes.spm",
+      "installed_size": 816054,
+      "installed_sha256": "5ae254fa9b15aa182e70fd2a6186b1333c63a29a48043a9224c6aa4fcac058ad",
+      "spdx_conclusion": "MPL-2.0",
+      "license_url": "https://github.com/mozilla/firefox-translations-models/blob/e7957fc407441a5e3e35bbcbf9d60d9b35764618/LICENSE"
+    },
+    {
+      "role": "lexical_shortlist",
+      "record_id": "fb49bf6d-4532-4717-a577-b1d1da2cff4b",
+      "record_version": "3.0",
+      "architecture": "base-memory",
+      "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models-v2/51318160-1249-451f-80fb-12e61f8c1def.zst",
+      "compressed_name": "lex.50.50.enes.s2t.bin.zst",
+      "compressed_size": 1687731,
+      "compressed_sha256": "0dd2945dc8a5bbccad6fb1e1dfce137d363de839f4492cab717f60f1f38c09e6",
+      "installed_name": "lex.50.50.enes.s2t.bin",
+      "installed_size": 4198436,
+      "installed_sha256": "7d51237c0a07027dcd61643cfbbb0f8c48597d19907ef53d2cae9d6bec2cf25c",
+      "spdx_conclusion": "MPL-2.0",
+      "license_url": "https://github.com/mozilla/firefox-translations-models/blob/e7957fc407441a5e3e35bbcbf9d60d9b35764618/LICENSE"
+    }
+  ],
+  "budgets": {
+    "maximum_transfer_bytes": 67108864,
+    "maximum_active_installed_bytes": 134217728,
+    "maximum_lifecycle_bytes": 402653184,
+    "required_free_bytes": 536870912,
+    "peak_rss_bytes": 1073741824,
+    "inference_threads": 4,
+    "provider_deadline_ms": 15000
+  },
+  "license_bundle": {
+    "extension_spdx": "MIT",
+    "required_paths": [
+      "LICENSES/THIRD_PARTY_NOTICES.md",
+      "LICENSES/MPL-2.0.txt",
+      "LICENSES/SOURCE.md"
+    ]
+  }
+}

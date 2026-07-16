@@ -199,6 +199,9 @@ benchmark-results/
 !crates/
 !crates/**
 
+# Las excepciones de codigo anteriores no deben reabrir salidas Cargo anidadas.
+crates/**/target/
+
 # La extension Zed es un crate Rust/WASM aislado: su target/ y su .wasm
 # compilado son artefactos de build, no fuente versionable.
 zed-extension/target/

@@ -1,5 +1,8 @@
 pub mod azure_translator;
 pub mod contract;
+mod embedded_process;
+mod embedded_protocol;
+mod embedded_provider;
 pub mod errors;
 pub mod libretranslate;
 pub mod limits;
@@ -15,6 +18,8 @@ pub use contract::{
     validate_direct_text_input, validate_segments, InputKind, Language, Tone, TranslatableSegment,
     TranslateFailure, TranslateRequest, TranslateResult, TranslateSuccess,
 };
+pub use embedded_process::{EmbeddedProcessRunner, EmbeddedRunnerLimits};
+pub use embedded_provider::EmbeddedProcessProvider;
 pub use errors::ErrorCode;
 pub use libretranslate::LibreTranslateProvider;
 pub use limits::{

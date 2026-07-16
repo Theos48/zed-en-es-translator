@@ -1,0 +1,62 @@
+name: Marketplace package
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: marketplace-package-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build exact Linux x86_64 package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Validate tag and package version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=$(sed -n 's/^version = "\([^"]*\)"/\1/p' zed-extension/extension.toml)
+          test "${GITHUB_REF_NAME}" = "v${version}"
+          test "$(jq -r .package_version ops/marketplace/package.lock.json)" = "${version}"
+          test "$(basename "$(jq -r .server_archive.url ops/marketplace/package.lock.json)")" = "en-es-translator-${version}-linux-x86_64.tar.gz"
+
+      - name: Reproduce native runner and supply chain
+        run: make test-marketplace-native-supply-chain
+
+      - name: Build and validate deterministic package
+        shell: bash
+        run: |
+          set -euo pipefail
+          make test-marketplace-package
+          archive="target/marketplace-package/en-es-translator-${GITHUB_REF_NAME#v}-linux-x86_64.tar.gz"
+          first=$(sha256sum "$archive" | cut -d' ' -f1)
+          make marketplace-package
+          second=$(sha256sum "$archive" | cut -d' ' -f1)
+          test "$first" = "$second"
+          make test-marketplace-release-contents
+          sha256sum "$archive" >"$archive.sha256"
+
+      - name: Publish immutable release assets
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="target/marketplace-package/en-es-translator-${GITHUB_REF_NAME#v}-linux-x86_64.tar.gz"
+          gh release create "$GITHUB_REF_NAME" "$archive" "$archive.sha256" \
+            --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes

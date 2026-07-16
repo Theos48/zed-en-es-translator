@@ -110,6 +110,24 @@ en `binary.env` tras la brecha detectada en el smoke real. La arquitectura
 estable vive en D073-D075 y ADR 0004; el estado manual real vive en
 `manual-validation.md`.
 
+La septima feature formal fue implementada y validada en
+`specs/007-operational-providers/`. Demostro el camino local real y offline,
+pero su ciclo Docker/LibreTranslate queda como superficie de desarrollo y
+compatibilidad, no como instalacion del producto.
+
+La feature activa convierte F012 y F009 en una sola entrega orientada a la
+Gallery:
+
+```text
+specs/009-zed-marketplace-install/
+```
+
+La extension prepara automaticamente un paquete local Bergamot/Marian y tres
+recursos Mozilla `en -> es` de identidad fija, lo ejecuta offline y conserva
+todo dentro del work directory de Zed. La implementacion y validacion
+automatizada estan completas; tag/release, submission upstream y aceptacion
+limpia desde Gallery siguen siendo gates externos obligatorios.
+
 Direccion actual:
 
 - la base tecnica existe: core, CLI, MCP, fundacion de extension Zed local,
@@ -129,10 +147,13 @@ Direccion actual:
 - Azure AI Translator Text v3 permanece como adaptador avanzado opcional bajo
   target fijo, consentimiento por solicitud y pruebas controladas; no requiere
   evidencia real ni bloquea F011;
-- el modelo Argos `en-es` se aprovisionara localmente, pero no se redistribuira
-  mientras upstream no declare su licencia;
-- F009/publicacion queda pospuesta mientras se decide la secuencia con F012 y
-  se resuelve el gate independiente de licencia/redistribucion.
+- el camino publicado no usa el modelo Argos ni el ciclo Docker; usa recursos
+  Mozilla exactos con avisos y conclusiones de licencia registrados;
+- F012 y F009 convergen en `specs/009-zed-marketplace-install/`: Gallery,
+  preparacion automatica, traduccion offline y remocion por Zed son una sola
+  experiencia plug-and-play;
+- una PR local o dev extension no cierra la feature: tag/asset, submission al
+  registro y 3/3 instalaciones limpias posteriores al merge siguen abiertos.
 
 ## Flujo por feature
 
@@ -266,7 +287,7 @@ Completado como sexta feature formal, incluida validacion manual en Zed:
 
 ### 7. Configuracion operativa de proveedores reales
 
-Activa como septima feature formal:
+Completada como septima feature formal:
 
 ```text
 specs/007-operational-providers/
@@ -292,12 +313,16 @@ specs/007-operational-providers/
 - no redistribuir el modelo Argos `en-es` mientras su licencia siga sin
   declarar en upstream; este gate debe resolverse antes de publicar un bundle.
 
-### 8. Empaquetado y publicacion
+### 8. Paquete automatico y publicacion en Gallery
 
-Solo despues de tener la base segura, el flujo directo de extension y F011
-validada:
+Activa en `specs/009-zed-marketplace-install/`, combinando F012 y F009:
 
-- mantener remoto default deny;
-- confirmar cada envio fuera del equipo;
-- auditar dependencias;
-- preparar licencia y publicacion.
+- instalar desde la Gallery sin terminal, checkout, Docker, cuenta, key, ruta
+  o provider manual;
+- preparar automaticamente el paquete Linux `x86_64` con fuentes y hashes
+  fijos;
+- traducir localmente y offline con limites, redaccion y no-mutacion;
+- conservar active/previous y recuperar fallos sin limpieza manual;
+- dejar runtime/modelos/estado bajo propiedad de Zed para disable/uninstall;
+- publicar tag/asset exacto, abrir PR del proyecto y submission upstream;
+- cerrar solo tras tres instalaciones limpias desde la Gallery ya fusionada.

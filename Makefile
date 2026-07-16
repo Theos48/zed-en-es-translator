@@ -1,5 +1,5 @@
 RUST_VERSION ?= 1.96.1
-RUST_IMAGE ?= rust:$(RUST_VERSION)-bookworm
+RUST_IMAGE ?= rust:$(RUST_VERSION)-bookworm@sha256:a339861ae23e9abb272cea45dfafde21760d2ce6577a70f8a926153677902663
 RUST_DEV_IMAGE ?= zed-en-es-translator-rust:$(RUST_VERSION)
 CARGO_DENY_VERSION ?= 0.20.2
 DOCKER ?= docker
@@ -48,6 +48,18 @@ HELP_LINES := \
 	'  make zed-extension-prepare Prepare the local translator-mcp artifact path' \
 	'  make test-zed-extension Run Zed wrapper validation checks' \
 	'  make test-zed-ux-flow Run Zed UX flow documentation contract checks' \
+	'  make test-marketplace-foundation Run bounded runner and embedded-provider gates' \
+	'  make marketplace-runner-build Build the locked portable Bergamot runner' \
+	'  make test-marketplace-native-supply-chain Verify native source and binary identities' \
+	'  make test-marketplace-contract Run marketplace lock, manifest, extension and LSP contracts' \
+	'  make marketplace-extension-lock Resolve the marketplace extension dependency lock' \
+	'  make marketplace-package Build the deterministic Linux x86_64 release package' \
+	'  make test-marketplace-package Validate release archive paths, modes and hashes' \
+	'  make test-marketplace-acquisition Run automatic preparation/recovery contracts' \
+	'  make marketplace-real-package Prepare the exact public offline package' \
+	'  make test-marketplace-offline Run the real 20-case network-disabled benchmark' \
+	'  make test-marketplace-release-contents Validate budgets, executables and notices' \
+	'  make marketplace-release-check Validate the exact public tag and release asset' \
 	'  make format         Format Rust sources inside the container' \
 	'  make fmt           Check Rust formatting inside the container' \
 	'  make clippy        Run clippy inside the container' \
@@ -55,7 +67,7 @@ HELP_LINES := \
 	'  make shell         Open a shell inside the Rust container' \
 	'  make clean         Remove local Rust build/cache output'
 
-.PHONY: all help install pull-rust-base rust-image workspace-storage-check worktree-audit test-worktree-storage rust-version test test-core test-mcp test-operational-providers test-real-provider-config translator-cli-release provider-local-prepare provider-local-start provider-local-status provider-local-verify provider-local-stop provider-local-update provider-local-rollback provider-local-clean zed-direct-lock zed-direct-server-release zed-direct-prepare test-direct-zed-translation zed-extension-build zed-extension-server-release zed-extension-prepare test-zed-extension test-zed-ux-flow format fmt clippy deny shell clean
+.PHONY: all help install pull-rust-base rust-image workspace-storage-check worktree-audit test-worktree-storage rust-version test test-core test-mcp test-operational-providers test-real-provider-config translator-cli-release provider-local-prepare provider-local-start provider-local-status provider-local-verify provider-local-stop provider-local-update provider-local-rollback provider-local-clean zed-direct-lock zed-direct-server-release zed-direct-prepare test-direct-zed-translation zed-extension-build zed-extension-server-release zed-extension-prepare test-zed-extension test-zed-ux-flow marketplace-source-fetch marketplace-runner-build marketplace-runner-contract-build marketplace-extension-lock marketplace-package marketplace-real-package marketplace-release-check test-marketplace-package test-marketplace-native-supply-chain test-marketplace-foundation test-marketplace-contract test-marketplace-acquisition test-marketplace-offline test-marketplace-release-contents format fmt clippy deny shell clean
 
 all: test
 
@@ -77,7 +89,7 @@ test-worktree-storage:
 	@./tests/integration/worktree_storage_guard.sh
 
 rust-image: workspace-storage-check
-	$(DOCKER) build --build-arg RUST_IMAGE=$(RUST_IMAGE) --build-arg CARGO_DENY_VERSION=$(CARGO_DENY_VERSION) -t $(RUST_DEV_IMAGE) -f docker/rust-toolchain.Dockerfile .
+	$(DOCKER) build --provenance=false --build-arg RUST_IMAGE=$(RUST_IMAGE) --build-arg CARGO_DENY_VERSION=$(CARGO_DENY_VERSION) -t $(RUST_DEV_IMAGE) -f docker/rust-toolchain.Dockerfile .
 
 rust-version: rust-image
 	$(RUST_RUN) rustc --version
@@ -100,7 +112,7 @@ test-operational-providers: rust-image
 	$(RUST_RUN) cargo test -p translator-core --test operational_provider_configuration --test azure_translator_provider --test azure_translator_failures --test operational_provider_redaction
 	$(RUST_RUN) cargo test -p translator-cli --test cli_operational_providers
 	$(RUST_RUN) cargo test -p translator-lsp --test operational_provider_locality
-	$(RUST_RUN) cargo test --manifest-path zed-extension/Cargo.toml --test provider_settings --test direct_lsp --locked
+	$(RUST_RUN) cargo test --manifest-path zed-extension/Cargo.toml --test diagnostics_redaction --test extension_manifest --locked
 	$(foreach t,$(OPERATIONAL_PROVIDER_SHELL_TESTS),./tests/integration/$(t).sh &&) true
 
 test-real-provider-config: rust-image
@@ -108,7 +120,7 @@ test-real-provider-config: rust-image
 	$(RUST_RUN) cargo test -p translator-cli --test cli_operational_providers --test cli_provider_configuration --test cli_remote_confirmation --test cli_provider_failures
 	$(RUST_RUN) cargo test -p translator-mcp --test mcp_provider_configuration --test mcp_remote_confirmation --test mcp_provider_failures
 	$(RUST_RUN) cargo test -p translator-lsp --test operational_provider_locality --test remote_confirmation --test remote_privacy
-	$(RUST_RUN) cargo test --manifest-path zed-extension/Cargo.toml --test provider_settings --test diagnostics_redaction --test direct_lsp --locked
+	$(RUST_RUN) cargo test --manifest-path zed-extension/Cargo.toml --test diagnostics_redaction --test extension_manifest --locked
 
 translator-cli-release: rust-image
 	$(RUST_RUN) cargo build -p translator-cli --release --locked
@@ -165,16 +177,66 @@ zed-extension-prepare: zed-extension-server-release
 
 # Single source of truth for the test-zed-extension script list, expanded by
 # make (not the shell) so `make -n test-zed-extension` still prints each
-# literal script path for tests/integration/zed_extension_make_targets.sh.
-ZED_EXTENSION_TESTS := prepare_artifact prepare_idempotent make_targets dependency_scope no_mutation remote_denial
-
-test-zed-extension: zed-extension-build zed-extension-prepare
-	$(foreach t,$(ZED_EXTENSION_TESTS),./tests/integration/zed_extension_$(t).sh &&) true
+test-zed-extension: zed-extension-build
+	@./tests/integration/marketplace_no_setup.sh
 
 ZED_UX_FLOW_TESTS := make_targets docs_contract evidence_contract privacy_contract failure_contract redaction_contract
 
 test-zed-ux-flow:
 	$(foreach t,$(ZED_UX_FLOW_TESTS),./tests/integration/zed_ux_flow_$(t).sh &&) true
+
+marketplace-runner-contract-build: rust-image
+	mkdir -p target/marketplace-native-test
+	$(RUST_RUN) g++ -std=c++17 -Wall -Wextra -Wpedantic -Werror -O2 -march=x86-64 -mtune=generic -DTRANSLATOR_EMBEDDED_CONTROLLED_FIXTURE=1 native/translator-embedded-runtime/src/main.cpp -o target/marketplace-native-test/translator-embedded-runtime
+
+marketplace-source-fetch:
+	@./scripts/marketplace/fetch-native-source.sh
+
+marketplace-runner-build: rust-image marketplace-source-fetch
+	rm -rf target/embedded-native-release
+	$(DOCKER) run --rm --network none $(RUST_USER) $(RUST_ENV) -e PATH=/workspace/scripts/marketplace/offline-bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin $(RUST_MOUNTS) $(RUST_DEV_IMAGE) cmake -S native/translator-embedded-runtime -B target/embedded-native-release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=/workspace/scripts/marketplace/portable-cxx -DTRANSLATOR_BERGAMOT_SOURCE_DIR=/workspace/.cache/embedded-source/mozilla-translations
+	$(DOCKER) run --rm --network none $(RUST_USER) $(RUST_ENV) -e PATH=/workspace/scripts/marketplace/offline-bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin $(RUST_MOUNTS) $(RUST_DEV_IMAGE) cmake --build target/embedded-native-release --target translator-embedded-runtime --parallel 4
+
+test-marketplace-native-supply-chain: marketplace-runner-build
+	@./tests/integration/marketplace_native_supply_chain.sh
+
+marketplace-package: zed-direct-server-release marketplace-runner-build
+	@./scripts/marketplace/build-package.sh
+
+test-marketplace-package: marketplace-package
+	@./scripts/marketplace/validate-package.sh
+
+test-marketplace-foundation: marketplace-runner-contract-build
+	$(RUST_RUN) cargo test -p translator-core --test embedded_provider_configuration --test embedded_provider --test embedded_runner_boundary --locked
+	EMBEDDED_RUNNER=target/marketplace-native-test/translator-embedded-runtime native/translator-embedded-runtime/tests/runner_contract.sh
+
+marketplace-extension-lock: rust-image
+	$(RUST_RUN) cargo check --manifest-path zed-extension/Cargo.toml
+
+test-marketplace-contract: marketplace-extension-lock
+	@./tests/integration/marketplace_package_lock.sh
+	@./tests/integration/marketplace_no_setup.sh
+	$(RUST_RUN) cargo test --manifest-path zed-extension/Cargo.toml --test package_lock --locked
+	$(RUST_RUN) cargo test -p translator-lsp --test marketplace_embedded --locked
+
+test-marketplace-acquisition: marketplace-extension-lock
+	$(RUST_RUN) cargo test --manifest-path zed-extension/Cargo.toml --test acquisition_happy_path --test acquisition_failures --test acquisition_concurrency --test acquisition_rollback --test package_state --test unsupported_platform --locked
+	@./tests/integration/marketplace_acquisition_concurrency.sh
+
+marketplace-real-package: test-marketplace-package
+	@./scripts/marketplace/prepare-real-package.sh
+
+test-marketplace-release-contents: test-marketplace-package
+	@./tests/integration/marketplace_release_contents.sh
+	@./tests/integration/marketplace_removal_contract.sh
+
+test-marketplace-offline: marketplace-real-package
+	@./tests/integration/marketplace_offline_privacy.sh
+	@./tests/integration/marketplace_real_smoke.sh
+	@./tests/integration/marketplace_benchmark.sh
+
+marketplace-release-check:
+	@./tests/integration/marketplace_release_check.sh
 
 format: rust-image
 	$(RUST_RUN) cargo fmt --all

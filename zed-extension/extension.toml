@@ -1,13 +1,11 @@
 id = "en-es-translator"
 name = "English to Spanish Translator"
-version = "0.0.1"
+version = "0.1.0"
 schema_version = 1
 authors = ["theos"]
-description = "Local English to Spanish translator MCP wrapper."
-repository = "https://github.com/theos/zed-en-es-translator"
+description = "Private offline English-to-Spanish translation with automatic local setup."
+repository = "https://github.com/Theos48/zed-en-es-translator"
 
 [language_servers.en-es-translator]
 name = "English to Spanish Translator"
 languages = ["Markdown", "Plain Text"]
-
-[context_servers.translator-en-es]

@@ -1,81 +1,38 @@
 use std::fs;
 use std::path::Path;
 
-const MANIFEST_PATH: &str = "extension.toml";
-
 #[test]
-fn manifest_has_required_metadata() {
-    let manifest = parsed_manifest();
+fn manifest_registers_one_direct_language_server_and_no_manual_surface() {
+    let text = manifest_text();
+    let manifest: toml::Value = toml::from_str(&text).expect("extension manifest");
 
     assert_eq!(manifest["id"].as_str(), Some("en-es-translator"));
+    assert_eq!(manifest["version"].as_str(), Some("0.1.0"));
     assert_eq!(
-        manifest["name"].as_str(),
-        Some("English to Spanish Translator")
+        manifest["language_servers"]["en-es-translator"]["languages"]
+            .as_array()
+            .expect("languages"),
+        &[
+            toml::Value::String("Markdown".to_string()),
+            toml::Value::String("Plain Text".to_string())
+        ]
     );
-    assert_eq!(manifest["version"].as_str(), Some("0.0.1"));
-    assert_eq!(manifest["schema_version"].as_integer(), Some(1));
-    assert_eq!(
-        manifest["authors"].as_array().map(|authors| authors
-            .iter()
-            .filter_map(toml::Value::as_str)
-            .collect::<Vec<_>>()),
-        Some(vec!["theos"])
-    );
-    assert_eq!(
-        manifest["description"].as_str(),
-        Some("Local English to Spanish translator MCP wrapper.")
-    );
-}
-
-#[test]
-fn manifest_declares_exactly_one_context_server() {
-    let manifest = parsed_manifest();
-
-    assert_eq!(context_server_ids(&manifest), vec!["translator-en-es"]);
-}
-
-#[test]
-fn manifest_context_server_matches_launch_contract() {
-    let manifest = manifest_text();
-
-    assert!(manifest.contains("[context_servers.translator-en-es]"));
-}
-
-#[test]
-fn manifest_does_not_declare_out_of_scope_capabilities() {
-    let manifest = manifest_text();
-
+    assert!(manifest.get("context_servers").is_none());
     for forbidden in [
-        "[languages.",
-        "[themes.",
-        "[grammars.",
-        "[snippets.",
-        "[debug_adapters.",
+        "binary_path",
         "provider",
         "api_key",
         "base_url",
         "/home/",
+        "make ",
+        "docker",
+        "cargo",
     ] {
-        assert!(
-            !manifest.contains(forbidden),
-            "manifest should not contain forbidden fragment {forbidden}"
-        );
+        assert!(!text.to_ascii_lowercase().contains(forbidden));
     }
 }
 
 fn manifest_text() -> String {
-    fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join(MANIFEST_PATH))
-        .expect("extension manifest should be readable")
-}
-
-fn parsed_manifest() -> toml::Value {
-    toml::from_str(&manifest_text()).expect("extension manifest should be valid TOML")
-}
-
-fn context_server_ids(manifest: &toml::Value) -> Vec<&str> {
-    manifest
-        .get("context_servers")
-        .and_then(toml::Value::as_table)
-        .map(|table| table.keys().map(String::as_str).collect())
-        .unwrap_or_default()
+    fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join("extension.toml"))
+        .expect("extension manifest")
 }

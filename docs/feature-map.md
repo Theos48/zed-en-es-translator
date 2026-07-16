@@ -31,13 +31,15 @@ Estado actual:
   Zed.
 - Completado formal: F011 mediante `specs/007-operational-providers/`, incluido
   el camino local real, ciclo de vida, limpieza y evidencia redaccionada.
-- Siguiente gate: preparar F012 para el modelo local embebido/no-Docker antes
-  de decidir el alcance de publicacion.
+- Activo: F012 y F009 convergen en
+  `specs/009-zed-marketplace-install/`; el paquete local automatico completo
+  conserva como pendientes los gates externos de publicacion y Gallery.
 
-Prioridad actual: preparar F012 sobre la base local/offline real y sin cuenta
-cerrada por F011. El remoto permanece opcional y controlado; la siguiente
-mejora de UX de proveedor debe estudiar un modelo local embebido/no-Docker con
-licencia, tamano, actualizacion y empaquetado revisados.
+Prioridad actual: cerrar la instalacion plug-and-play desde Gallery. El usuario
+no administra el provider: Zed prepara un paquete local verificado, traduce
+offline y elimina su estado al desinstalar. Tag/asset, submission upstream y
+aceptacion 3/3 desde la Gallery siguen siendo parte del cierre, no una feature
+posterior.
 
 Regla de direccion desde F006: las features que toquen Zed deben ser
 extension-first. El Agent Panel puede usarse para validar integracion o cubrir
@@ -187,9 +189,9 @@ Criterios:
 
 Objetivo: preparar el proyecto para distribucion.
 
-Estado: futuro posterior a F011. La publicacion debe esperar a que exista una
-experiencia directa de extension sin Agent, un camino local real validado sin
-cuenta y una decision legalmente revisada para cualquier modelo distribuido.
+Estado: activo junto con F012 en `specs/009-zed-marketplace-install/`. La
+experiencia directa y el camino local existen; la feature empaqueta el runtime,
+automatiza la adquisicion y lleva la misma entrega hasta release y registro.
 
 Criterios:
 
@@ -283,7 +285,10 @@ Objetivo: ofrecer la experiencia normal de traduccion sin cuenta, API key,
 servicio remoto ni ciclo Docker visible para el usuario, manteniendo ejecucion
 local, privacidad y actualizaciones verificables.
 
-Estado: futuro; requiere un ciclo Spec Kit propio despues de cerrar F011.
+Estado: activo e integrado con F009 en
+`specs/009-zed-marketplace-install/`. La decision vigente usa Bergamot/Marian y
+los tres recursos Mozilla `en -> es` exactos, sin conservar el manager manual
+del prototipo.
 
 Criterios iniciales para `speckit-specify`:
 

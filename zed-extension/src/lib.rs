@@ -1,183 +1,94 @@
-//! Direct Zed translation wrapper with MCP compatibility.
+//! Plug-and-play local English-to-Spanish translation for Zed.
 
+pub mod acquisition;
 pub mod diagnostics;
-pub mod launch;
-pub mod settings;
+pub mod package;
 
-use std::collections::HashMap;
+use std::path::Path;
 
-use launch::{build_launch_profile, build_lsp_launch_profile, CONTEXT_SERVER_ID};
-use settings::{CommandSettingsInput, LaunchSettings};
+use acquisition::{Acquisition, HostPlatform, ZedDownloader};
+use package::PublishedPackage;
 use zed_extension_api as zed;
 
-/// Zed extension entry point.
-pub struct EnEsTranslatorExtension;
+const LANGUAGE_SERVER_ID: &str = "en-es-translator";
+const PACKAGE_LOCK: &str = include_str!("../../ops/marketplace/package.lock.json");
+
+/// Zed extension entry point. Runtime state lives only in Zed's work directory.
+pub struct EnEsTranslatorExtension {
+    acquisition: Acquisition<ZedDownloader>,
+}
 
 impl zed::Extension for EnEsTranslatorExtension {
     fn new() -> Self {
-        Self
-    }
-
-    fn context_server_command(
-        &mut self,
-        context_server_id: &zed::ContextServerId,
-        project: &zed::Project,
-    ) -> zed::Result<zed::Command> {
-        let zed_settings =
-            zed::settings::ContextServerSettings::for_project(context_server_id.as_ref(), project)
-                .map_err(redact_internal_error)?;
-        let command = command_settings_input(zed_settings.command);
-        let launch_settings = LaunchSettings::from_parts(zed_settings.settings.as_ref(), command)
-            .map_err(|event| event.to_user_message())?;
-        let profile = build_launch_profile(context_server_id.as_ref(), &launch_settings)
-            .map_err(|event| event.to_user_message())?;
-
-        Ok(zed::Command {
-            command: profile.command,
-            args: profile.args,
-            env: profile.env,
-        })
+        Self {
+            acquisition: Acquisition::new(Path::new("."), ZedDownloader),
+        }
     }
 
     fn language_server_command(
         &mut self,
         language_server_id: &zed::LanguageServerId,
-        worktree: &zed::Worktree,
+        _worktree: &zed::Worktree,
     ) -> zed::Result<zed::Command> {
-        let zed_settings =
-            zed::settings::LspSettings::for_worktree(language_server_id.as_ref(), worktree)
-                .map_err(redact_lsp_internal_error)?;
-        let command = command_settings_input(zed_settings.binary);
-        let launch_settings = LaunchSettings::from_parts(zed_settings.settings.as_ref(), command)
-            .map_err(direct_lsp_settings_error)?;
-        let profile = build_lsp_launch_profile(language_server_id.as_ref(), &launch_settings)
-            .map_err(|event| event.to_user_message())?;
+        if language_server_id.as_ref() != LANGUAGE_SERVER_ID {
+            return Err("Unsupported translation language server.".to_string());
+        }
+        let package = PublishedPackage::parse(PACKAGE_LOCK).map_err(|error| error.to_string())?;
+        let platform = host_platform();
+        zed::set_language_server_installation_status(
+            language_server_id,
+            &zed::LanguageServerInstallationStatus::CheckingForUpdate,
+        );
+        let preparation = match self.acquisition.ready_command(&package, platform) {
+            Ok(Some(command)) => Ok(command),
+            Ok(None) => {
+                zed::set_language_server_installation_status(
+                    language_server_id,
+                    &zed::LanguageServerInstallationStatus::Downloading,
+                );
+                self.acquisition.prepare(&package, platform)
+            }
+            Err(error) => Err(error),
+        };
+        let command = match preparation {
+            Ok(command) => command,
+            Err(error) => {
+                let message = diagnostics::acquisition_message(error);
+                zed::set_language_server_installation_status(
+                    language_server_id,
+                    &zed::LanguageServerInstallationStatus::Failed(message.clone()),
+                );
+                return Err(message);
+            }
+        };
+        zed::set_language_server_installation_status(
+            language_server_id,
+            &zed::LanguageServerInstallationStatus::None,
+        );
 
         Ok(zed::Command {
-            command: profile.command,
-            args: profile.args,
-            env: profile.env,
+            command: command.to_string_lossy().into_owned(),
+            args: Vec::new(),
+            env: vec![(
+                "TRANSLATOR_PROVIDER".to_string(),
+                "embedded_local".to_string(),
+            )],
         })
     }
+}
 
-    fn context_server_configuration(
-        &mut self,
-        context_server_id: &zed::ContextServerId,
-        _project: &zed::Project,
-    ) -> zed::Result<Option<zed::ContextServerConfiguration>> {
-        if context_server_id.as_ref() != CONTEXT_SERVER_ID {
-            return Ok(None);
-        }
-
-        Ok(Some(zed::ContextServerConfiguration {
-            installation_instructions: installation_instructions(),
-            settings_schema: settings_schema(),
-            default_settings: default_settings(),
-        }))
+fn host_platform() -> HostPlatform {
+    match zed::current_platform() {
+        (zed::Os::Linux, zed::Architecture::X8664) => HostPlatform::LinuxX8664,
+        (zed::Os::Linux, zed::Architecture::Aarch64) => HostPlatform::LinuxAarch64,
+        (zed::Os::Linux, zed::Architecture::X86) => HostPlatform::LinuxX86,
+        (zed::Os::Mac, zed::Architecture::Aarch64) => HostPlatform::MacAarch64,
+        (zed::Os::Mac, zed::Architecture::X86) => HostPlatform::MacX86,
+        (zed::Os::Mac, zed::Architecture::X8664) => HostPlatform::MacX8664,
+        (zed::Os::Windows, zed::Architecture::Aarch64) => HostPlatform::WindowsAarch64,
+        (zed::Os::Windows, zed::Architecture::X86) => HostPlatform::WindowsX86,
+        (zed::Os::Windows, zed::Architecture::X8664) => HostPlatform::WindowsX8664,
     }
-}
-
-fn command_settings_input(command: Option<zed::settings::CommandSettings>) -> CommandSettingsInput {
-    let Some(command) = command else {
-        return CommandSettingsInput::default();
-    };
-
-    let env = hashmap_to_sorted_pairs(command.env.unwrap_or_default());
-
-    CommandSettingsInput::new(command.path, command.arguments.unwrap_or_default(), env)
-}
-
-/// Convert Zed's unordered command environment map into a deterministic,
-/// sorted list of pairs. Sorting happens here (not in the caller) so the
-/// function name and behavior stay in sync: callers must not have to
-/// remember to sort separately, or determinism guarantees like
-/// `repeated_startup_failure_revalidates_without_state` could silently break.
-fn hashmap_to_sorted_pairs(values: HashMap<String, String>) -> Vec<(String, String)> {
-    let mut pairs: Vec<(String, String)> = values.into_iter().collect();
-    pairs.sort_by(|left, right| left.0.cmp(&right.0));
-    pairs
-}
-
-fn redact_internal_error(_error: String) -> String {
-    crate::diagnostics::diagnostic_with_action(
-        crate::diagnostics::DiagnosticPhase::Configuration,
-        crate::diagnostics::DiagnosticCode::InternalExtensionError,
-        "Zed context server settings could not be loaded.",
-    )
-    .to_user_message()
-}
-
-fn redact_lsp_internal_error(_error: String) -> String {
-    crate::diagnostics::direct_diagnostic_with_action(
-        crate::diagnostics::DiagnosticPhase::Configuration,
-        crate::diagnostics::DiagnosticCode::InternalExtensionError,
-        "Zed language server settings could not be loaded.",
-    )
-    .to_user_message()
-}
-
-fn direct_lsp_settings_error(event: crate::diagnostics::DiagnosticEvent) -> String {
-    crate::diagnostics::direct_diagnostic_with_action(
-        event.phase,
-        event.code,
-        "The direct language server configuration was rejected.",
-    )
-    .to_user_message()
-}
-
-fn installation_instructions() -> String {
-    "Run `make zed-extension-prepare`, then set `binary_path` to the printed translator-mcp artifact path.".to_string()
-}
-
-fn settings_schema() -> String {
-    r#"{
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["binary_path"],
-  "properties": {
-    "binary_path": {
-      "type": "string",
-      "description": "Absolute path printed by make zed-extension-prepare for target/release/translator-mcp."
-    },
-    "provider": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "mode": {
-          "type": "string",
-          "enum": ["mock", "libretranslate"],
-          "default": "mock"
-        },
-        "url": {
-          "type": "string",
-          "default": ""
-        },
-        "api_key_env": {
-          "type": "string",
-          "default": ""
-        },
-        "allow_remote": {
-          "type": "boolean",
-          "default": false
-        }
-      }
-    }
-  }
-}"#
-    .to_string()
-}
-
-fn default_settings() -> String {
-    r#"{
-  "binary_path": "",
-  "provider": {
-    "mode": "mock",
-    "url": "",
-    "api_key_env": "",
-    "allow_remote": false
-  }
-}"#
-    .to_string()
 }
 
 zed::register_extension!(EnEsTranslatorExtension);

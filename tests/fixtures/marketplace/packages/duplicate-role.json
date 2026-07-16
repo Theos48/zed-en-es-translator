@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "package_id": "duplicate-role",
+  "package_version": "0.1.0",
+  "platform": "linux-x86_64",
+  "source_language": "en",
+  "target_language": "es",
+  "artifacts": [
+    {
+      "role": "model",
+      "path": "models/first.bin",
+      "installed_size": 1,
+      "installed_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "executable": false
+    },
+    {
+      "role": "model",
+      "path": "models/second.bin",
+      "installed_size": 1,
+      "installed_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "executable": false
+    }
+  ]
+}

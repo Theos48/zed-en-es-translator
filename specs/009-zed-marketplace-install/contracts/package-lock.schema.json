@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Theos48/zed-en-es-translator/specs/009-zed-marketplace-install/contracts/package-lock.schema.json",
+  "title": "Published Translation Package Lock",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "package_id",
+    "package_version",
+    "platform",
+    "source_language",
+    "target_language",
+    "server_archive",
+    "model_resources",
+    "budgets",
+    "license_bundle"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "package_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$"
+    },
+    "package_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "platform": { "const": "linux-x86_64" },
+    "source_language": { "const": "en" },
+    "target_language": { "const": "es" },
+    "server_archive": { "$ref": "#/$defs/serverArchive" },
+    "model_resources": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/modelResource" }
+    },
+    "budgets": { "$ref": "#/$defs/budgets" },
+    "license_bundle": { "$ref": "#/$defs/licenseBundle" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "safePath": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$"
+    },
+    "httpsUrl": {
+      "type": "string",
+      "pattern": "^https://[^?#]+$"
+    },
+    "serverArchive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "archive_type", "files"],
+      "properties": {
+        "url": { "$ref": "#/$defs/httpsUrl" },
+        "archive_type": { "const": "gzip_tar" },
+        "files": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/serverFile" }
+        }
+      }
+    },
+    "serverFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "path",
+        "installed_size",
+        "installed_sha256",
+        "executable",
+        "spdx_conclusion",
+        "source_url"
+      ],
+      "properties": {
+        "role": {
+          "enum": ["language_server", "native_runner", "notice", "source_instructions", "license"]
+        },
+        "path": { "$ref": "#/$defs/safePath" },
+        "installed_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 134217728
+        },
+        "installed_sha256": { "$ref": "#/$defs/sha256" },
+        "executable": { "type": "boolean" },
+        "spdx_conclusion": { "type": "string", "minLength": 3, "maxLength": 256 },
+        "source_url": { "$ref": "#/$defs/httpsUrl" }
+      }
+    },
+    "modelResource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "record_id",
+        "url",
+        "compressed_name",
+        "compressed_size",
+        "compressed_sha256",
+        "installed_name",
+        "installed_size",
+        "installed_sha256",
+        "spdx_conclusion",
+        "license_url"
+      ],
+      "properties": {
+        "role": { "enum": ["model", "vocabulary", "lexical_shortlist"] },
+        "record_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "url": { "$ref": "#/$defs/httpsUrl" },
+        "compressed_name": { "$ref": "#/$defs/safePath" },
+        "compressed_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 67108864
+        },
+        "compressed_sha256": { "$ref": "#/$defs/sha256" },
+        "installed_name": { "$ref": "#/$defs/safePath" },
+        "installed_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 134217728
+        },
+        "installed_sha256": { "$ref": "#/$defs/sha256" },
+        "spdx_conclusion": { "const": "MPL-2.0" },
+        "license_url": { "$ref": "#/$defs/httpsUrl" }
+      }
+    },
+    "budgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maximum_transfer_bytes",
+        "maximum_active_installed_bytes",
+        "maximum_lifecycle_bytes",
+        "required_free_bytes",
+        "peak_rss_bytes",
+        "inference_threads",
+        "provider_deadline_ms"
+      ],
+      "properties": {
+        "maximum_transfer_bytes": { "const": 67108864 },
+        "maximum_active_installed_bytes": { "const": 134217728 },
+        "maximum_lifecycle_bytes": { "const": 402653184 },
+        "required_free_bytes": { "const": 536870912 },
+        "peak_rss_bytes": { "const": 1073741824 },
+        "inference_threads": { "const": 4 },
+        "provider_deadline_ms": { "const": 15000 }
+      }
+    },
+    "licenseBundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["extension_spdx", "required_paths"],
+      "properties": {
+        "extension_spdx": { "const": "MIT" },
+        "required_paths": {
+          "type": "array",
+          "minItems": 3,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/safePath" }
+        }
+      }
+    }
+  }
+}

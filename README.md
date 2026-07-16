@@ -1,19 +1,36 @@
-# zed-en-es-translator
+# English to Spanish Translator for Zed
 
-Proyecto para explorar y desarrollar una integracion de traduccion ingles -> espanol dentro de Zed.
+Extension de traduccion local ingles -> espanol para Markdown y texto plano.
+La experiencia de producto es plug-and-play: instalar desde la Extension
+Gallery de Zed, abrir un documento, ejecutar la accion de traduccion y leer el
+preview de solo lectura. No requiere terminal, checkout del repositorio,
+Docker, servicio, cuenta, API key, ruta de binario ni ajuste de provider.
 
-## Objetivo inicial
+## Instalacion y uso
 
-Permitir que una persona traduzca texto en ingles a espanol sin salir del editor Zed, con un flujo que se sienta integrado y que pueda evolucionar por features pequenas guiadas por SDD y TDD.
+La entrada en la Gallery esta pendiente de la publicacion y revision upstream
+descrita en `specs/009-zed-marketplace-install/`. Cuando esa entrada este
+disponible, el flujo de usuario sera:
 
-## Objetivo de producto
+1. Abrir la Extension Gallery de Zed.
+2. Buscar **English to Spanish Translator** e instalarla.
+3. Abrir Markdown o texto plano y ejecutar **Translate English to Spanish**.
+4. Leer la traduccion en el preview de Zed; el archivo original no cambia.
 
-Construir una extension nativa de traduccion para Zed, disenada como producto
-propio para trabajo tecnico: seleccion de texto, accion desde menu
-contextual/comando/boton, preview legible, preservacion de Markdown/codigo,
-control explicito para copiar/insertar/aplicar, proveedores locales o
-gratuitos/no pago, remoto siempre confirmado, privacidad por defecto y sin
-depender de Agent Panel como experiencia principal.
+La primera activacion descarga automaticamente un paquete fijo y los tres
+recursos publicos `en -> es`, comprueba tamano y SHA-256 antes de ejecutarlos y
+guarda todo dentro del directorio de trabajo de la extension. Despues funciona
+sin red. La primera publicacion soporta Linux `x86_64`; las demas plataformas
+muestran un mensaje dentro de Zed y no descargan nada.
+
+## Privacidad y desinstalacion
+
+El texto y la traduccion se procesan localmente y no forman parte de las
+descargas. El proceso de inferencia recibe un entorno limpio, limites de tiempo,
+memoria/salida e hilos, y no enlaza un cliente de red. Deshabilitar la extension
+impide nuevos arranques. Desinstalarla desde Zed elimina su directorio de
+trabajo, incluido runtime, modelos y estado; no existe una instalacion global o
+un segundo ciclo de vida que el usuario deba limpiar.
 
 ## Estado
 
@@ -27,6 +44,7 @@ specs/004-zed-ux-flow/                completada formal
 specs/005-real-provider-config/        completada formal
 specs/006-direct-zed-translation/      completada formal
 specs/007-operational-providers/       completada formal
+specs/009-zed-marketplace-install/     implementacion/publicacion en curso
 ```
 
 La primera feature entrega un MVP tecnico offline: core Rust, `MockProvider`,
@@ -92,8 +110,10 @@ es una superficie de aceptacion F011. El modelo Argos `en-es` no se
 redistribuira mientras upstream no declare su licencia; ese gate legal sigue
 siendo independiente para F009/empaquetado y publicacion.
 
-El proveedor local se administra solo mediante la interfaz versionada del
-proyecto:
+El proveedor LibreTranslate historico es una superficie de desarrollo y
+compatibilidad; no forma parte del uso de la extension publicada. Para
+mantenimiento del camino anterior se administra mediante la interfaz
+versionada del proyecto:
 
 ```bash
 make provider-local-prepare
