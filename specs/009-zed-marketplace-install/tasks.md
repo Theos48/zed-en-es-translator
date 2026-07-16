@@ -187,11 +187,11 @@ repository and move from a project package to an actual Gallery submission.
 - [x] T051 [P] Synchronize current direction/status in `docs/PLAN.md` and `docs/feature-map.md` without deleting future-platform backlog detail
 - [x] T052 Review all 43 items in `specs/009-zed-marketplace-install/checklists/marketplace-release.md` against final artifacts and record any changed result inline
 - [x] T053 Add the deterministic tagged-package CI/release workflow in `.github/workflows/marketplace-package.yml`
-- [ ] T054 After feature 010 regenerates the candidate, run `marketplace-release-check` against the public tag/asset/version/lock in `Makefile` and `tests/integration/marketplace_release_check.sh`; the target already exists and currently fails only because the tag is absent
+- [x] T054 After feature 010 regenerates the candidate, run `marketplace-release-check` against the public tag/asset/version/lock in `Makefile` and `tests/integration/marketplace_release_check.sh`; the public check passes against `v0.1.0`
 - [x] T055 Run `make workspace-storage-check`, `make worktree-audit`, `make format`, `make fmt`, `make clippy`, `make deny` and `git diff --check`, fixing only feature-related findings
 - [x] T056 Run `make test` plus every marketplace-focused target and record the complete redacted gate matrix in `specs/009-zed-marketplace-install/validation.md`
-- [ ] T057 Run the pre-publication interactive Zed test with the exact post-convergence release package (not a repository binary) and record redacted evidence in `specs/009-zed-marketplace-install/validation.md`
-- [ ] T058 Publish the exact post-convergence public project tag/release asset named by `ops/marketplace/package.lock.json` and rerun `make marketplace-release-check`
+- [ ] T057 Run the pre-Gallery interactive Zed test with the exact public post-convergence release package (not a repository binary) and record redacted evidence in `specs/009-zed-marketplace-install/validation.md`
+- [x] T058 Publish the exact post-convergence public project tag/release asset named by `ops/marketplace/package.lock.json` and rerun `make marketplace-release-check`
 - [x] T059 Commit and push the feature branch with Conventional Commits, open the project PR and derive every Spec Kit/test/manual/external gate in its body from `specs/009-zed-marketplace-install/validation.md`
 - [ ] T060 Submit the HTTPS submodule/version change to `zed-industries/extensions` only after feature 010 and T054-T058 pass, then after upstream merge run three independent clean Gallery acceptances and append the 3/3 result to `specs/009-zed-marketplace-install/validation.md`
 
