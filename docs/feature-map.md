@@ -23,7 +23,7 @@ demostrado y revisión constitucional.
 
 **Estado**: implementado en `specs/009-zed-marketplace-install/`; release de
 proyecto `v0.1.0` publicada y verificada; PR upstream #6843 enviado con checks
-técnicos aprobados, pendiente de CLA, revisión y publicación en Gallery.
+aprobados, pendiente de revisión y publicación en Gallery.
 
 Entrega:
 
@@ -36,7 +36,7 @@ Entrega:
 
 Pendiente:
 
-1. firmar el CLA y obtener el merge del PR upstream;
+1. obtener el merge del PR upstream;
 2. después del merge, validar interactivamente el paquete público
    exacto y completar 3/3 instalaciones limpias.
 

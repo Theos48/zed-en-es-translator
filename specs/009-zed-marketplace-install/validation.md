@@ -75,10 +75,9 @@ clean Gallery acceptance because it intentionally used a development extension.
   seconds.
 - [Upstream Danger run 29522063706](https://github.com/zed-industries/extensions/actions/runs/29522063706)
   passed.
-- `verification/cla-signed` is the only failing check. Zed requires account
-  `Theos48` to sign the contributor agreement at <https://zed.dev/cla> and then
-  request `@cla-bot check` on the PR. This legal acceptance cannot be completed
-  by the agent.
+- `verification/cla-signed` passed after the contributor accepted Zed's CLA and
+  the agent requested `@cla-bot check` on the PR. All submission checks are
+  green and the PR is mergeable.
 
 ## Automated Gate Matrix
 
@@ -152,11 +151,10 @@ The interactive and Gallery gates remain intentionally open:
 |---|---|---|
 | T057 exact-package interactive Zed acceptance | BLOCKED | After the upstream registry entry is available, install from Gallery in a clean supported Zed profile and record only public fixture/version/outcome evidence. A dev extension or repository binary cannot replace this gate. |
 | T058 public tag and release asset | PASS | The reviewed `v0.1.0` release workflow published the exact locked archive and checksum; `make marketplace-release-check` passed against them. |
-| T060 central registry and Gallery acceptance | SUBMITTED / USER+EXTERNAL | Upstream PR #6843 exists and technical checks pass. The contributor must sign Zed's CLA; maintainer merge and the subsequent T057 plus two additional clean Gallery installations remain external. |
+| T060 central registry and Gallery acceptance | SUBMITTED / EXTERNAL | Upstream PR #6843 is mergeable and all checks pass. Maintainer merge and the subsequent T057 plus two additional clean Gallery installations remain external. |
 
-No product decision remains, but the contributor must accept Zed's CLA. After
-the CLA check and maintainer merge, perform T057 and record 3/3 clean Gallery
-runs. Until those steps pass,
+No product decision or user-controlled gate remains. After maintainer merge,
+perform T057 and record 3/3 clean Gallery runs. Until those steps pass,
 FR-001, FR-026, FR-027, SC-001, SC-009 and SC-010 remain publication-level
 open gates even though their local contracts are implemented.
 

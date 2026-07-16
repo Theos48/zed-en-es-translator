@@ -17,8 +17,8 @@ contiene el archivo exacto de 5,548,286 bytes y SHA-256
 `make marketplace-release-check` confirma que tag, URL, versión, tamaño y hash
 coinciden con el package lock. El PR
 [zed-industries/extensions#6843](https://github.com/zed-industries/extensions/pull/6843)
-ya pasa `package` y Danger; siguen pendientes la firma del CLA, el merge y la
-aceptación interactiva 3/3 desde Gallery.
+ya pasa `package`, Danger y CLA; siguen pendientes el merge y la aceptación
+interactiva 3/3 desde Gallery.
 
 ## 1. Probar como dev extension
 

@@ -7,8 +7,8 @@ el archivo originales nunca se modifican.
 > **Estado de publicación:** el release público `v0.1.0` está publicado y su
 > paquete exacto está verificado. La extensión todavía no está disponible en
 > la Extension Gallery. El [PR upstream #6843](https://github.com/zed-industries/extensions/pull/6843)
-> ya fue enviado y sus checks técnicos pasan; faltan la firma del CLA, el merge
-> de Zed y la aceptación interactiva posterior.
+> ya fue enviado y todos sus checks pasan; faltan el merge de Zed y la
+> aceptación interactiva posterior.
 
 ## Qué ofrece
 
@@ -123,7 +123,7 @@ Ya están completas y validadas:
 
 Quedan únicamente gates externos:
 
-1. firmar el CLA requerido y obtener el merge del PR upstream;
+1. obtener el merge del PR upstream;
 2. después del merge, completar la aceptación interactiva contra el
    asset público exacto y 3/3 instalaciones limpias desde la Gallery.
 
